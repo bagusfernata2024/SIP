@@ -100,75 +100,90 @@ class Dashboard extends BaseController
             . view('templates/footer');
     }
 
-    public function updateStatus()
-    {
-        $id = $this->request->getPost('id');
-        $action = strtolower($this->request->getPost('action'));
-        $nipg = $this->request->getPost('nipg');
+    // public function updateStatus()
+    // {
+    //     $id = $this->request->getPost('id');
+    //     $action = strtolower($this->request->getPost('action'));
+    //     $nipg = $this->request->getPost('nipg');
 
-        if ($id && in_array($action, ['accept', 'reject'])) {
-            $registrasiModel = new RegistrasiModel();
-            $mentorModel = new MentorModel();
-            $detailRegisModel = new DetailRegisModel();
-            $anakMagangModel = new AnakMagangModel();
+    //     // Debug untuk memastikan data diterima dengan benar
+    //     if (!$id || !$action || !$nipg) {
+    //         log_message('error', 'Data tidak lengkap: id=' . $id . ', action=' . $action . ', nipg=' . $nipg);
+    //         $this->session->setFlashdata('error', 'Data tidak lengkap.');
+    //         return redirect()->to('/admin/dashboard');
+    //     }
+    // }
 
-            $peserta = $registrasiModel->getPesertaById($id);
-            if (!$peserta) {
-                $this->session->setFlashdata('error', 'Peserta tidak ditemukan.');
-                return redirect()->to('/admin/dashboard');
-            }
 
-            $statusUpdate = ($action === 'accept') ? 'Accept' : 'reject';
-            $registrasiModel->updateStatus($id, $statusUpdate);
+    // public function updateStatus()
+    // {
+    //     $id = $this->request->getPost('id');
+    //     $action = strtolower($this->request->getPost('action'));
+    //     $nipg = $this->request->getPost('nipg');
 
-            if ($statusUpdate === 'Accept') {
-                $dataDetailRegis = [
-                    'id_register' => $id,
-                    'nipg' => $nipg,
-                    'approved' => 'Y'
-                ];
+    //     if ($id && in_array($action, ['accept', 'reject'])) {
+    //         $registrasiModel = new RegistrasiModel();
+    //         $mentorModel = new MentorModel();
+    //         $detailRegisModel = new DetailRegisModel();
+    //         $anakMagangModel = new AnakMagangModel();
 
-                $detailRegisModel->insertDetailRegis($dataDetailRegis);
+    //         $peserta = $registrasiModel->getPesertaById($id);
+    //         if (!$peserta) {
+    //             $this->session->setFlashdata('error', 'Peserta tidak ditemukan.');
+    //             return redirect()->to('/admin/dashboard');
+    //         }
 
-                $mentor = $mentorModel->getMentorByNipg($nipg);
+    //         $statusUpdate = ($action === 'accept') ? 'Accept' : 'reject';
+    //         $registrasiModel->updateStatus($id, $statusUpdate);
 
-                if ($mentor) {
-                    $this->sendEmailToMentor($mentor, $peserta);
-                    $this->sendEmailToPeserta($peserta, $statusUpdate, $mentor);
+    //         if ($statusUpdate === 'Accept') {
+    //             $dataDetailRegis = [
+    //                 'id_register' => $id,
+    //                 'nipg' => $nipg,
+    //                 'approved' => 'Y'
+    //             ];
 
-                    $unitKerja = $peserta['minat'];
-                    $tglMulai = $peserta['tanggal1'];
-                    $tglSelesai = $peserta['tanggal2'];
+    //             $detailRegisModel->insertDetailRegis($dataDetailRegis);
 
-                    $dataAnakMagang = [
-                        'id_register' => $id,
-                        'unit_kerja' => $unitKerja,
-                        'tgl_mulai' => $tglMulai,
-                        'tgl_selesai' => $tglSelesai,
-                        'id_mentor' => $mentor['id_mentor']
-                    ];
+    //             $mentor = $mentorModel->getMentorByNipg($nipg);
 
-                    $insertSuccess = $anakMagangModel->insertAnakMagang($dataAnakMagang);
+    //             if ($mentor) {
+    //                 $this->sendEmailToMentor($mentor, $peserta);
+    //                 $this->sendEmailToPeserta($peserta, $statusUpdate, $mentor);
 
-                    if (!$insertSuccess) {
-                        $this->session->setFlashdata('error', 'Gagal memasukkan data ke tabel anak_magang.');
-                        return redirect()->to('/admin/dashboard');
-                    }
-                } else {
-                    $this->session->setFlashdata('error', 'Informasi mentor tidak ditemukan.');
-                    return redirect()->to('/admin/dashboard');
-                }
-            } elseif ($statusUpdate === 'reject') {
-                $this->sendEmailToPeserta($peserta, $statusUpdate);
-            }
+    //                 $unitKerja = $peserta['minat'];
+    //                 $tglMulai = $peserta['tanggal1'];
+    //                 $tglSelesai = $peserta['tanggal2'];
 
-            $this->session->setFlashdata('success', 'Status berhasil diperbarui.');
-            return redirect()->to('/admin/dashboard');
-        } else {
-            $this->session->setFlashdata('error', 'Data atau aksi tidak valid.');
-            return redirect()->to('/admin/dashboard');
-        }
-    }
+    //                 $dataAnakMagang = [
+    //                     'id_register' => $id,
+    //                     'unit_kerja' => $unitKerja,
+    //                     'tgl_mulai' => $tglMulai,
+    //                     'tgl_selesai' => $tglSelesai,
+    //                     'id_mentor' => $mentor['id_mentor']
+    //                 ];
+
+    //                 $insertSuccess = $anakMagangModel->insertAnakMagang($dataAnakMagang);
+
+    //                 if (!$insertSuccess) {
+    //                     $this->session->setFlashdata('error', 'Gagal memasukkan data ke tabel anak_magang.');
+    //                     return redirect()->to('/admin/dashboard');
+    //                 }
+    //             } else {
+    //                 $this->session->setFlashdata('error', 'Informasi mentor tidak ditemukan.');
+    //                 return redirect()->to('/admin/dashboard');
+    //             }
+    //         } elseif ($statusUpdate === 'reject') {
+    //             $this->sendEmailToPeserta($peserta, $statusUpdate);
+    //         }
+
+    //         $this->session->setFlashdata('success', 'Status berhasil diperbarui.');
+    //         return redirect()->to('/admin/dashboard');
+    //     } else {
+    //         $this->session->setFlashdata('error', 'Data atau aksi tidak valid.');
+    //         return redirect()->to('/admin/dashboard');
+    //     }
+    // }
 
     private function sendEmailToPeserta($peserta, $status, $mentor = null)
     {

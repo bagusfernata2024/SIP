@@ -86,4 +86,6 @@ class RegistrasiModel extends Model
             ->where('status', $status)
             ->countAllResults();
     }
+
+    
 }

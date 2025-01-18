@@ -8,7 +8,7 @@ class AbsensiModel extends Model
 {
     protected $table = 'absen';
     protected $primaryKey = 'id_absen';
-    protected $allowedFields = ['approved']; // Pastikan ini sesuai dengan field tabel
+    protected $allowedFields = ['approved', 'deskripsi']; // Pastikan ini sesuai dengan field tabel
 
     public function getAbsensiByUserNomor($user_nomor)
     {
@@ -18,10 +18,24 @@ class AbsensiModel extends Model
             ->join('registrasi', 'registrasi.id_register = anak_magang.id_register', 'left')
             ->join('users', 'users.nomor = registrasi.nik', 'left')
             ->where('users.nomor', $user_nomor)
-            ->orderBy('absen.tgl', 'DESC')
+            ->orderBy('absen.tgl', 'DESC') // Mengurutkan berdasarkan tanggal terbaru
             ->get()
             ->getResultArray();
     }
+
+
+    // public function getAbsensiByUserNomor($user_nomor)
+    // {
+    //     return $this->db->table('absen')
+    //         ->select('absen.*, anak_magang.id_magang, anak_magang.id_mentor, users.nomor')
+    //         ->join('anak_magang', 'anak_magang.id_magang = absen.id_magang', 'left')
+    //         ->join('registrasi', 'registrasi.id_register = anak_magang.id_register', 'left')
+    //         ->join('users', 'users.nomor = registrasi.nik', 'left')
+    //         ->where('users.nomor', $user_nomor)
+    //         ->orderBy('absen.tgl', 'ASC')
+    //         ->get()
+    //         ->getResultArray();
+    // }
 
     public function saveCheckIn($data)
     {
@@ -127,11 +141,50 @@ class AbsensiModel extends Model
         $builder->update(['approved' => $status]);
     }
 
+    public function updateDeskripsi($id_absen, $data)
+    {
+        return $this->update($id_absen, $data); // Fungsi update
+    }
+
     public function hasCheckedInToday($id_magang, $tgl)
     {
         return $this->db->table('absen')
             ->where('id_magang', $id_magang)
             ->where('tgl', $tgl)
             ->countAllResults() > 0;
+    }
+
+    public function getLastIdAbsen()
+    {
+        $query = $this->db->table('absen')
+            ->selectMax('id_absen', 'last_id')
+            ->get();
+
+        $result = $query->getRow();
+        return $result ? $result->last_id : 0; // Jika tabel kosong, kembalikan 0
+    }
+
+    public function tambahAbsen()
+    {
+        // Dapatkan ID terakhir
+        $lastId = $this->absensiModel->getLastIdAbsen();
+
+        // Hitung ID baru
+        $newId = $lastId + 1;
+
+        // Data absensi baru
+        $data = [
+            'id_absen' => $newId,
+            'id_magang' => 916,
+            'tgl' => date('Y-m-d'),
+            'jam_masuk' => '08:00:00',
+            'jam_pulang' => NULL,
+            'statuss' => 'Hadir',
+        ];
+
+        // Simpan data ke tabel
+        $this->absensiModel->insert($data);
+
+        return redirect()->to('/absensi');
     }
 }

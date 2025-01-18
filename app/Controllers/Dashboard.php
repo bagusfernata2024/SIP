@@ -23,7 +23,7 @@ class Dashboard extends BaseController
 
     public function __construct()
     {
-        $this->session = session();  // CI4 session
+        $this->session = \Config\Services::session();
         $this->absensiModel = new AbsensiModel(); // Memuat model dengan CI4 syntax
         $this->anakMagangModel = new AnakMagangModel();
         $this->nilaiModel = new NilaiModel();
@@ -65,8 +65,13 @@ class Dashboard extends BaseController
 
         $tgl = date('Y-m-d');
 
+        // Mengambil data absensi hari ini
         $data['absensi_today'] = $this->absensiModel->getTodayAbsence($id_magang, $tgl);
+
+        // Mengambil semua data absensi user, terurut berdasarkan tanggal terbaru
         $data['absensi'] = $this->absensiModel->getAbsensiByUserNomor($user_nomor);
+
+        // ID magang digunakan untuk referensi
         $data['id_magang'] = $id_magang;
 
         return view('peserta/header') .
@@ -75,6 +80,74 @@ class Dashboard extends BaseController
             view('peserta/absensi', $data) .
             view('peserta/footer');
     }
+
+    // public function updateDeskripsi()
+    // {
+    //     // Mendapatkan data dari request POST
+    //     $id_absen = $this->request->getPost('id_absen');
+    //     $deskripsi = $this->request->getPost('deskripsi');
+
+    //     // Validasi data
+    //     if (!$id_absen || !$deskripsi) {
+    //         return $this->response->setJSON(['success' => false, 'message' => 'Data tidak valid']);
+    //     }
+
+    //     // Update deskripsi pada absensi dengan id_absen yang diberikan
+    //     try {
+    //         $data = [
+    //             'deskripsi' => $deskripsi
+    //         ];
+
+    //         // Memastikan bahwa id_absen ada dan data berhasil diupdate
+    //         $updateResult = $this->absensiModel->update($id_absen, $data);
+
+    //         if ($updateResult) {
+    //             return $this->response->setJSON(['success' => true]);
+    //         } else {
+    //             return $this->response->setJSON(['success' => false, 'message' => 'Gagal memperbarui data']);
+    //         }
+    //     } catch (\Exception $e) {
+    //         // Tangani error jika ada
+    //         return $this->response->setJSON(['success' => false, 'message' => $e->getMessage()]);
+    //     }
+    // }
+
+    public function updateDeskripsi()
+    {
+        $id_absen = $this->request->getPost('id_absen');
+        $deskripsi = $this->request->getPost('deskripsi');
+
+        // Validasi atau proses lainnya sesuai kebutuhan
+        $data = [
+            'deskripsi' => $deskripsi
+        ];
+
+        // Update deskripsi pada absensi dengan id_absen yang diberikan
+        $this->absensiModel->update($id_absen, $data);
+
+        // Kembalikan response sukses
+        return $this->response->setJSON(['success' => true]);
+    }
+
+
+    // public function absensi()
+    // {
+    //     helper('date');
+    //     $user_nomor = $this->session->get('nomor');
+    //     $id_magang = $this->absensiModel->getIdMagang($user_nomor);
+
+    //     $tgl = date('Y-m-d');
+
+    //     $data['absensi_today'] = $this->absensiModel->getTodayAbsence($id_magang, $tgl);
+    //     $data['absensi'] = $this->absensiModel->getAbsensiByUserNomor($user_nomor);
+    //     $data['id_magang'] = $id_magang;
+
+    //     return view('peserta/header') .
+    //         view('peserta/sidebar') .
+    //         view('peserta/topbar') .
+    //         view('peserta/absensi', $data) .
+    //         view('peserta/footer');
+    // }
 
     public function checkIn()
     {

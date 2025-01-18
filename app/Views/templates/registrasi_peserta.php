@@ -1,15 +1,11 @@
+<?php
+$status = session()->getFlashdata('status');
+log_message('debug', 'Flashdata status di view: ' . $status);
+?>
 <main class="main">
     <!-- Hero Section -->
     <section class="hero section">
         <div class="container" data-aos="fade-up">
-            <div class="d-flex flex-column justify-content-center align-items-center mb-4">
-                <h2 class="mb-4">Pilih Jenis Pendaftaran</h2>
-                <div class="btn-group" role="group">
-                    <a href="<?php echo base_url('registrasi') ?>" class="btn btn-warning btn-lg disabled">Daftar Sebagai Peserta</a>
-                    <a href="<?php echo base_url('registrasi/registrasi_mentor') ?>" class="btn btn-primary btn-lg">Daftar Sebagai Mentor</a>
-                </div>
-            </div>
-
             <div class="row justify-content-center">
                 <div class="col-lg-8">
                     <div class="card p-4 shadow">
@@ -18,7 +14,7 @@
                         </a>
                         <h2 class="text-center mb-4">Formulir Registrasi Peserta Magang</h2>
                         <p class="text-center mb-4">Isi formulir berikut untuk mendaftar program magang.</p>
-                    
+
                         <form action="<?= site_url('registrasi/proses_registrasi_peserta'); ?>" method="POST" class="needs-validation" novalidate enctype="multipart/form-data">
                             <!-- Tipe -->
                             <div class="mb-3">
@@ -49,7 +45,8 @@
                                     name="email"
                                     required
                                     placeholder="Harus menggunakan @gmail.com"
-                                    pattern="^[a-zA-Z0-9._%+-]+@gmail\.com$">
+                                    pattern="^[a-zA-Z0-9._%+-]+@gmail\.com$"
+                                    required>
                                 <div class="invalid-feedback">Email harus menggunakan domain @gmail.com.</div>
                             </div>
 
@@ -124,11 +121,6 @@
                             </div>
 
                             <!-- Lama PKL -->
-                            <!-- <div class="mb-3">
-          <label for="lama_pkl" class="form-label">Lama PKL (dalam minggu)</label>
-          <input type="number" class="form-control" id="lama_pkl" name="lama_pkl" min="1" required>
-          <div class="invalid-feedback">Lama PKL wajib diisi.</div>
-        </div> -->
 
                             <!-- NIM / NIS -->
                             <div class="mb-3">
@@ -138,7 +130,7 @@
                             </div>
 
                             <!-- Tanggal PKL -->
-                            <div class="mb-3">
+                            <div class="mb-0">
                                 <label class="form-label">Periode PKL</label>
                                 <div class="input-group">
                                     <input
@@ -149,7 +141,8 @@
                                         placeholder="Tanggal Mulai"
                                         min="<?= date('Y-m-d'); ?>"
                                         required
-                                        onchange="updatePeriode(); document.getElementById('tanggal2').min = this.value;">
+                                        onchange="updatePeriode(); document.getElementById('tanggal2').min = this.value;"
+                                        required>
                                     <span class="input-group-text">sampai</span>
                                     <input
                                         type="date"
@@ -159,11 +152,33 @@
                                         placeholder="Tanggal Selesai"
                                         min="<?= date('Y-m-d'); ?>"
                                         required
-                                        onchange="updatePeriode();">
+                                        onchange="updatePeriode();"
+                                        required>
                                 </div>
                                 <!-- Area untuk menampilkan durasi PKL dalam bulan -->
                                 <div id="keteranganPeriode" class="mt-2 text-muted"></div>
                             </div>
+
+                            <?php if (session()->getFlashdata('status')): ?>
+                                <script>
+                                    document.addEventListener('DOMContentLoaded', function() {
+                                        const status = '<?= session()->getFlashdata('status') ?>';
+
+                                        console.log('status:', status); // Debugging
+
+                                        if (status === 'success') {
+                                            console.log('Menampilkan modal sukses');
+                                            const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+                                            successModal.show();
+                                        } else if (status === 'fail') {
+                                            console.log('Menampilkan modal gagal');
+                                            const failModal = new bootstrap.Modal(document.getElementById('failModal'));
+                                            failModal.show();
+                                        }
+                                    });
+                                </script>
+
+                            <?php endif; ?>
 
                             <script>
                                 function updatePeriode() {
@@ -196,7 +211,11 @@
                                 }
                             </script>
 
-                            <br>
+                            <div class="mb-3">
+                                <label for="foto" class="form-label">Foto</label>
+                                <input type="file" class="form-control" id="foto" name="foto" accept=".jpg, .jpeg, .png" required>
+                                <div class="invalid-feedback">Unggah Foto.</div>
+                            </div>
 
                             <!-- Minat -->
                             <div class="mb-3">
@@ -258,9 +277,47 @@
                 </div>
             </div>
 
+            <!-- Modal Berhasil -->
+            <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="successModalLabel">Registrasi Berhasil</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            Pendaftaran Anda berhasil! Kami akan menghubungi Anda segera.
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-success" data-bs-dismiss="modal">OK</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Gagal -->
+            <div class="modal fade" id="failModal" tabindex="-1" aria-labelledby="failModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="failModalLabel">Registrasi Gagal</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            Terjadi kesalahan saat registrasi. Silakan periksa kembali data Anda.
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Coba Lagi</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
 
         </div>
 
     </section><!-- /Hero Section -->
+
 
 </main>

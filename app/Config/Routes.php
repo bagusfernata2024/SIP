@@ -82,6 +82,9 @@ $routes->post('/dashboard/checkIn', 'Dashboard::checkIn');
 $routes->post('/dashboard/checkOut', 'Dashboard::checkOut');
 $routes->post('/dashboard/proses_upload_laporan_akhir', 'Dashboard::proses_upload_laporan_akhir');
 $routes->get('dashboard/file/(:any)', 'Dashboard::file/$1');
+$routes->post('dashboard/updateDeskripsi', 'Dashboard::updateDeskripsi');
+
+
 
 
 

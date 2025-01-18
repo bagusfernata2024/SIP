@@ -7,6 +7,7 @@ class UserModel extends Model
 {
     protected $table = 'users';
     protected $primaryKey = 'id';
+    protected $allowedFields = ['nomor', 'username', 'pasword', 'level', 'foto', 'aktif', 'last_login'];
 
     public function insertUser($data)
     {

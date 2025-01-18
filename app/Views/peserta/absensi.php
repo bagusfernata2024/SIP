@@ -79,6 +79,33 @@
             </div>
         </div>
 
+        <!-- Modal untuk Edit Deskripsi -->
+        <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="modalLabelEdit" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalLabelEdit">Edit Deskripsi</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="editForm">
+                            <div class="form-group">
+                                <label for="editDeskripsi">Deskripsi</label>
+                                <textarea class="form-control" id="editDeskripsi" rows="4" placeholder="Isi deskripsi aksi Anda..." required></textarea>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                        <button type="button" class="btn btn-primary" id="saveEdit">Simpan</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
 
         <!-- Data Absensi -->
         <div class="card shadow mb-4">
@@ -88,57 +115,45 @@
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                        <a href="javascript:void(0);" class="btn btn-warning btn-sm cetakBtn">
+                            <i class="bi bi-printer"></i> Cetak
+                        </a>
+
                         <thead>
                             <tr>
-                                <th>Tanggal</th>
+                                <th class="sorting_desc" aria-controls="dataTable" aria-label="Tanggal: activate to sort column ascending" aria-sort="descending">Tanggal</th>
                                 <th>Jam Masuk</th>
                                 <th>Jam Pulang</th>
                                 <th>Deskripsi</th>
                                 <th>Status</th>
-                                <th>Geolocation Masuk</th>
-                                <th>Geolocation Keluar</th>
-                                <th>Approved by Mentor</th>
+                                <th>Approved</th>
+                                <th>Aksi</th>
                             </tr>
                         </thead>
-                        <tfoot>
-                            <tr>
-                                <th>Tanggal</th>
-                                <th>Jam Masuk</th>
-                                <th>Jam Pulang</th>
-                                <th>Deskripsi</th>
-                                <th>Status</th>
-                                <th>Geolocation Masuk</th>
-                                <th>Geolocation Keluar</th>
-                                <th>Approved by Mentor</th>
-                            </tr>
-                        </tfoot>
                         <tbody>
-                            <?php foreach ($absensi as $absen) { ?>
+                            <?php foreach ($absensi as $absen): ?>
                                 <tr>
                                     <td><?= formatTanggalIndo($absen['tgl']) ?></td>
-                                    <td><?= $absen['jam_masuk']; ?></td>
-                                    <td><?= $absen['jam_pulang']; ?></td>
-                                    <td><?= $absen['deskripsi']; ?></td>
-                                    <td><?= $absen['statuss']; ?></td>
+                                    <td><?= $absen['jam_masuk'] ?></td>
+                                    <td><?= $absen['jam_pulang'] ?></td>
+                                    <td><?= $absen['deskripsi'] ?></td>
+                                    <td><?= $absen['statuss'] ?></td>
                                     <td>
-                                        <?= $absen['latitude_masuk'] && $absen['longitude_masuk']
-                                            ? '<a href="https://www.google.com/maps?q=' . $absen['latitude_masuk'] . ',' . $absen['longitude_masuk'] . '" target="_Blank">Periksa Lokasi Masuk</a>'
-                                            : 'Anda belum absen'; ?>
-                                    </td>
-                                    <td>
-                                        <?= $absen['latitude_keluar'] && $absen['longitude_keluar']
-                                            ? '<a href="https://www.google.com/maps?q=' . $absen['latitude_keluar'] . ',' . $absen['longitude_keluar'] . '" target="_Blank">Periksa Lokasi Keluar</a>'
-                                            : 'Anda belum absen'; ?>
-                                    </td>
-                                    <td>
-                                        <span class="badge <?= $absen['approved'] == 'Y' ? 'bg-success' : ($absen['approved'] == 'N' ? 'bg-danger' : 'bg-warning'); ?> text-white">
-                                            <?= $absen['approved'] == 'Y' ? 'Diterima' : ($absen['approved'] == 'N' ? 'Ditolak' : 'Menunggu'); ?>
+                                        <span class="badge <?= $absen['approved'] == 'Y' ? 'bg-success' : ($absen['approved'] == 'N' ? 'bg-danger' : 'bg-warning') ?>">
+                                            <?= $absen['approved'] == 'Y' ? 'Diterima' : ($absen['approved'] == 'N' ? 'Ditolak' : 'Menunggu') ?>
                                         </span>
                                     </td>
+                                    <td>
+                                        <a href="javascript:void(0);" class="btn btn-warning btn-sm editBtn" data-id="<?= $absen['id_absen']; ?>" data-deskripsi="<?= $absen['deskripsi']; ?>">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                    </td>
+
                                 </tr>
-                            <?php } ?>
+                            <?php endforeach; ?>
                         </tbody>
                     </table>
+
                 </div>
             </div>
         <?php elseif ($id_magang == NULL) : ?>
@@ -153,6 +168,65 @@
 
 <script>
     let latitude, longitude;
+
+    $(document).ready(function() {
+        var table = $('#dataTable').DataTable({
+            "order": [
+                [0, 'desc']
+            ], // Urutkan berdasarkan kolom pertama (Tanggal) secara descending
+            "stateSave": true,
+            "columnDefs": [{
+                "targets": 0,
+                "type": "date",
+            }]
+        });
+
+        console.log(table.order()); // Ini akan menampilkan pengurutan kolom setelah inisialisasi
+    });
+
+    $(document).ready(function() {
+        // Menangani klik tombol Edit
+        $('.editBtn').on('click', function() {
+            var idAbsensi = $(this).data('id');
+            var deskripsi = $(this).data('deskripsi');
+
+            // Isi nilai deskripsi di dalam modal
+            $('#editDeskripsi').val(deskripsi);
+
+            // Simpan ID absensi di dalam modal untuk digunakan saat menyimpan perubahan
+            $('#saveEdit').data('id', idAbsensi);
+
+            // Tampilkan modal
+            $('#editModal').modal('show');
+        });
+
+        // Menangani klik tombol Simpan di modal
+        $('#saveEdit').on('click', function() {
+            var idAbsensi = $(this).data('id');
+            var deskripsiBaru = $('#editDeskripsi').val();
+
+            // Kirim data melalui AJAX untuk disimpan
+            $.ajax({
+                url: '<?= base_url('dashboard/updateDeskripsi'); ?>', // Sesuaikan URL dengan controller yang menangani pembaruan
+                type: 'POST',
+                data: {
+                    id_absen: idAbsensi,
+                    deskripsi: deskripsiBaru
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Menutup modal setelah berhasil
+                        $('#editModal').modal('hide');
+                        // Reload halaman untuk melihat perubahan
+                        location.reload();
+                    } else {
+                        alert('Gagal memperbarui deskripsi!');
+                    }
+                }
+            });
+        });
+    });
+
 
     function getLocation() {
         if (navigator.geolocation) {
@@ -198,68 +272,11 @@
         });
     });
 
-    // document.getElementById("btnCheckOut").addEventListener("click", function() {
-    //     let jamPulang = this.dataset.jamPulang;
-    //     console.log("Jam Pulang:", jamPulang);
-
-    //     getLocation();
-    //     $('#checkOutModal').modal('show');
-    // });
-
-    // document.getElementById("confirmCheckOut").addEventListener("click", function() {
-    //     const currentTime = new Date().toLocaleTimeString('en-GB'); // Format HH:mm:ss
-    //     console.log("Jam Keluar:", currentTime);
-
-    //     $.ajax({
-    //         url: '<?= base_url('dashboard/checkOut'); ?>',
-    //         type: 'POST',
-    //         data: {
-    //             latitude: latitude,
-    //             longitude: longitude,
-    //             jam_keluar: currentTime, // Kirim waktu lokal ke server
-    //         },
-    //         success: function(response) {
-    //             location.reload(); // Reload halaman setelah data berhasil disimpan
-    //         }
-    //     });
-    // });
-
-
-    // document.getElementById("btnCheckOut").addEventListener("click", function() {
-    //     let jamPulang = this.dataset.jamPulang;
-    //     console.log("Jam Pulang:", jamPulang);
-
-    //     getLocation();
-    //     $('#checkOutModal').modal('show');
-    // });
-
-
-    // document.getElementById("confirmCheckOut").addEventListener("click", function() {
-    //     const currentTime = new Date().toLocaleTimeString('en-GB'); // Format HH:mm:ss
-    //     console.log("Jam Keluar:", currentTime);
-
-    //     $.ajax({
-    //         url: '<?= base_url('dashboard/checkOut'); ?>',
-    //         type: 'POST',
-    //         data: {
-    //             latitude: latitude,
-    //             longitude: longitude,
-    //             jam_keluar: currentTime, // Kirim waktu lokal ke server
-    //         },
-    //         success: function(response) {
-    //             location.reload();
-    //         }
-    //     });
-
-    //     console.log("Latitude:", latitude);
-    //     console.log("Longitude:", longitude);
-    //     console.log("Jam Keluar:", currentTime);
-    // });
-
     document.getElementById("btnCheckOut").addEventListener("click", function() {
         getLocation(); // Ambil lokasi
         $('#checkOutModal').modal('show'); // Tampilkan modal checkout
     });
+
 
     document.getElementById("confirmCheckOut").addEventListener("click", function() {
         const currentTime = new Date().toLocaleTimeString('en-GB'); // Ambil waktu checkout dari browser
@@ -283,29 +300,23 @@
         });
     });
 
+    $(document).ready(function() {
+        // Menangani klik tombol Cetak
+        $('.cetakBtn').on('click', function() {
+            // Ambil hanya bagian yang ingin dicetak, dalam hal ini tabel
+            var printContent = document.getElementById("dataTable").outerHTML;
 
-    // document.getElementById("btnCheckOut").addEventListener("click", function() {
-    //     let jamPulang = this.dataset.jamPulang;
-    //     console.log("Jam Pulang:", jamPulang);
+            // Buat halaman baru untuk proses cetak
+            var newWindow = window.open('', '', 'height=400, width=600');
+            newWindow.document.write('<html><head><title>Cetak Data Absensi</title>');
+            newWindow.document.write('</head><body>');
+            newWindow.document.write('<h3>Data Absensi</h3>'); // Judul atau teks tambahan
+            newWindow.document.write(printContent); // Tampilkan tabel yang akan dicetak
+            newWindow.document.write('</body></html>');
 
-    //     getLocation();
-    //     $('#checkOutModal').modal('show');
-    // });
-    // document.getElementById("confirmCheckOut").addEventListener("click", function() {
-    //     const currentTime = new Date().toLocaleTimeString('en-GB'); // Format HH:mm:ss
-    //     console.log("Jam Keluar:", currentTime);
-
-    //     $.ajax({
-    //         url: '<?= base_url('dashboard/checkOut'); ?>',
-    //         type: 'POST',
-    //         data: {
-    //             latitude: latitude,
-    //             longitude: longitude,
-    //             jam_keluar: currentTime, // Kirim waktu lokal ke server
-    //         },
-    //         success: function(response) {
-    //             location.reload();
-    //         }
-    //     });
-    // });
+            // Selesaikan proses cetak
+            newWindow.document.close();
+            newWindow.print();
+        });
+    });
 </script>
