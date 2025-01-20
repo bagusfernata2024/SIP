@@ -114,6 +114,82 @@ class Dashboard extends BaseController
     //     }
     // }
 
+    public function updateStatus()
+    {
+        $id = $this->request->getPost('id');
+        $action = strtolower($this->request->getPost('action'));
+        $nipg = $this->request->getPost('nipg');
+
+        if ($id && in_array($action, ['accept', 'reject'])) {
+            $registrasiModel = new RegistrasiModel();
+            $mentorModel = new MentorModel();
+            $detailRegisModel = new DetailRegisModel();
+            $anakMagangModel = new AnakMagangModel();
+
+            $peserta = $registrasiModel->getPesertaById($id);
+            if (!$peserta) {
+                $this->session->setFlashdata('error', 'Peserta tidak ditemukan.');
+                return redirect()->to('/admin/dashboard');
+            }
+
+            $statusUpdate = ($action === 'accept') ? 'Accept' : 'reject';
+            $registrasiModel->updateStatus($id, $statusUpdate);
+
+            $lastPrimaryKey = $detailRegisModel->selectMax('iddetail')->first();
+            $newPrimaryKey = isset($lastPrimaryKey['iddetail']) ? $lastPrimaryKey['iddetail'] + 1 : 1;
+
+            if ($statusUpdate === 'Accept') {
+                $dataDetailRegis = [
+                    'iddetail' => $newPrimaryKey,
+                    'id_register' => $id,
+                    'nipg' => $nipg,
+                    'approved' => 'W'
+                ];
+
+                $detailRegisModel->insertDetailRegis($dataDetailRegis);
+
+                $mentor = $mentorModel->getMentorByNipg($nipg);
+
+                if ($mentor) {
+                    $this->sendEmailToMentor($mentor, $peserta);
+
+                    $unitKerja = $peserta['minat'];
+                    $tglMulai = $peserta['tanggal1'];
+                    $tglSelesai = $peserta['tanggal2'];
+
+                    $lastPrimaryKey = $anakMagangModel->selectMax('id_magang')->first();
+                    $newPrimaryKey = isset($lastPrimaryKey['id_magang']) ? $lastPrimaryKey['id_magang'] + 1 : 1;
+                    $dataAnakMagang = [
+                        'id_magang' => $newPrimaryKey,
+                        'id_register' => $id,
+                        'unit_kerja' => $unitKerja,
+                        'tgl_mulai' => $tglMulai,
+                        'tgl_selesai' => $tglSelesai,
+                        'id_mentor' => $mentor['id_mentor'],
+                    ];
+
+                    $insertSuccess = $anakMagangModel->insertAnakMagang($dataAnakMagang);
+
+                    if (!$insertSuccess) {
+                        $this->session->setFlashdata('error', 'Gagal memasukkan data ke tabel anak_magang.');
+                        return redirect()->to('/admin/dashboard');
+                    }
+                } else {
+                    $this->session->setFlashdata('error', 'Informasi mentor tidak ditemukan.');
+                    return redirect()->to('/admin/dashboard');
+                }
+            } elseif ($statusUpdate === 'reject') {
+                $this->sendEmailToPeserta($peserta, $statusUpdate);
+            }
+
+            $this->session->setFlashdata('success', 'Status berhasil diperbarui.');
+            return redirect()->to('/admin/dashboard');
+        } else {
+            $this->session->setFlashdata('error', 'Data atau aksi tidak valid.');
+            return redirect()->to('/admin/dashboard');
+        }
+    }
+
 
     // public function updateStatus()
     // {
@@ -136,8 +212,12 @@ class Dashboard extends BaseController
     //         $statusUpdate = ($action === 'accept') ? 'Accept' : 'reject';
     //         $registrasiModel->updateStatus($id, $statusUpdate);
 
+    //         $lastPrimaryKey = $detailRegisModel->selectMax('iddetail')->first();
+    //         $newPrimaryKey = isset($lastPrimaryKey['iddetail']) ? $lastPrimaryKey['iddetail'] + 1 : 1;
+
     //         if ($statusUpdate === 'Accept') {
     //             $dataDetailRegis = [
+    //                 'iddetail' => $newPrimaryKey,
     //                 'id_register' => $id,
     //                 'nipg' => $nipg,
     //                 'approved' => 'Y'
@@ -155,7 +235,10 @@ class Dashboard extends BaseController
     //                 $tglMulai = $peserta['tanggal1'];
     //                 $tglSelesai = $peserta['tanggal2'];
 
+    //                 $lastPrimaryKey = $anakMagangModel->selectMax('id_magang')->first();
+    //                 $newPrimaryKey = isset($lastPrimaryKey['id_magang']) ? $lastPrimaryKey['id_magang'] + 1 : 1;
     //                 $dataAnakMagang = [
+    //                     'id_magang' => $newPrimaryKey,
     //                     'id_register' => $id,
     //                     'unit_kerja' => $unitKerja,
     //                     'tgl_mulai' => $tglMulai,
@@ -243,10 +326,10 @@ class Dashboard extends BaseController
         $email->setMessage("
         Anda memiliki anak bimbingan baru:
 			- Nama: {$peserta['nama']}
-			- No Telp: {$peserta['no_telp']}
+			- No Telp: {$peserta['notelp']}
 			- Email: {$peserta['email']}
 			- Prodi: {$peserta['prodi']}
-			- Fakultas: {$peserta['fakultas']}
+			- Fakultas: {$peserta['jurusan']}
 			- Instansi: {$peserta['instansi']}
 			- Satuan Kerja: {$peserta['minat']}
 			

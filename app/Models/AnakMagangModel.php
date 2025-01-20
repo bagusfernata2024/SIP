@@ -8,6 +8,7 @@ class AnakMagangModel extends Model
 {
     protected $table = 'anak_magang';
     protected $primaryKey = 'id_magang';
+    protected $allowedFields = ['id_magang', 'id_register', 'unit_kerja', 'tgl_mulai', 'tgl_selesai', 'tgl_perpanjangan', 'id_mentor', 'status', 'surat_persetujuan', 'surat_pernyataan', 'nota_dinas', 'bank', 'no_rekening', 'buku_rek', 'nama_penerima_bank', 'laporan_akhir', 'approved_laporan_akhir', 'bpp', 'suket']; // Pastikan ini sesuai dengan field tabel
 
     public function getData()
     {

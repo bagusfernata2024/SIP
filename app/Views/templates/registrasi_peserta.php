@@ -213,7 +213,7 @@ log_message('debug', 'Flashdata status di view: ' . $status);
 
                             <div class="mb-3">
                                 <label for="foto" class="form-label">Foto</label>
-                                <input type="file" class="form-control" id="foto" name="foto" accept=".jpg, .jpeg, .png" required>
+                                <input type="file" class="form-control" id="foto" name="foto" accept="image/*" required>
                                 <div class="invalid-feedback">Unggah Foto.</div>
                             </div>
 

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use CodeIgniter\Model;
@@ -7,7 +8,7 @@ class UserModel extends Model
 {
     protected $table = 'users';
     protected $primaryKey = 'id';
-    protected $allowedFields = ['nomor', 'username', 'pasword', 'level', 'foto', 'aktif', 'last_login'];
+    protected $allowedFields = ['nomor', 'username', 'password', 'level', 'foto', 'aktif', 'last_login'];
 
     public function insertUser($data)
     {
@@ -28,6 +29,17 @@ class UserModel extends Model
             ->get()
             ->getRowArray();
     }
+
+    public function getUserWithUsername($username)
+    {
+        return $this->db->table('users')
+            ->select('users.*, registrasi.nama, registrasi.instansi, registrasi.email, registrasi.alamat, registrasi.notelp')
+            ->join('registrasi', 'registrasi.nomor = users.nomor', 'left') // Join dengan tabel registrasi
+            ->where('users.username', $username)
+            ->get()
+            ->getRowArray();
+    }
+
 
     public function getUserWithMentor($username)
     {

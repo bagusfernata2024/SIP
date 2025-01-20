@@ -7,6 +7,8 @@ class DetailRegisModel extends Model
 {
     protected $table = 'detailregis';
     protected $primaryKey = 'iddetail';
+    protected $allowedFields = ['iddetail', 'id_register', 'nipg', 'approved', 'email_kasat']; // Pastikan ini sesuai dengan field tabel
+
 
     public function getData()
     {

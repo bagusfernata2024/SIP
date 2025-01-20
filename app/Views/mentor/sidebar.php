@@ -24,6 +24,17 @@
 	<hr class="sidebar-divider" />
 
 	<!-- Heading -->
+	<div class="sidebar-heading">Peserta</div>
+	<?php $uri = service('uri'); ?>
+	<li class="nav-item <?= $uri->getSegment(3) == 'daftar_peserta' ? 'active' : ''; ?>">
+		<a class="nav-link" href="<?= site_url('mentor/dashboard/daftar_peserta'); ?>">
+			<i class="fa fa-list"></i>
+			<span>Daftar Peserta</span>
+		</a>
+	</li>
+
+	<hr class="sidebar-divider" />
+
 	<div class="sidebar-heading">Absensi Peserta</div>
 
 	<?php $uri = service('uri'); ?>

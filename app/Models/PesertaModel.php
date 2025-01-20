@@ -27,6 +27,8 @@ class PesertaModel extends Model
             ->update($data);
     }
 
+    
+
     public function getPesertaByMentor($user_nomor)
     {
         return $this->db->table('anak_magang')

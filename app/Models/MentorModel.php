@@ -7,7 +7,7 @@ class MentorModel extends Model
 {
     protected $table = 'mentor';
     protected $primaryKey = 'id_mentor';
-    protected $allowedFields = ['nama', 'nipg', 'posisi', 'direktorat', 'division', 'subsidiaries', 'email', 'gender', 'job'];
+    protected $allowedFields = ['id_mentor' ,'nama', 'nipg', 'posisi', 'direktorat', 'division', 'subsidiaries', 'email', 'gender', 'job'];
 
     public function getData()
     {

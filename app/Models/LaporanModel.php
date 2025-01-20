@@ -7,6 +7,8 @@ class LaporanModel extends Model
 {
     protected $table = 'laporan';
     protected $primaryKey = 'id_lap';
+    protected $allowedFields = ['id_lap', 'id_magang', 'nama_file', 'approved']; // Pastikan ini sesuai dengan field tabel
+
 
     public function insertLaporan($data)
     {

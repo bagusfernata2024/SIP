@@ -84,12 +84,11 @@ $routes->post('/dashboard/proses_upload_laporan_akhir', 'Dashboard::proses_uploa
 $routes->get('dashboard/file/(:any)', 'Dashboard::file/$1');
 $routes->post('dashboard/updateDeskripsi', 'Dashboard::updateDeskripsi');
 
-
-
-
-
 //Dashboard Mentor
 $routes->get('/mentor/dashboard', 'DashboardMentor::index');
+$routes->get('/mentor/dashboard/daftar_peserta', 'DashboardMentor::daftarPeserta');
+$routes->post('mentor/dashboard/approve_peserta', 'DashboardMentor::approve_peserta');
+// $routes->get('mentor/dashboard/approve_peserta', 'Dashboard::approve_peserta');
 $routes->get('/mentor/dashboard/absensi_bimbingan', 'DashboardMentor::absensiBimbingan');
 $routes->post('/mentor/dashboard/update_status_absensi', 'DashboardMentor::updateStatusAbsensi');
 $routes->get('/mentor/dashboard/rekap_absensi_bimbingan', 'DashboardMentor::rekapAbsensiBimbingan');

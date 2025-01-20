@@ -8,7 +8,7 @@ class AbsensiModel extends Model
 {
     protected $table = 'absen';
     protected $primaryKey = 'id_absen';
-    protected $allowedFields = ['approved', 'deskripsi']; // Pastikan ini sesuai dengan field tabel
+    protected $allowedFields = ['id_absen', 'id_magang','tgl', 'jam_masuk', 'jam_pulang', 'deskripsi', 'statuss', 'latitude_masuk', 'longtitude_masuk', 'latitude_keluar', 'longtitude_keluar', 'approved']; // Pastikan ini sesuai dengan field tabel
 
     public function getAbsensiByUserNomor($user_nomor)
     {

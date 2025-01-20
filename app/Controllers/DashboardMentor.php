@@ -7,6 +7,10 @@ use App\Models\AnakMagangModel;
 use App\Models\LaporanModel;
 use App\Models\NilaiModel;
 use App\Models\PesertaModel;
+use App\Models\RegistrasiModel;
+use App\Models\DetailRegisModel;
+use App\Models\MentorModel;
+use App\Models\UserModel;
 use App\Libraries\PdfGenerator;
 
 use App\Controllers\BaseController;
@@ -18,6 +22,10 @@ class DashboardMentor extends BaseController
     protected $laporanModel;
     protected $nilaiModel;
     protected $pesertaModel;
+    protected $registrasiModel;
+    protected $detailRegisModel;
+    protected $mentorModel;
+    protected $userModel;
     protected $pdfgenerator;
 
     public function __construct()
@@ -27,6 +35,10 @@ class DashboardMentor extends BaseController
         $this->laporanModel = new LaporanModel();
         $this->nilaiModel = new NilaiModel();
         $this->pesertaModel = new PesertaModel();
+        $this->registrasiModel = new RegistrasiModel();
+        $this->detailRegisModel = new DetailRegisModel();
+        $this->mentorModel = new MentorModel();
+        $this->userModel = new UserModel();
         $this->pdfgenerator = new PdfGenerator();
 
         // Session check
@@ -69,6 +81,330 @@ class DashboardMentor extends BaseController
             view('mentor/dashboard', $data) .
             view('mentor/footer');
     }
+
+    public function daftarPeserta()
+    {
+        helper('date');
+        $user_nomor = session()->get('nomor');
+        $data['peserta'] = $this->pesertaModel->getPesertaByMentor($user_nomor);
+        // dd($data['peserta']);
+
+        return view('mentor/header') .
+            view('mentor/sidebar') .
+            view('mentor/topbar') .
+            view('mentor/daftar_peserta', $data) .
+            view('mentor/footer');
+    }
+
+    public function approve_peserta()
+    {
+        if ($this->request->isAJAX()) {
+            try {
+                $input = $this->request->getJSON();
+
+                // Validasi input JSON
+                if (!isset($input->id_magang, $input->id_register)) {
+                    return $this->response->setJSON(['success' => false, 'message' => 'Data tidak valid']);
+                }
+
+                $idMagang = $input->id_magang;
+                $idRegister = $input->id_register;
+
+                // Load model
+                $anakMagangModel = new \App\Models\AnakMagangModel();
+                $detailRegisModel = new \App\Models\DetailRegisModel();
+                $registrasiModel = new \App\Models\RegistrasiModel();
+                $userModel = new \App\Models\UserModel();
+
+                // Get data registrasi
+                $registrasi = $registrasiModel->find($idRegister);
+                if (!$registrasi) {
+                    return $this->response->setJSON(['success' => false, 'message' => 'Data registrasi tidak ditemukan']);
+                }
+
+                // Update status di tabel anak_magang
+                if (!$anakMagangModel->update($idMagang, ['status' => 'Aktif'])) {
+                    return $this->response->setJSON(['success' => false, 'message' => 'Gagal memperbarui status peserta']);
+                }
+
+                // Update approved di tabel detailregis
+                if (!$detailRegisModel->where('id_register', $idRegister)->set(['approved' => 'Y'])->update()) {
+                    return $this->response->setJSON(['success' => false, 'message' => 'Gagal memperbarui data registrasi']);
+                }
+
+                // Insert data ke tabel users
+                $username = strtolower($registrasi['tipe']) . $idRegister; // Generate username
+                $password = bin2hex(random_bytes(4));
+                if (!$userModel->insert([
+                    'nomor' => $registrasi['nomor'],
+                    'username' => $username,
+                    'password' => password_hash($password, PASSWORD_BCRYPT),
+                    'level' => 'user',
+                    'aktif' => 'Y'
+                ])) {
+                    return $this->response->setJSON(['success' => false, 'message' => 'Gagal membuat akun pengguna']);
+                }
+
+                // Get mentor data
+                $mentor = $anakMagangModel->select('mentor.nama, mentor.nipg, mentor.email, mentor.division')
+                    ->join('mentor', 'mentor.id_mentor = anak_magang.id_mentor')
+                    ->where('anak_magang.id_magang', $idMagang)
+                    ->first();
+
+                if (!$mentor) {
+                    return $this->response->setJSON(['success' => false, 'message' => 'Data mentor tidak ditemukan']);
+                }
+
+                // Send email to peserta
+                if (!$this->sendEmailToPeserta($registrasi, 'Accept', $mentor, $username, $password)) {
+                    return $this->response->setJSON(['success' => false, 'message' => 'Gagal mengirim email ke peserta']);
+                }
+
+                return $this->response->setJSON(['success' => true, 'message' => 'Peserta berhasil diapprove']);
+            } catch (\Exception $e) {
+                log_message('error', 'Error saat memproses approve peserta: ' . $e->getMessage());
+                return $this->response->setJSON(['success' => false, 'message' => 'Terjadi kesalahan pada server']);
+            }
+        }
+
+        return $this->response->setJSON(['success' => false, 'message' => 'Invalid request']);
+    }
+
+
+    private function sendEmailToPeserta($peserta, $status, $mentor = null, $username = null, $password = null)
+    {
+        $email = \Config\Services::email();
+
+        if (empty($peserta['email'])) {
+            log_message('error', 'Email peserta tidak tersedia.');
+            return false;
+        }
+
+        $email->setFrom('ormasbbctestt@gmail.com', 'PGN GAS Admin Internship Program');
+        $email->setTo($peserta['email']);
+
+        if ($status === 'Accept' && $mentor && $username && $password) {
+            $email->setSubject('Selamat! Pendaftaran Anda Telah Diterima');
+            $email->setMessage("
+            Kepada Yth. {$peserta['nama']},
+            
+            Dengan hormat,
+            Kami dengan senang hati menginformasikan bahwa pendaftaran Anda dalam program ini telah diterima.
+            
+            Berikut adalah informasi terkait akun Anda:
+            - **Username**: {$username}
+            - **Password**: {$password}
+            
+            Berikut juga informasi terkait mentor Anda:
+            - Nama: {$mentor['nama']}
+            - NIPG: {$mentor['nipg']}
+            - Email: {$mentor['email']}
+            - Satuan Kerja: {$mentor['division']}
+            
+            Silakan login ke sistem kami menggunakan username dan password di atas untuk informasi lebih lanjut dan memulai program ini. Jika Anda memiliki pertanyaan, jangan ragu untuk menghubungi kami.
+            
+            Terima kasih atas partisipasi Anda.
+    
+            Hormat kami,
+            Admin Program
+        ");
+        } elseif ($status === 'reject') {
+            $email->setSubject('Hasil Pendaftaran Program');
+            $email->setMessage("
+            Kepada Yth. {$peserta['nama']},
+            
+            Dengan hormat,
+            Kami mengucapkan terima kasih atas minat dan partisipasi Anda dalam program ini. 
+            Namun, dengan berat hati kami sampaikan bahwa pendaftaran Anda belum dapat diterima.
+            
+            Kami mendorong Anda untuk tetap semangat dan terus meningkatkan kemampuan Anda. 
+            Jika ada pertanyaan lebih lanjut, silakan hubungi tim kami.
+    
+            Hormat kami,
+            Admin Program
+        ");
+        }
+
+        // Proses pengiriman email
+        if (!$email->send()) {
+            log_message('error', 'Email gagal dikirim ke ' . $peserta['email']);
+            log_message('error', 'Debugger Email: ' . $email->printDebugger(['headers', 'subject', 'body']));
+            return false;
+        }
+
+        log_message('info', 'Email berhasil dikirim ke ' . $peserta['email']);
+        return true;
+    }
+
+
+    // public function approve_peserta()
+    // {
+    //     if ($this->request->isAJAX()) {
+    //         $input = $this->request->getJSON();
+    //         $idMagang = $input->id_magang;
+    //         $idRegister = $input->id_register;
+
+    //         // Load model
+    //         $anakMagangModel = new \App\Models\AnakMagangModel();
+    //         $detailRegisModel = new \App\Models\DetailRegisModel();
+    //         $registrasiModel = new \App\Models\RegistrasiModel();
+    //         $userModel = new \App\Models\UserModel();
+
+    //         // Get data registrasi
+    //         $registrasi = $registrasiModel->find($idRegister);
+    //         if (!$registrasi) {
+    //             return $this->response->setJSON(['success' => false, 'message' => 'Data registrasi tidak ditemukan']);
+    //         }
+
+    //         // Update status di tabel anak_magang
+    //         $anakMagangModel->update($idMagang, ['status' => 'Aktif']);
+
+    //         // Update approved di tabel detailregis
+    //         $detailRegisModel->where('id_register', $idRegister)
+    //             ->set(['approved' => 'Y'])
+    //             ->update();
+
+    //         // Insert data ke tabel users
+    //         $username = strtolower($registrasi['tipe']) . $idRegister; // Generate username
+    //         $password = 'defaultpassword'; // Default password
+    //         $userModel->insert([
+    //             'nomor' => $registrasi['nomor'],
+    //             'username' => $username,
+    //             'password' => password_hash($password, PASSWORD_BCRYPT), // Default password
+    //             'level' => 'user',
+    //             'aktif' => 'Y'
+    //         ]);
+
+    //         // Get mentor data (optional)
+    //         $mentor = $anakMagangModel->select('mentor.nama, mentor.nipg, mentor.email, mentor.division')
+    //             ->join('mentor', 'mentor.id_mentor = anak_magang.id_mentor')
+    //             ->where('anak_magang.id_magang', $idMagang)
+    //             ->first();
+
+    //         // Send email to peserta
+    //         $this->sendEmailToPeserta($registrasi, 'Accept', $mentor, $username, $password);
+
+    //         return $this->response->setJSON(['success' => true]);
+    //     }
+
+    //     return $this->response->setJSON(['success' => false, 'message' => 'Invalid request']);
+    // }
+
+    // private function sendEmailToPeserta($peserta, $status, $mentor = null, $username = null, $password = null)
+    // {
+    //     $email = \Config\Services::email();
+
+    //     $email->setFrom('ormasbbctestt@gmail.com', 'PGN GAS Admin Internship Program');
+    //     $email->setTo($peserta['email']);
+
+    //     if ($status === 'Accept' && $mentor && $username && $password) {
+    //         $email->setSubject('Selamat! Pendaftaran Anda Telah Diterima');
+    //         $email->setMessage("
+    //         Kepada Yth. {$peserta['nama']},
+
+    //         Dengan hormat,
+    //         Kami dengan senang hati menginformasikan bahwa pendaftaran Anda dalam program ini telah diterima.
+
+    //         Berikut adalah informasi terkait akun Anda:
+    //         - **Username**: {$username}
+    //         - **Password**: {$password}
+
+    //         Berikut juga informasi terkait mentor Anda:
+    //         - Nama: {$mentor['nama']}
+    //         - NIPG: {$mentor['nipg']}
+    //         - Email: {$mentor['email']}
+    //         - Satuan Kerja: {$mentor['division']}
+
+    //         Silakan login ke sistem kami menggunakan username dan password di atas untuk informasi lebih lanjut dan memulai program ini. Jika Anda memiliki pertanyaan, jangan ragu untuk menghubungi kami.
+
+    //         Terima kasih atas partisipasi Anda.
+
+    //         Hormat kami,
+    //         Admin Program
+    //     ");
+    //     } elseif ($status === 'reject') {
+    //         $email->setSubject('Hasil Pendaftaran Program');
+    //         $email->setMessage("
+    //         Kepada Yth. {$peserta['nama']},
+
+    //         Dengan hormat,
+    //         Kami mengucapkan terima kasih atas minat dan partisipasi Anda dalam program ini. 
+    //         Namun, dengan berat hati kami sampaikan bahwa pendaftaran Anda belum dapat diterima.
+
+    //         Kami mendorong Anda untuk tetap semangat dan terus meningkatkan kemampuan Anda. 
+    //         Jika ada pertanyaan lebih lanjut, silakan hubungi tim kami.
+
+    //         Hormat kami,
+    //         Admin Program
+    //     ");
+    //     }
+
+    //     // Proses pengiriman email
+    //     if (!$email->send()) {
+    //         // Log jika email gagal dikirim
+    //         echo $email->printDebugger(['headers']);
+    //         log_message('error', 'Email gagal dikirim ke ' . $peserta['email']);
+    //         log_message('error', 'Debug email: ' . $email->printDebugger(['headers', 'subject', 'body']));
+    //         return false; // Kembalikan false jika gagal
+    //     } else {
+    //         // Log jika email berhasil dikirim
+    //         log_message('info', 'Email berhasil dikirim ke ' . $peserta['email']);
+    //         return true; // Kembalikan true jika berhasil
+    //     }
+    // }
+
+
+    // private function sendEmailToPeserta($peserta, $status, $mentor = null, $username = null, $password = null)
+    // {
+    //     $email = \Config\Services::email();
+
+    //     $email->setFrom('ormasbbctestt@gmail.com', 'PGN GAS Admin Internship Program');
+    //     $email->setTo($peserta['email']);
+
+    //     if ($status === 'Accept' && $mentor && $username && $password) {
+    //         $email->setSubject('Selamat! Pendaftaran Anda Telah Diterima');
+    //         $email->setMessage("
+    //         Kepada Yth. {$peserta['nama']},
+
+    //         Dengan hormat,
+    //         Kami dengan senang hati menginformasikan bahwa pendaftaran Anda dalam program ini telah diterima.
+
+    //         Berikut adalah informasi terkait akun Anda:
+    //         - **Username**: {$username}
+    //         - **Password**: {$password}
+
+    //         Berikut juga informasi terkait mentor Anda:
+    //         - Nama: {$mentor['nama']}
+    //         - NIPG: {$mentor['nipg']}
+    //         - Email: {$mentor['email']}
+    //         - Satuan Kerja: {$mentor['division']}
+
+    //         Silakan login ke sistem kami menggunakan username dan password di atas untuk informasi lebih lanjut dan memulai program ini. Jika Anda memiliki pertanyaan, jangan ragu untuk menghubungi kami.
+
+    //         Terima kasih atas partisipasi Anda.
+
+    //         Hormat kami,
+    //         Admin Program
+    //     ");
+    //     } elseif ($status === 'reject') {
+    //         $email->setSubject('Hasil Pendaftaran Program');
+    //         $email->setMessage("
+    //         Kepada Yth. {$peserta['nama']},
+
+    //         Dengan hormat,
+    //         Kami mengucapkan terima kasih atas minat dan partisipasi Anda dalam program ini. 
+    //         Namun, dengan berat hati kami sampaikan bahwa pendaftaran Anda belum dapat diterima.
+
+    //         Kami mendorong Anda untuk tetap semangat dan terus meningkatkan kemampuan Anda. 
+    //         Jika ada pertanyaan lebih lanjut, silakan hubungi tim kami.
+
+    //         Hormat kami,
+    //         Admin Program
+    //     ");
+    //     }
+
+    //     return $email->send();
+    // }
 
     public function absensiBimbingan()
     {

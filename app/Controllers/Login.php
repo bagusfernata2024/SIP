@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controllers;
 
 use App\Models\UserModel;
@@ -13,19 +14,18 @@ class Login extends BaseController
     {
         $this->session = session();
         $this->userModel = new UserModel();
-
     }
 
     public function index()
     {
-    
+
         if ($this->session->get('admin_logged_in')) {
             redirect('dashboard');
         }
-        
+
         return view('web_templates/header') .
-               view('templates/login_peserta', ['session' => $this->session]) .
-               view('web_templates/footer');
+            view('templates/login_peserta', ['session' => $this->session]) .
+            view('web_templates/footer');
     }
 
     public function prosesLoginPeserta()
@@ -33,7 +33,7 @@ class Login extends BaseController
         $username = $this->request->getPost('username');
         $password = $this->request->getPost('password');
 
-        $admin = $this->userModel->getUserWithRegistrasi($username);
+        $admin = $this->userModel->getUserWithUsername($username);
 
         if ($admin && password_verify($password, $admin['password'])) {
             $this->session->set([
@@ -63,8 +63,8 @@ class Login extends BaseController
         }
 
         return view('web_templates/header_special') .
-               view('templates/login_admin') .
-               view('web_templates/footer_special');
+            view('templates/login_admin') .
+            view('web_templates/footer_special');
     }
 
     public function prosesLoginAdmin()
@@ -98,8 +98,8 @@ class Login extends BaseController
         // }
 
         return view('web_templates/header_special') .
-               view('templates/login_mentor') .
-               view('web_templates/footer_special');
+            view('templates/login_mentor') .
+            view('web_templates/footer_special');
     }
 
     public function prosesLoginMentor()
