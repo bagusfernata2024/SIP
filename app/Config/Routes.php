@@ -9,8 +9,11 @@ use CodeIgniter\Router\RouteCollection;
 //Landing Page
 $routes->get('/', 'HalamanUtama::index');
 
-//Login Peserta
+//Login
 $routes->get('/login', 'Login::index');
+$routes->post('/login/proses_login', 'Login::prosesLogin');
+
+//Login Peserta
 $routes->post('/login/proses_login_peserta', 'Login::prosesLoginPeserta');
 
 //Login Mentor
@@ -33,6 +36,8 @@ $routes->get('/mentor/logout', 'Login::logoutMentor');
 //Registrasi Peserta
 $routes->get('/registrasi', 'Registrasi::index');
 $routes->post('/registrasi/proses_registrasi_peserta', 'Registrasi::prosesRegistrasiPeserta');
+$routes->post('/registrasi/validateEmail', 'Registrasi::validateEmail');
+
 
 //Registrasi Mentor
 $routes->get('/registrasi/registrasi_mentor', 'Registrasi::registrasiMentor');
@@ -61,6 +66,11 @@ $routes->post('/admin/dashboard/perpanjang_magang', 'Admin\Dashboard::perpanjang
 $routes->post('/admin/dashboard/changeStatus/(:num)', 'Admin\Dashboard::changeStatus/$1');
 $routes->get('/admin/dashboard/informasi_laporan/(:num)', 'Admin\Dashboard::informasi_laporan/$1');
 $routes->get('/admin/dashboard/informasi_nilai_akhir/(:num)', 'Admin\Dashboard::informasi_nilai_akhir/$1');
+$routes->get('/admin/dashboard/exportToExcel', 'Admin\Dashboard::exportToExcel');
+$routes->get('/admin/dashboard/generateSertifikat/(:num)', 'Admin\Dashboard::generateSertifikat/$1');
+$routes->get('/admin/dashboard/download_buku_rekening/(:any)', 'Admin\Dashboard::download_buku_rekening/$1');
+
+
 
 
 // $routes->get('/admin/dashboard/perpanjang_peserta/(:num)', 'Admin\Dashboard::perpanjang_peserta/$1');
@@ -83,6 +93,10 @@ $routes->post('/dashboard/checkOut', 'Dashboard::checkOut');
 $routes->post('/dashboard/proses_upload_laporan_akhir', 'Dashboard::proses_upload_laporan_akhir');
 $routes->get('dashboard/file/(:any)', 'Dashboard::file/$1');
 $routes->post('dashboard/updateDeskripsi', 'Dashboard::updateDeskripsi');
+$routes->get('dashboard/sertifikat', 'Dashboard::sertifikat');
+$routes->get('dashboard/generate_sertifikat/(:num)', 'Dashboard::generate_sertifikat/$1');
+$routes->get('dashboard/cetak_absensi', 'Dashboard::cetak_absensi');
+
 
 //Dashboard Mentor
 $routes->get('/mentor/dashboard', 'DashboardMentor::index');
@@ -100,6 +114,7 @@ $routes->get('/mentor/dashboard/file/(:any)', 'DashboardMentor::file/$1');
 $routes->post('/mentor/dashboard/update_status_laporan_akhir', 'DashboardMentor::updateStatusLaporanAkhir');
 $routes->get('/mentor/dashboard/riwayat_laporan_bimbingan', 'DashboardMentor::riwayatLaporanBimbingan');
 $routes->get('/mentor/dashboard/nilai_bimbingan', 'DashboardMentor::nilaiBimbingan');
+$routes->post('/mentor/dashboard/simpan_nilai', 'DashboardMentor::simpan_nilai');
 $routes->get('/mentor/dashboard/riwayat_nilai_bimbingan', 'DashboardMentor::riwayatNilaiBimbingan');
 $routes->get('/mentor/dashboard/detail_riwayat_nilai_bimbingan/(:num)', 'DashboardMentor::detailRiwayatNilaiBimbingan/$1');
 $routes->get('mentor/dashboard/cetak_detail_riwayat_nilai_bimbingan/(:num)', 'DashboardMentor::cetakDetailRiwayatNilaiBimbingan/$1');

@@ -61,7 +61,12 @@
 								aria-haspopup="true"
 								aria-expanded="false">
 								<span class="mr-2 d-none d-lg-inline text-gray-600 small"><?= session()->get('nama'); ?></span>
-								<i class="fas fa-user-circle fa-2x" alt="Profile Icon"></i>
+								<img
+									src="<?= base_url('uploads/' . session()->get('foto')); ?>"
+									alt="Profile Picture"
+									class="img-profile rounded-circle"
+									style="width: 40px; height: 40px;">
+
 							</a>
 							<!-- Dropdown - User Information -->
 							<div

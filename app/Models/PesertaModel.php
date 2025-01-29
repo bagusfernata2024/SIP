@@ -8,7 +8,7 @@ class PesertaModel extends Model
 {
     protected $table = 'registrasi';
     protected $primaryKey = 'id_register';
-    protected $allowedFields = ['tipe', 'nomor', 'nama', 'email', 'notelp', 'alamat', 'jk', 'tgl_lahir', 'strata', 'jurusan', 'prodi', 'instansi', 'lama_pkl', 'surat_permohonan', 'proposal_magang', 'cv', 'marksheet', 'tanggal1', 'tanggal2', 'status', 'tgl_regis', 'minat', 'nik', 'fc_ktp', 'tipe_magang', 'email_ap', 'foto'];
+    protected $allowedFields = ['tipe', 'nomor', 'nama', 'email', 'notelp', 'alamat', 'jk', 'tgl_lahir', 'strata', 'jurusan', 'prodi', 'instansi', 'lama_pkl', 'surat_permohonan', 'proposal_magang', 'cv', 'marksheet', 'tanggal1', 'tanggal2', 'status', 'tgl_regis', 'minat', 'nik', 'fc_ktp', 'tipe_magang', 'email_ap', 'foto', 'timeline'];
 
     public function getData()
     {
@@ -27,7 +27,7 @@ class PesertaModel extends Model
             ->update($data);
     }
 
-    
+
 
     public function getPesertaByMentor($user_nomor)
     {
@@ -169,5 +169,15 @@ class PesertaModel extends Model
         return $this->db->table('anak_magang')
             ->where('id_magang', $id_magang)
             ->update(['status' => $status]);
+    }
+
+    public function getTimelineFromRegistrasi($id_magang)
+    {
+        // Ambil data timeline dari tabel registrasi berdasarkan id_magang
+        return $this->db->table('registrasi')
+            ->select('timeline')
+            ->where('id_register', $id_magang)
+            ->get()
+            ->getRowArray(); // Asumsikan kolom timeline berisi data yang dapat diproses
     }
 }

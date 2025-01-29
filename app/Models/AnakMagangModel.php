@@ -15,6 +15,79 @@ class AnakMagangModel extends Model
         return $this->findAll();
     }
 
+    public function getTanggalMagang($idMagang)
+    {
+        return $this->select('tgl_mulai AS tanggal1, tgl_selesai AS tanggal')
+            ->where('id_magang', $idMagang)
+            ->first();
+    }
+
+    public function getIdMagangByRegister($id_register)
+    {
+        return $this->where('id_register', $id_register)->first()['id_magang'] ?? null;
+    }
+
+    public function getIdRegisterByIdMagang($id_magang)
+    {
+        // Query untuk mendapatkan id_register berdasarkan id_magang
+        return $this->db->table('anak_magang')
+            ->select('id_register')
+            ->where('id_magang', $id_magang)
+            ->get()
+            ->getRow()->id_register ?? null;
+    }
+
+
+    public function updateStatusInactive($id_magang)
+    {
+        // Query untuk memperbarui status pada tabel anak_magang
+        return $this->db->table('anak_magang')
+            ->set('status', 'Selesai Magang')
+            ->where('id_magang', $id_magang)
+            ->update();
+    }
+
+    public function getAllPeserta()
+    {
+        return $this->db->table('anak_magang')->get()->getResult();
+    }
+
+    public function getPesertaByIdMagang($id_magang)
+    {
+        return $this->db->table('anak_magang')
+            ->select('anak_magang.id_magang, registrasi.nomor, registrasi.nama, registrasi.instansi, registrasi.tanggal1, registrasi.tanggal2, anak_magang.status')
+            ->join('registrasi', 'registrasi.id_register = anak_magang.id_register')
+            ->where('anak_magang.id_magang', $id_magang)
+            ->get()
+            ->getRowArray(); // Mengembalikan satu baris sebagai array
+    }
+
+    public function getPesertaMagangDesc()
+    {
+        return $this->db->table('registrasi')
+            ->select('registrasi.nomor, registrasi.nama, registrasi.instansi, registrasi.tanggal1, registrasi.tanggal2, anak_magang.status, anak_magang.id_magang')
+            ->join('anak_magang', 'registrasi.id_register = anak_magang.id_register') // Menghubungkan tabel registrasi dan anak_magang
+            ->orderBy('anak_magang.id_magang', 'DESC') // Mengurutkan berdasarkan kolom id_magang secara descending
+            ->get()
+            ->getResultArray();
+    }
+
+
+
+
+
+    public function getPesertaMagang()
+    {
+        return $this->db->table('registrasi')
+            ->select('registrasi.nomor, registrasi.nama, registrasi.instansi, registrasi.tanggal1, registrasi.tanggal2, anak_magang.status, anak_magang.id_magang')
+            ->join('anak_magang', 'registrasi.id_register = anak_magang.id_register') // Perbaikan di sini
+            ->get()
+            ->getResultArray();
+    }
+
+
+
+
     public function getIdMagang($user_nomor)
     {
         $id_register = $this->db->table('registrasi')
@@ -158,5 +231,37 @@ class AnakMagangModel extends Model
         return $this->db->table('anak_magang')
             ->where('id_magang', $id_magang)
             ->update($data);
+    }
+
+    public function updateRegistrasi($id_register, $data)
+    {
+        return $this->db->table('registrasi')
+            ->where('id_register', $id_register)
+            ->update($data);
+    }
+
+    public function getIdRegister($nomor)
+    {
+        return $this->db->table('registrasi')
+            ->select('id_register')
+            ->where('nomor', $nomor)
+            ->get()
+            ->getRowArray()['id_register'];
+    }
+
+    public function getBankInfo($id_magang)
+    {
+        return $this->where('id_magang', $id_magang)
+            ->select('buku_rek')
+            ->first();
+    }
+
+    public function getAnakMagangWithNama($id_magang)
+    {
+        // Pastikan hanya satu data yang diambil
+        return $this->select('anak_magang.*, registrasi.nama')
+            ->join('registrasi', 'registrasi.id_register = anak_magang.id_register')
+            ->where('anak_magang.id_magang', $id_magang)
+            ->first();
     }
 }

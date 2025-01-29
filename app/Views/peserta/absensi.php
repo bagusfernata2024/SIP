@@ -18,21 +18,28 @@
     <?php if ($id_magang != NULL) : ?>
         <!-- Tombol Check-In dan Check-Out -->
         <div class="mb-3">
+            <!-- Tombol Check-In -->
             <button
-                class="btn btn-success <?= ($absensi_today && $absensi_today['jam_masuk']) ? 'disabled' : '' ?>"
+                class="btn btn-success <?= ($absensi_today && !empty($absensi_today['jam_masuk'])) ? 'disabled' : '' ?>"
                 id="btnCheckIn"
-                <?= ($absensi_today && $absensi_today['jam_masuk']) ? 'disabled' : '' ?>
-                data-jam-masuk="<?= $absensi_today['jam_masuk'] ?? '' ?>">
+                <?= ($absensi_today && !empty($absensi_today['jam_masuk'])) ? 'disabled' : '' ?>>
                 Check-In
             </button>
+
+            <!-- Tombol Check-Out -->
             <button
-                class="btn btn-danger <?= ($absensi_today && $absensi_today['jam_masuk'] && !$absensi_today['jam_pulang']) ? '' : 'disabled' ?>"
+                class="btn btn-danger <?= ($absensi_today && !empty($absensi_today['jam_masuk']) && empty($absensi_today['jam_pulang'])) ? '' : 'disabled' ?>"
                 id="btnCheckOut"
-                <?= ($absensi_today && $absensi_today['jam_masuk'] && !$absensi_today['jam_pulang']) ? '' : 'disabled' ?>
-                data-jam-pulang="<?= $absensi_today['jam_pulang'] ?? '' ?>">
+                <?= ($absensi_today && !empty($absensi_today['jam_masuk']) && empty($absensi_today['jam_pulang'])) ? '' : 'disabled' ?>>
                 Check-Out
             </button>
+
+            <a href="<?= base_url('dashboard/cetak_absensi') ?>" target="_blank" class="btn btn-warning">
+                <i class="fas fa-file-pdf"></i> Cetak Absen
+            </a>
         </div>
+
+
         <!-- Modal untuk Konfirmasi Check-In -->
         <div class="modal fade" id="checkInModal" tabindex="-1" aria-labelledby="modalLabelCheckIn" aria-hidden="true">
             <div class="modal-dialog">
@@ -53,6 +60,7 @@
                 </div>
             </div>
         </div>
+
 
         <!-- Modal untuk Konfirmasi Check-Out -->
         <div class="modal fade" id="checkOutModal" tabindex="-1" aria-labelledby="modalLabelCheckOut" aria-hidden="true">
@@ -115,9 +123,6 @@
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                        <a href="javascript:void(0);" class="btn btn-warning btn-sm cetakBtn">
-                            <i class="bi bi-printer"></i> Cetak
-                        </a>
 
                         <thead>
                             <tr>
@@ -131,27 +136,42 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach ($absensi as $absen): ?>
+                            <?php if (!empty($absensi)): ?>
+                                <?php foreach ($absensi as $absen): ?>
+                                    <tr>
+                                        <td><?= $absen['tgl'] ?></td>
+                                        <td><?= $absen['jam_masuk'] ?? '-' ?></td>
+                                        <td><?= $absen['jam_pulang'] ?? '-' ?></td>
+                                        <td><?= $absen['deskripsi'] ?? '-' ?></td>
+                                        <td><?= $absen['statuss'] ?></td>
+                                        <td>
+                                            <?php if ($absen['approved'] === 'Y'): ?>
+                                                <span class="badge bg-success">Diterima</span>
+                                            <?php elseif ($absen['approved'] === 'R'): ?>
+                                                <span class="badge bg-danger">Ditolak</span>
+                                            <?php else: ?>
+                                                <span class="text-muted">-</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td>
+                                            <!-- Tombol Edit hanya aktif jika approved bukan Y dan deskripsi tidak null -->
+                                            <?php if ($absen['approved'] !== 'Y' && !empty($absen['deskripsi'])): ?>
+                                                <button class="btn btn-warning btn-sm editBtn" data-id="<?= $absen['id_absen'] ?>" data-deskripsi="<?= $absen['deskripsi'] ?>">
+                                                    <i class="bi bi-pencil"></i>
+                                                </button>
+                                            <?php else: ?>
+                                                -
+                                            <?php endif; ?>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php else: ?>
                                 <tr>
-                                    <td><?= formatTanggalIndo($absen['tgl']) ?></td>
-                                    <td><?= $absen['jam_masuk'] ?></td>
-                                    <td><?= $absen['jam_pulang'] ?></td>
-                                    <td><?= $absen['deskripsi'] ?></td>
-                                    <td><?= $absen['statuss'] ?></td>
-                                    <td>
-                                        <span class="badge <?= $absen['approved'] == 'Y' ? 'bg-success' : ($absen['approved'] == 'N' ? 'bg-danger' : 'bg-warning') ?>">
-                                            <?= $absen['approved'] == 'Y' ? 'Diterima' : ($absen['approved'] == 'N' ? 'Ditolak' : 'Menunggu') ?>
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <a href="javascript:void(0);" class="btn btn-warning btn-sm editBtn" data-id="<?= $absen['id_absen']; ?>" data-deskripsi="<?= $absen['deskripsi']; ?>">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
-                                    </td>
-
+                                    <td colspan="7">Data absensi belum tersedia.</td>
                                 </tr>
-                            <?php endforeach; ?>
+                            <?php endif; ?>
                         </tbody>
+
                     </table>
 
                 </div>
@@ -164,159 +184,169 @@
         </div>
 </div>
 
-<!-- /.container-fluid -->
-
 <script>
     let latitude, longitude;
 
-    $(document).ready(function() {
-        var table = $('#dataTable').DataTable({
-            "order": [
-                [0, 'desc']
-            ], // Urutkan berdasarkan kolom pertama (Tanggal) secara descending
-            "stateSave": true,
-            "columnDefs": [{
-                "targets": 0,
-                "type": "date",
-            }]
-        });
-
-        console.log(table.order()); // Ini akan menampilkan pengurutan kolom setelah inisialisasi
-    });
-
-    $(document).ready(function() {
-        // Menangani klik tombol Edit
-        $('.editBtn').on('click', function() {
-            var idAbsensi = $(this).data('id');
-            var deskripsi = $(this).data('deskripsi');
-
-            // Isi nilai deskripsi di dalam modal
-            $('#editDeskripsi').val(deskripsi);
-
-            // Simpan ID absensi di dalam modal untuk digunakan saat menyimpan perubahan
-            $('#saveEdit').data('id', idAbsensi);
-
-            // Tampilkan modal
-            $('#editModal').modal('show');
-        });
-
-        // Menangani klik tombol Simpan di modal
-        $('#saveEdit').on('click', function() {
-            var idAbsensi = $(this).data('id');
-            var deskripsiBaru = $('#editDeskripsi').val();
-
-            // Kirim data melalui AJAX untuk disimpan
-            $.ajax({
-                url: '<?= base_url('dashboard/updateDeskripsi'); ?>', // Sesuaikan URL dengan controller yang menangani pembaruan
-                type: 'POST',
-                data: {
-                    id_absen: idAbsensi,
-                    deskripsi: deskripsiBaru
-                },
-                success: function(response) {
-                    if (response.success) {
-                        // Menutup modal setelah berhasil
-                        $('#editModal').modal('hide');
-                        // Reload halaman untuk melihat perubahan
-                        location.reload();
-                    } else {
-                        alert('Gagal memperbarui deskripsi!');
-                    }
-                }
-            });
-        });
-    });
-
-
+    // Fungsi untuk mendapatkan lokasi
     function getLocation() {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(setLocation, showError);
         } else {
-            alert("Geolocation is not supported by this browser.");
+            alert("Geolocation tidak didukung oleh browser ini.");
         }
     }
 
+    // Fungsi untuk menyimpan lokasi ke variabel global
     function setLocation(position) {
         latitude = position.coords.latitude;
         longitude = position.coords.longitude;
+        console.log("Lokasi diperoleh:", latitude, longitude);
     }
 
+    // Fungsi untuk menangani error lokasi
     function showError(error) {
-        alert("Error occurred: " + error.message);
+        console.error("Error mendapatkan lokasi:", error.message);
+        alert("Gagal mendapatkan lokasi. Periksa pengaturan GPS Anda.");
     }
 
+    // Event listener untuk Check-In
     document.getElementById("btnCheckIn").addEventListener("click", function() {
-        let jamMasuk = this.dataset.jamMasuk;
-        console.log("Jam Masuk:", jamMasuk);
-
         getLocation();
         $('#checkInModal').modal('show');
     });
 
-
     document.getElementById("confirmCheckIn").addEventListener("click", function() {
-        const currentTime = new Date().toLocaleTimeString('en-GB'); // Format HH:mm:ss
-        console.log("Jam Masuk:", currentTime);
-
+        const currentTime = new Date().toLocaleTimeString('en-GB');
         $.ajax({
-            url: '<?= base_url('dashboard/checkIn'); ?>',
+            url: '<?= base_url("dashboard/checkIn"); ?>',
             type: 'POST',
             data: {
                 latitude: latitude,
                 longitude: longitude,
-                jam_masuk: currentTime, // Kirim waktu lokal ke server
+                jam_masuk: currentTime
             },
             success: function(response) {
+                alert(response.success || response.error);
                 location.reload();
+            },
+            error: function(error) {
+                console.error("Error Check-In:", error.responseText);
+                alert("Gagal Check-In.");
             }
         });
     });
 
+    // Event listener untuk Check-Out
     document.getElementById("btnCheckOut").addEventListener("click", function() {
-        getLocation(); // Ambil lokasi
-        $('#checkOutModal').modal('show'); // Tampilkan modal checkout
+        getLocation();
+        $('#checkOutModal').modal('show');
     });
-
 
     document.getElementById("confirmCheckOut").addEventListener("click", function() {
-        const currentTime = new Date().toLocaleTimeString('en-GB'); // Ambil waktu checkout dari browser
-        const deskripsi = document.getElementById('deskripsi').value; // Ambil deskripsi dari form
-
-        console.log("Jam Keluar:", currentTime);
-        console.log("Deskripsi:", deskripsi);
-
+        const currentTime = new Date().toLocaleTimeString('en-GB');
+        const deskripsi = document.getElementById('deskripsi').value;
         $.ajax({
-            url: '<?= base_url('dashboard/checkOut'); ?>',
+            url: '<?= base_url("dashboard/checkOut"); ?>',
             type: 'POST',
             data: {
                 latitude: latitude,
                 longitude: longitude,
-                jam_keluar: currentTime, // Kirim waktu checkout
-                deskripsi: deskripsi // Kirim deskripsi
+                jam_keluar: currentTime,
+                deskripsi: deskripsi
             },
             success: function(response) {
-                location.reload(); // Reload halaman setelah data berhasil disimpan
+                alert(response.success || response.error);
+                location.reload();
+            },
+            error: function(error) {
+                console.error("Error Check-Out:", error.responseText);
+                alert("Gagal Check-Out.");
             }
         });
     });
 
-    $(document).ready(function() {
-        // Menangani klik tombol Cetak
-        $('.cetakBtn').on('click', function() {
-            // Ambil hanya bagian yang ingin dicetak, dalam hal ini tabel
-            var printContent = document.getElementById("dataTable").outerHTML;
+    // Event listener untuk tombol Edit
+    document.querySelectorAll(".editBtn").forEach(function(button) {
+        button.addEventListener("click", function() {
+            const idAbsen = button.getAttribute("data-id");
+            const deskripsi = button.getAttribute("data-deskripsi");
 
-            // Buat halaman baru untuk proses cetak
-            var newWindow = window.open('', '', 'height=400, width=600');
-            newWindow.document.write('<html><head><title>Cetak Data Absensi</title>');
-            newWindow.document.write('</head><body>');
-            newWindow.document.write('<h3>Data Absensi</h3>'); // Judul atau teks tambahan
-            newWindow.document.write(printContent); // Tampilkan tabel yang akan dicetak
-            newWindow.document.write('</body></html>');
+            // Isi data deskripsi ke modal edit
+            document.getElementById("editDeskripsi").value = deskripsi;
 
-            // Selesaikan proses cetak
-            newWindow.document.close();
-            newWindow.print();
+            // Tampilkan modal Edit
+            $('#editModal').modal('show');
+
+            // Simpan perubahan deskripsi
+            document.getElementById("saveEdit").addEventListener("click", function() {
+                const idAbsen = document.querySelector(".editBtn").getAttribute("data-id"); // Ambil ID Absen
+                const newDeskripsi = document.getElementById("editDeskripsi").value;
+
+                $.ajax({
+                    url: '<?= base_url("dashboard/updateDeskripsi"); ?>', // Endpoint untuk update deskripsi
+                    type: 'POST',
+                    data: {
+                        id_absen: idAbsen,
+                        deskripsi: newDeskripsi,
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            alert(response.success); // Tampilkan pesan sukses
+                            location.reload(); // Reload halaman untuk memperbarui data
+                        } else {
+                            alert(response.error); // Tampilkan pesan error jika ada
+                        }
+                    },
+                    error: function(error) {
+                        console.error("Error Update:", error.responseText);
+                        alert("Gagal memperbarui deskripsi."); // Pesan default jika ada error
+                    },
+                });
+            });
+
         });
     });
+
+    document.addEventListener("DOMContentLoaded", function() {
+        // Fungsi untuk mengecek waktu dan mengatur tombol
+        function updateButtonState() {
+            const currentTime = new Date();
+            const currentHour = currentTime.getHours();
+            const currentMinute = currentTime.getMinutes();
+
+            const btnCheckIn = document.getElementById("btnCheckIn");
+            const btnCheckOut = document.getElementById("btnCheckOut");
+
+            // Logika untuk Clock-In (hanya aktif sebelum jam 12:00 siang)
+            if (currentHour < 20) {
+                btnCheckIn.disabled = false;
+                btnCheckIn.classList.remove("disabled");
+            } else {
+                btnCheckIn.disabled = true;
+                btnCheckIn.classList.add("disabled");
+            }
+
+            // Logika untuk Clock-Out (aktif hanya antara 12:00 siang - 11:59 malam)
+            if (currentHour >= 12 && currentHour < 17) {
+                btnCheckOut.disabled = false;
+                btnCheckOut.classList.remove("disabled");
+            } else {
+                btnCheckOut.disabled = true;
+                btnCheckOut.classList.add("disabled");
+            }
+
+            // Debugging log untuk memastikan fungsi berjalan
+            console.log(`Waktu sekarang: ${currentHour}:${currentMinute}`);
+            console.log(`Clock-In: ${!btnCheckIn.disabled}, Clock-Out: ${!btnCheckOut.disabled}`);
+        }
+
+        // Perbarui tombol saat halaman pertama kali dimuat
+        updateButtonState();
+
+        // Atur interval untuk mengecek setiap menit (60000 ms)
+        setInterval(updateButtonState, 1);
+    });
 </script>
+
+
+<!-- /.container-fluid -->

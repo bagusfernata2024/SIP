@@ -299,17 +299,16 @@
                             <td>Surat Permohonan</td>
                             <td><?php echo $detail_peserta[0]->surat_permohonan ?></td>
                             <td>
-                                <a href="<?php echo base_url('admin/dashboard/file/' . $detail_peserta[0]->surat_permohonan); ?>"
-                                    class="btn btn-primary btn-sm" download>Download</a>
+                                <a href="<?= $detail_peserta[0]->surat_permohonan; ?>" class="btn btn-primary btn-sm" download>Download</a>
                             </td>
+
                         </tr>
                         <tr>
                             <td>2</td>
                             <td>Proposal Magang</td>
                             <td><?php echo $detail_peserta[0]->proposal_magang ?></td>
                             <td>
-                                <a href="<?php echo base_url('admin/dashboard/file/' . $detail_peserta[0]->proposal_magang); ?>"
-                                    class="btn btn-primary btn-sm" download>Download</a>
+                                <a href="<?= $detail_peserta[0]->proposal_magang; ?>" class="btn btn-primary btn-sm" download>Download</a>
                             </td>
                         </tr>
                         <tr>
@@ -317,8 +316,7 @@
                             <td>Curriculum Vitae (CV)</td>
                             <td><?php echo $detail_peserta[0]->cv ?></td>
                             <td>
-                                <a href="<?php echo base_url('admin/dashboard/file/' . $detail_peserta[0]->cv); ?>"
-                                    class="btn btn-primary btn-sm" download>Download</a>
+                                <a href="<?= $detail_peserta[0]->cv; ?>" class="btn btn-primary btn-sm" download>Download</a>
                             </td>
                         </tr>
                         <tr>
@@ -326,8 +324,7 @@
                             <td>Marksheet</td>
                             <td><?php echo $detail_peserta[0]->marksheet; ?></td>
                             <td>
-                                <a href="<?php echo base_url('admin/dashboard/file/' . $detail_peserta[0]->marksheet); ?>"
-                                    class="btn btn-primary btn-sm" download>Download</a>
+                                <a href="<?= $detail_peserta[0]->marksheet; ?>" class="btn btn-primary btn-sm" download>Download</a>
                             </td>
                         </tr>
                         <tr>
@@ -335,8 +332,7 @@
                             <td>Fotocopy KTP</td>
                             <td><?php echo $detail_peserta[0]->fc_ktp; ?></td>
                             <td>
-                                <a href="<?php echo base_url('admin/dashboard/file/' . $detail_peserta[0]->fc_ktp); ?>"
-                                    class="btn btn-primary btn-sm" download>Download</a>
+                                <a href="<?= $detail_peserta[0]->fc_ktp; ?>" class="btn btn-primary btn-sm" download>Download</a>
                             </td>
                         </tr>
 

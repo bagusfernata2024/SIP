@@ -8,7 +8,7 @@ class UserModel extends Model
 {
     protected $table = 'users';
     protected $primaryKey = 'id';
-    protected $allowedFields = ['nomor', 'username', 'password', 'level', 'foto', 'aktif', 'last_login'];
+    protected $allowedFields = ['nomor', 'username', 'password', 'level', 'foto', 'aktif', 'last_login', 'id_register'];
 
     public function insertUser($data)
     {
@@ -49,5 +49,10 @@ class UserModel extends Model
             ->where('users.username', $username)
             ->get()
             ->getRowArray();
+    }
+
+    public function getUserByUsername($username)
+    {
+        return $this->where('username', $username)->first();
     }
 }

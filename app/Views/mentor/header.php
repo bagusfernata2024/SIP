@@ -26,6 +26,9 @@
 
 	<!-- Custom styles for this page -->
 	<link href="<?php echo base_url('files/'); ?>vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet" />
+	<!-- DataTables JS -->
+	<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
+
 
 	<!-- Font Awesome -->
 	<link

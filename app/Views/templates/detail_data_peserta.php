@@ -213,15 +213,34 @@
                             <th>Status</th>
                             <td style="color:white">
                                 <span class="badge 
-                                <?php
-                                if ($detail_peserta[0]->status === 'Accept') echo 'bg-success';
-                                elseif ($detail_peserta[0]->status === 'reject') echo 'bg-danger';
-                                else echo 'bg-warning text-dark';
-                                ?>">
-                                    <?php echo $detail_peserta[0]->status ? ucfirst($detail_peserta[0]->status) : 'Belum Diterima'; ?>
+                                    <?php
+                                    if ($detail_peserta[0]->status === 'Aktif') {
+                                        // Jika status Accept, cek apakah tanggal mulai magang belum terjadi
+                                        $current_date = date('Y-m-d'); // Tanggal saat ini
+                                        if ($detail_peserta[0]->tgl_mulai > $current_date) {
+                                            echo 'bg-warning text-light'; // Warna untuk status Belum Aktif
+                                            $status_text = 'Belum Aktif';
+                                        } else {
+                                            echo 'bg-success text-light'; // Warna untuk status Aktif
+                                            $status_text = 'Aktif';
+                                        }
+                                    } elseif ($detail_peserta[0]->status === 'reject') {
+                                        echo 'bg-danger text-light';
+                                        $status_text = 'Ditolak';
+                                    } elseif ($detail_peserta[0]->status === 'Selesai Magang') {
+                                        echo 'bg-info text-light';
+                                        $status_text = 'Selesai Magang';
+                                    } else {
+                                        echo 'bg-warning text-light';
+                                        $status_text = 'Menunggu Konfirmasi';
+                                    }
+                                    ?>">
+                                    <?php echo $status_text; ?>
                                 </span>
                             </td>
                         </tr>
+
+
                         <tr>
                             <th>Minat Satuan Kerja</th>
                             <td><?php echo $detail_peserta[0]->minat ?></td>
@@ -277,15 +296,6 @@
                         </tr>
                         <tr>
                             <td>4</td>
-                            <td>Marksheet</td>
-                            <td><?php echo $detail_peserta[0]->marksheet; ?></td>
-                            <td>
-                                <a href="<?php echo base_url('admin/dashboard/file/' . $detail_peserta[0]->marksheet); ?>"
-                                    class="btn btn-primary btn-sm" download>Download</a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>5</td>
                             <td>Fotocopy KTP</td>
                             <td><?php echo $detail_peserta[0]->fc_ktp; ?></td>
                             <td>

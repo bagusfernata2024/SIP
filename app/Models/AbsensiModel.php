@@ -8,7 +8,7 @@ class AbsensiModel extends Model
 {
     protected $table = 'absen';
     protected $primaryKey = 'id_absen';
-    protected $allowedFields = ['id_absen', 'id_magang','tgl', 'jam_masuk', 'jam_pulang', 'deskripsi', 'statuss', 'latitude_masuk', 'longtitude_masuk', 'latitude_keluar', 'longtitude_keluar', 'approved']; // Pastikan ini sesuai dengan field tabel
+    protected $allowedFields = ['id_absen', 'id_magang', 'tgl', 'jam_masuk', 'jam_pulang', 'deskripsi', 'statuss', 'latitude_masuk', 'longtitude_masuk', 'latitude_keluar', 'longtitude_keluar', 'approved']; // Pastikan ini sesuai dengan field tabel
 
     public function getAbsensiByUserNomor($user_nomor)
     {
@@ -37,10 +37,26 @@ class AbsensiModel extends Model
     //         ->getResultArray();
     // }
 
+    // public function saveCheckIn($data)
+    // {
+    //     $this->db->table('absen')->insert($data);
+    // }
+
+
+
     public function saveCheckIn($data)
     {
-        $this->db->table('absen')->insert($data);
+        log_message('debug', 'Data untuk Check-In: ' . json_encode($data));
+        if ($this->insert($data)) {
+            log_message('debug', 'Data Check-In berhasil disimpan.');
+            return true;
+        } else {
+            log_message('error', 'Error saat menyimpan Check-In: ' . json_encode($this->errors()));
+            return false;
+        }
     }
+
+
 
     public function saveCheckOut($data)
     {
@@ -67,14 +83,14 @@ class AbsensiModel extends Model
     //         ->update($data);
     // }
 
-    public function getTodayAbsence($id_magang, $tgl)
-    {
-        return $this->db->table('absen')
-            ->where('id_magang', $id_magang)
-            ->where('tgl', $tgl)
-            ->get()
-            ->getRowArray();
-    }
+    // public function getTodayAbsence($id_magang, $tgl)
+    // {
+    //     return $this->db->table('absen')
+    //         ->where('id_magang', $id_magang)
+    //         ->where('tgl', $tgl)
+    //         ->get()
+    //         ->getRowArray();
+    // }
 
     public function getIdMagang($user_nomor)
     {
@@ -98,7 +114,7 @@ class AbsensiModel extends Model
 
         return null;
     }
-
+    
     public function getAbsenByMentor($user_nomor)
     {
         return $this->db->table('absen')
@@ -140,19 +156,84 @@ class AbsensiModel extends Model
         $builder->where('tgl', $tgl);
         $builder->update(['approved' => $status]);
     }
-
     public function updateDeskripsi($id_absen, $data)
     {
-        return $this->update($id_absen, $data); // Fungsi update
+        return $this->db->table($this->table)
+            ->where('id_absen', $id_absen)
+            ->update($data);
+    }
+
+    public function getAbsensiByMagang($id_magang)
+    {
+        return $this->where('id_magang', $id_magang)
+            ->orderBy('tgl', 'ASC') // Mengurutkan berdasarkan tanggal descending
+            ->findAll();
+    }
+
+    public function getTodayAbsensi($id_magang, $date)
+    {
+        return $this->where('id_magang', $id_magang)
+            ->where('tgl', $date)
+            ->get()
+            ->getRowArray(); // Ambil baris pertama sebagai array
     }
 
     public function hasCheckedInToday($id_magang, $tgl)
     {
-        return $this->db->table('absen')
+        return $this->where('id_magang', $id_magang)->where('tgl', $tgl)->countAllResults() > 0;
+    }
+
+    public function getTodayAbsence($id_magang, $tgl)
+    {
+        return $this->db->table($this->table)
             ->where('id_magang', $id_magang)
             ->where('tgl', $tgl)
-            ->countAllResults() > 0;
+            ->get()
+            ->getRowArray();
     }
+
+    public function updateAbsensi($id_absen, $data)
+    {
+        return $this->db->table($this->table)
+            ->where('id_absen', $id_absen)
+            ->update($data);
+    }
+
+
+
+    // public function updateAbsensi($id_magang, $tgl, $data)
+    // {
+    //     // Update record absensi berdasarkan id_magang dan tanggal
+    //     return $this->db->table('absen')
+    //         ->where('id_magang', $id_magang)
+    //         ->where('tgl', $tgl)
+    //         ->update($data);
+    // }
+
+    // public function getTodayAbsence($id_magang, $tgl)
+    // {
+    //     // Ambil record absensi berdasarkan id_magang dan tanggal
+    //     return $this->db->table('absen')
+    //         ->where('id_magang', $id_magang)
+    //         ->where('tgl', $tgl)
+    //         ->get()
+    //         ->getRowArray();
+    // }
+
+
+    // public function getTodayAbsence($id_magang, $tgl)
+    // {
+    //     return $this->where('id_magang', $id_magang)->where('tgl', $tgl)->first();
+    // }
+
+
+    // public function hasCheckedInToday($id_magang, $tgl)
+    // {
+    //     return $this->db->table('absen')
+    //         ->where('id_magang', $id_magang)
+    //         ->where('tgl', $tgl)
+    //         ->countAllResults() > 0;
+    // }
 
     public function getLastIdAbsen()
     {

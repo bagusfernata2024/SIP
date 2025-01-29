@@ -117,18 +117,35 @@ class Registrasi extends BaseController
             return redirect()->to('/registrasi')->withInput();
         }
 
-        $files = ['surat_permohonan', 'proposal_magang', 'cv', 'marksheet', 'fc_ktp', 'foto'];
+        $nik = $this->request->getPost('nik');
+        $tipe = $this->request->getPost('tipe');
+        $email = $this->request->getPost('email');
+
+
+        // Cek apakah nik sudah pernah mendaftar untuk tipe program yang sama
+        $existingRegistration = $this->pesertaModel
+            ->where('email', $email)
+            ->where('tipe', $tipe)
+            ->first();
+
+        if ($existingRegistration) {
+            session()->setFlashdata('status', 'fail');
+            session()->setFlashdata('error_message', 'Anda sudah pernah mendaftar untuk tipe program ini. Silakan pilih tipe program lain.');
+            return redirect()->to('/registrasi')->withInput();
+        }
+
+        // Jika nik belum pernah mendaftar untuk tipe ini, lanjutkan proses registrasi
+        $files = ['surat_permohonan', 'proposal_magang', 'cv', 'fc_ktp', 'foto'];
         $uploads = [];
         $nama = $this->request->getPost('nama');
-        $nim = $this->request->getPost('nik');
         $instansi = $this->request->getPost('instansi');
         $tanggal = date('Ymd');
 
         foreach ($files as $file) {
             $uploadedFile = $this->request->getFile($file);
             if ($uploadedFile->isValid() && !$uploadedFile->hasMoved()) {
-                $newName = $this->createRenameFile($file, $nama, $nim, $instansi, $tanggal);
-                $uploadedFile->move(WRITEPATH . 'uploads', $newName);
+                $newName = $this->createRenameFile($file, $nama, $nik, $instansi, $tanggal);
+                $uploadedFile->move(FCPATH . 'uploads', $newName);
                 $uploads[$file] = $newName;
                 log_message('debug', "File $file uploaded successfully.");
             } else {
@@ -148,11 +165,11 @@ class Registrasi extends BaseController
 
         $lastPrimaryKey = $this->pesertaModel->selectMax('id_register')->first();
         $newPrimaryKey = isset($lastPrimaryKey['id_register']) ? $lastPrimaryKey['id_register'] + 1 : 1;
-
+        $timeline = 'Review Berkas';
         $data = [
             'id' => $newPrimaryKey, // Memastikan id berurutan
-            'tipe' => $this->request->getPost('tipe'),
-            'nomor' => $nim,
+            'tipe' => $tipe,
+            'nomor' => $nik,
             'nama' => $nama,
             'email' => $this->request->getPost('email'),
             'notelp' => $this->request->getPost('notelp'),
@@ -172,39 +189,38 @@ class Registrasi extends BaseController
             'surat_permohonan' => $uploads['surat_permohonan'],
             'proposal_magang' => $uploads['proposal_magang'],
             'cv' => $uploads['cv'],
-            'marksheet' => $uploads['marksheet'],
+            'marksheet' => null,
             'fc_ktp' => $uploads['fc_ktp'],
             'foto' => $uploads['foto'],
+            'timeline' => $timeline
         ];
 
         if ($this->pesertaModel->insert($data)) {
-            log_message('debug', 'Last query: ' . $this->pesertaModel->getLastQuery());
-            log_message('debug', 'Data successfully inserted into pesertaModel.');
-            $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
-            $lastPrimaryKey = $this->userModel->selectMax('id')->first();
-            $newPrimaryKey = isset($lastPrimaryKey['id']) ? $lastPrimaryKey['id'] + 1 : 1;
-            // $userData = [
-            //     'id' => $newPrimaryKey,
-            //     'nomor' => $nim,
-            //     'username' => $nim,
-            //     'password' => $hashedPassword,
-            //     'level' => 'user',
-            //     'aktif' => 'Y',
-            //     'foto' => $uploads['foto'],
-            // ];
-
-            // if ($this->userModel->insert($userData)) {
-            //     log_message('debug', 'User data successfully inserted into userModel.');
-            // } else {
-            //     log_message('debug', 'Failed to insert user data into userModel.');
-            // }
-
+            // Kirim email ke peserta
             session()->setFlashdata('status', 'success');
-            log_message('debug', 'Flashdata set to success before redirect.');
+            $email = \Config\Services::email();
+
+            $email->setFrom('mdndfzn@gmail.com', 'PGN GAS Admin Internship Program');
+            $email->setTo($this->request->getPost('email'));
+            $email->setSubject('Pendaftaran Sedang Diproses');
+            $email->setMessage("
+            <p>Kepada Yth.</p>
+            <p>$nama</p>
+            <p>Terima kasih telah mendaftar program kami dengan tipe program: <b>{$tipe}</b>.</p>
+            <p>Saat ini, pendaftaran Anda sedang kami proses. Mohon menunggu informasi lebih lanjut.</p>
+            <p>Salam hangat,<br>Tim Administrasi</p>
+        ");
+
+            if ($email->send()) {
+                log_message('info', 'Email berhasil dikirim ke ' . $this->request->getPost('email'));
+            } else {
+                log_message('error', 'Gagal mengirim email ke ' . $this->request->getPost('email'));
+                log_message('error', $email->printDebugger(['headers']));
+            }
+            session()->setFlashdata('status', 'success');
+            session()->setFlashdata('email', $this->request->getPost('email'));
             return redirect()->to('/registrasi');
         } else {
-            log_message('debug', 'Last query: ' . $this->pesertaModel->getLastQuery());
-            log_message('debug', 'Failed to insert data into pesertaModel.');
             session()->setFlashdata('status', 'fail');
             return redirect()->to('/registrasi');
         }

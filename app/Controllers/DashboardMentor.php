@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use \DateTime;
 use App\Models\AbsensiModel;
 use App\Models\AnakMagangModel;
 use App\Models\LaporanModel;
@@ -96,13 +97,142 @@ class DashboardMentor extends BaseController
             view('mentor/footer');
     }
 
+    // APPROVE WITH CETAK ABSEN
+    // public function approve_peserta()
+    // {
+    //     if ($this->request->isAJAX()) {
+    //         try {
+    //             $input = $this->request->getJSON();
+
+    //             // Validasi input JSON
+    //             if (!isset($input->id_magang, $input->id_register)) {
+    //                 return $this->response->setJSON(['success' => false, 'message' => 'Data tidak valid']);
+    //             }
+
+    //             $idMagang = $input->id_magang;
+    //             $idRegister = $input->id_register;
+
+    //             // Load model
+    //             $anakMagangModel = new \App\Models\AnakMagangModel();
+    //             $detailRegisModel = new \App\Models\DetailRegisModel();
+    //             $registrasiModel = new \App\Models\RegistrasiModel();
+    //             $userModel = new \App\Models\UserModel();
+    //             $absensiModel = new \App\Models\AbsensiModel();
+
+    //             // Get data registrasi
+    //             $registrasi = $registrasiModel->find($idRegister);
+    //             if (!$registrasi) {
+    //                 return $this->response->setJSON(['success' => false, 'message' => 'Data registrasi tidak ditemukan']);
+    //             }
+
+    //             // Update status di tabel anak_magang
+    //             if (!$anakMagangModel->update($idMagang, ['status' => 'Aktif'])) {
+    //                 return $this->response->setJSON(['success' => false, 'message' => 'Gagal memperbarui status peserta']);
+    //             }
+
+    //             // Update approved di tabel detailregis
+    //             if (!$detailRegisModel->where('id_register', $idRegister)->set(['approved' => 'Y'])->update()) {
+    //                 return $this->response->setJSON(['success' => false, 'message' => 'Gagal memperbarui data registrasi']);
+    //             }
+
+    //             // Insert data ke tabel users
+    //             $username = strtolower($registrasi['tipe']) . $idRegister; // Generate username
+    //             $password = bin2hex(random_bytes(4));
+    //             if (!$userModel->insert([
+    //                 'nomor' => $registrasi['nomor'],
+    //                 'username' => $username,
+    //                 'password' => password_hash($password, PASSWORD_BCRYPT),
+    //                 'level' => 'user',
+    //                 'aktif' => 'Y'
+    //             ])) {
+    //                 return $this->response->setJSON(['success' => false, 'message' => 'Gagal membuat akun pengguna']);
+    //             }
+
+    //             // Get data magang (tanggal mulai dan selesai)
+    //             $anakMagang = $anakMagangModel->find($idMagang);
+    //             if (!$anakMagang) {
+    //                 return $this->response->setJSON(['success' => false, 'message' => 'Data magang tidak ditemukan']);
+    //             }
+
+    //             $tanggalAwal = $anakMagang['tgl_mulai'];
+    //             $tanggalAkhir = $anakMagang['tgl_selesai'];
+
+    //             // Generate range tanggal
+    //             $tanggalRange = $this->generateTanggalRange($tanggalAwal, $tanggalAkhir);
+
+    //             // Insert data absensi
+    //             $dataAbsensi = [];
+    //             foreach ($tanggalRange as $tanggal) {
+    //                 $lastPrimaryKey = $this->absensiModel->selectMax('id_absen')->first();
+    //                 $newPrimaryKey = isset($lastPrimaryKey['id_absen']) ? $lastPrimaryKey['id_absen'] + 1 : 1;
+    //                 $dataAbsensi[] = [
+    //                     'id_absen' => $newPrimaryKey, // AUTO_INCREMENT
+    //                     'id_magang' => $idMagang,
+    //                     'tgl' => $tanggal,
+    //                     'approved' => 'N', // Default value
+    //                     'jam_masuk' => null,
+    //                     'jam_pulang' => null,
+    //                     'deskripsi' => null,
+    //                     'statuss' => 'Belum Absen', // Default status
+    //                     'latitude_masuk' => null,
+    //                     'longitude_masuk' => null,
+    //                     'latitude_keluar' => null,
+    //                     'longitude_keluar' => null,
+    //                 ];
+    //             }
+    //             $absensiModel->insertBatch($dataAbsensi);
+
+    //             // Get mentor data
+    //             $mentor = $anakMagangModel->select('mentor.nama, mentor.nipg, mentor.email, mentor.division')
+    //                 ->join('mentor', 'mentor.id_mentor = anak_magang.id_mentor')
+    //                 ->where('anak_magang.id_magang', $idMagang)
+    //                 ->first();
+
+    //             if (!$mentor) {
+    //                 return $this->response->setJSON(['success' => false, 'message' => 'Data mentor tidak ditemukan']);
+    //             }
+
+    //             // Send email to peserta
+    //             if (!$this->sendEmailToPeserta($registrasi, 'Accept', $mentor, $username, $password)) {
+    //                 return $this->response->setJSON(['success' => false, 'message' => 'Gagal mengirim email ke peserta']);
+    //             }
+
+    //             return $this->response->setJSON(['success' => true, 'message' => 'Peserta berhasil diapprove dan absensi telah dibuat.']);
+    //         } catch (\Exception $e) {
+    //             log_message('error', 'Error saat memproses approve peserta: ' . $e->getMessage());
+    //             return $this->response->setJSON(['success' => false, 'message' => 'Terjadi kesalahan pada server']);
+    //         }
+    //     }
+
+    //     return $this->response->setJSON(['success' => false, 'message' => 'Invalid request']);
+    // }
+
+    // // Helper untuk generate range tanggal
+    // private function generateTanggalRange($startDate, $endDate)
+    // {
+    //     $start = new \DateTime($startDate);
+    //     $end = new \DateTime($endDate);
+    //     $end->modify('+1 day'); // Tambahkan 1 hari untuk menyertakan tanggal akhir
+    //     $interval = new \DateInterval('P1D'); // Interval 1 hari
+    //     $dateRange = new \DatePeriod($start, $interval, $end);
+
+    //     $dates = [];
+    //     foreach ($dateRange as $date) {
+    //         $dates[] = $date->format('Y-m-d');
+    //     }
+
+    //     return $dates;
+    // }
+
+    // Approve + Insert Nilai + Insert Absen
     public function approve_peserta()
     {
+        helper('date');
+
         if ($this->request->isAJAX()) {
             try {
                 $input = $this->request->getJSON();
 
-                // Validasi input JSON
                 if (!isset($input->id_magang, $input->id_register)) {
                     return $this->response->setJSON(['success' => false, 'message' => 'Data tidak valid']);
                 }
@@ -111,10 +241,12 @@ class DashboardMentor extends BaseController
                 $idRegister = $input->id_register;
 
                 // Load model
-                $anakMagangModel = new \App\Models\AnakMagangModel();
-                $detailRegisModel = new \App\Models\DetailRegisModel();
-                $registrasiModel = new \App\Models\RegistrasiModel();
-                $userModel = new \App\Models\UserModel();
+                $anakMagangModel = new AnakMagangModel();
+                $detailRegisModel = new DetailRegisModel();
+                $registrasiModel = new RegistrasiModel();
+                $userModel = new UserModel();
+                $nilaiModel = new NilaiModel();
+                $absenModel = new AbsensiModel();
 
                 // Get data registrasi
                 $registrasi = $registrasiModel->find($idRegister);
@@ -122,30 +254,57 @@ class DashboardMentor extends BaseController
                     return $this->response->setJSON(['success' => false, 'message' => 'Data registrasi tidak ditemukan']);
                 }
 
+                // Update timeline status di tabel registrasi
+                $registrasiModel->updateTimelineAccMentor($idRegister, 'Kegiatan Dimulai');
+
+                // Update timeline status di tabel registrasi
+                $registrasiModel->updateStatusAccMentor($idRegister, 'Accept');
+
                 // Update status di tabel anak_magang
-                if (!$anakMagangModel->update($idMagang, ['status' => 'Aktif'])) {
-                    return $this->response->setJSON(['success' => false, 'message' => 'Gagal memperbarui status peserta']);
-                }
+                $anakMagangModel->update($idMagang, ['status' => 'Aktif']);
 
                 // Update approved di tabel detailregis
-                if (!$detailRegisModel->where('id_register', $idRegister)->set(['approved' => 'Y'])->update()) {
-                    return $this->response->setJSON(['success' => false, 'message' => 'Gagal memperbarui data registrasi']);
-                }
+                $detailRegisModel->where('id_register', $idRegister)->set(['approved' => 'Y'])->update();
 
                 // Insert data ke tabel users
-                $username = strtolower($registrasi['tipe']) . $idRegister; // Generate username
+                $username = strtolower($registrasi['tipe']) . $idRegister;
                 $password = bin2hex(random_bytes(4));
-                if (!$userModel->insert([
+                $userModel->insert([
                     'nomor' => $registrasi['nomor'],
                     'username' => $username,
                     'password' => password_hash($password, PASSWORD_BCRYPT),
                     'level' => 'user',
-                    'aktif' => 'Y'
-                ])) {
-                    return $this->response->setJSON(['success' => false, 'message' => 'Gagal membuat akun pengguna']);
+                    'aktif' => 'Y',
+                    'id_register' => $idRegister
+                ]);
+
+                // Insert default nilai for the new participant
+                $nilaiModel->insert([
+                    'id_magang' => $idMagang,
+                    // Nilai lainnya
+                ]);
+
+                // Generate absen data for the participant
+                $tanggalMulai = new DateTime($registrasi['tanggal1']);
+                $tanggalSelesai = new DateTime($registrasi['tanggal2']);
+                $tanggalSekarang = clone $tanggalMulai;
+
+                $absenData = [];
+                while ($tanggalSekarang <= $tanggalSelesai) {
+                    $absenData[] = [
+                        'id_magang' => $idMagang,
+                        'tgl' => $tanggalSekarang->format('Y-m-d'),
+                        'approved' => 'N'
+                    ];
+                    $tanggalSekarang->modify('+1 day');
                 }
 
-                // Get mentor data
+                if (!$absenModel->insertBatch($absenData)) {
+                    log_message('error', 'Insert batch error: ' . json_encode($absenModel->errors()));
+                    return $this->response->setJSON(['success' => false, 'message' => 'Gagal membuat data absen']);
+                }
+
+                //Get mentor data
                 $mentor = $anakMagangModel->select('mentor.nama, mentor.nipg, mentor.email, mentor.division')
                     ->join('mentor', 'mentor.id_mentor = anak_magang.id_mentor')
                     ->where('anak_magang.id_magang', $idMagang)
@@ -171,6 +330,191 @@ class DashboardMentor extends BaseController
     }
 
 
+
+    //Approve + Insert Nilai
+    // public function approve_peserta()
+    // {
+    //     if ($this->request->isAJAX()) {
+    //         try {
+    //             $input = $this->request->getJSON();
+
+    //             if (!isset($input->id_magang, $input->id_register)) {
+    //                 return $this->response->setJSON(['success' => false, 'message' => 'Data tidak valid']);
+    //             }
+
+    //             $idMagang = $input->id_magang;
+    //             $idRegister = $input->id_register;
+
+    //             // Load model
+    //             $anakMagangModel = new AnakMagangModel();
+    //             $detailRegisModel = new DetailRegisModel();
+    //             $registrasiModel = new RegistrasiModel();
+    //             $userModel = new UserModel();
+    //             $nilaiModel = new NilaiModel();
+
+    //             // Get data registrasi
+    //             $registrasi = $registrasiModel->find($idRegister);
+    //             if (!$registrasi) {
+    //                 return $this->response->setJSON(['success' => false, 'message' => 'Data registrasi tidak ditemukan']);
+    //             }
+
+    //             // Update timeline status di tabel registrasi
+    //             $timelineUpdated = $registrasiModel->updateTimelineAccMentor($idRegister, 'Kegiatan Dimulai');
+    //             if (!$timelineUpdated) {
+    //                 return $this->response->setJSON(['success' => false, 'message' => 'Gagal memperbarui timeline']);
+    //             }
+
+    //             // Update status di tabel anak_magang
+    //             if (!$anakMagangModel->update($idMagang, ['status' => 'Aktif'])) {
+    //                 return $this->response->setJSON(['success' => false, 'message' => 'Gagal memperbarui status peserta']);
+    //             }
+
+    //             // Update approved di tabel detailregis
+    //             if (!$detailRegisModel->where('id_register', $idRegister)->set(['approved' => 'Y'])->update()) {
+    //                 return $this->response->setJSON(['success' => false, 'message' => 'Gagal memperbarui data registrasi']);
+    //             }
+
+    //             // Insert data ke tabel users
+    //             $username = strtolower($registrasi['tipe']) . $idRegister;
+    //             $password = bin2hex(random_bytes(4));
+    //             if (!$userModel->insert([
+    //                 'nomor' => $registrasi['nomor'],
+    //                 'username' => $username,
+    //                 'password' => password_hash($password, PASSWORD_BCRYPT),
+    //                 'level' => 'user',
+    //                 'aktif' => 'Y',
+    //                 'id_register' => $idRegister
+    //             ])) {
+    //                 return $this->response->setJSON(['success' => false, 'message' => 'Gagal membuat akun pengguna']);
+    //             }
+
+    //             // Insert default nilai for the new participant
+    //             $nilaiData = [
+    //                 'id_magang' => $idMagang,
+    //                 'ketepatan_waktu' => null,
+    //                 'sikap_kerja' => null,
+    //                 'tanggung_jawab' => null,
+    //                 'kehadiran' => null,
+    //                 'kemampuan_kerja' => null,
+    //                 'keterampilan_kerja' => null,
+    //                 'kualitas_hasil' => null,
+    //                 'kemampuan_komunikasi' => null,
+    //                 'kerjasama' => null,
+    //                 'kerajinan' => null,
+    //                 'percaya_diri' => null,
+    //                 'mematuhi_aturan' => null,
+    //                 'penampilan' => null,
+    //                 'perilaku' => null,
+    //             ];
+
+    //             // Insert the nilai data
+    //             if (!$nilaiModel->insert($nilaiData)) {
+    //                 return $this->response->setJSON(['success' => false, 'message' => 'Gagal menyimpan data nilai']);
+    //             }
+
+    //             // Get mentor data
+    //             $mentor = $anakMagangModel->select('mentor.nama, mentor.nipg, mentor.email, mentor.division')
+    //                 ->join('mentor', 'mentor.id_mentor = anak_magang.id_mentor')
+    //                 ->where('anak_magang.id_magang', $idMagang)
+    //                 ->first();
+
+    //             if (!$mentor) {
+    //                 return $this->response->setJSON(['success' => false, 'message' => 'Data mentor tidak ditemukan']);
+    //             }
+
+    //             // Send email to peserta
+    //             if (!$this->sendEmailToPeserta($registrasi, 'Accept', $mentor, $username, $password)) {
+    //                 return $this->response->setJSON(['success' => false, 'message' => 'Gagal mengirim email ke peserta']);
+    //             }
+
+    //             return $this->response->setJSON(['success' => true, 'message' => 'Peserta berhasil diapprove']);
+    //         } catch (\Exception $e) {
+    //             log_message('error', 'Error saat memproses approve peserta: ' . $e->getMessage());
+    //             return $this->response->setJSON(['success' => false, 'message' => 'Terjadi kesalahan pada server']);
+    //         }
+    //     }
+
+    //     return $this->response->setJSON(['success' => false, 'message' => 'Invalid request']);
+    // 
+
+
+    // public function approve_peserta()
+    // {
+    //     if ($this->request->isAJAX()) {
+    //         try {
+    //             $input = $this->request->getJSON();
+
+    //             // Validasi input JSON
+    //             if (!isset($input->id_magang, $input->id_register)) {
+    //                 return $this->response->setJSON(['success' => false, 'message' => 'Data tidak valid']);
+    //             }
+
+    //             $idMagang = $input->id_magang;
+    //             $idRegister = $input->id_register;
+
+    //             // Load model
+    //             $anakMagangModel = new AnakMagangModel();
+    //             $detailRegisModel = new DetailRegisModel();
+    //             $registrasiModel = new RegistrasiModel();
+    //             $userModel = new UserModel();
+
+    //             // Get data registrasi
+    //             $registrasi = $registrasiModel->find($idRegister);
+    //             if (!$registrasi) {
+    //                 return $this->response->setJSON(['success' => false, 'message' => 'Data registrasi tidak ditemukan']);
+    //             }
+
+    //             $registrasiModel->updateTimelineAccMentor($idRegister, 'Kegiatan Dimulai');
+
+
+    //             // Update status di tabel anak_magang
+    //             if (!$anakMagangModel->update($idMagang, ['status' => 'Aktif'])) {
+    //                 return $this->response->setJSON(['success' => false, 'message' => 'Gagal memperbarui status peserta']);
+    //             }
+
+    //             // Update approved di tabel detailregis
+    //             if (!$detailRegisModel->where('id_register', $idRegister)->set(['approved' => 'Y'])->update()) {
+    //                 return $this->response->setJSON(['success' => false, 'message' => 'Gagal memperbarui data registrasi']);
+    //             }
+
+    //             // Insert data ke tabel users
+    //             $username = strtolower($registrasi['tipe']) . $idRegister; // Generate username
+    //             $password = bin2hex(random_bytes(4));
+    //             if (!$userModel->insert([
+    //                 'nomor' => $registrasi['nomor'],
+    //                 'username' => $username,
+    //                 'password' => password_hash($password, PASSWORD_BCRYPT),
+    //                 'level' => 'user',
+    //                 'aktif' => 'Y'
+    //             ])) {
+    //                 return $this->response->setJSON(['success' => false, 'message' => 'Gagal membuat akun pengguna']);
+    //             }
+
+    //             // Get mentor data
+    //             $mentor = $anakMagangModel->select('mentor.nama, mentor.nipg, mentor.email, mentor.division')
+    //                 ->join('mentor', 'mentor.id_mentor = anak_magang.id_mentor')
+    //                 ->where('anak_magang.id_magang', $idMagang)
+    //                 ->first();
+
+    //             if (!$mentor) {
+    //                 return $this->response->setJSON(['success' => false, 'message' => 'Data mentor tidak ditemukan']);
+    //             }
+
+    //             // Send email to peserta
+    //             if (!$this->sendEmailToPeserta($registrasi, 'Accept', $mentor, $username, $password)) {
+    //                 return $this->response->setJSON(['success' => false, 'message' => 'Gagal mengirim email ke peserta']);
+    //             }
+
+    //             return $this->response->setJSON(['success' => true, 'message' => 'Peserta berhasil diapprove']);
+    //         } catch (\Exception $e) {
+    //             log_message('error', 'Error saat memproses approve peserta: ' . $e->getMessage());
+    //             return $this->response->setJSON(['success' => false, 'message' => 'Terjadi kesalahan pada server']);
+    //         }
+    //     }
+
+    //     return $this->response->setJSON(['success' => false, 'message' => 'Invalid request']);
+    // }
+
     private function sendEmailToPeserta($peserta, $status, $mentor = null, $username = null, $password = null)
     {
         $email = \Config\Services::email();
@@ -186,42 +530,82 @@ class DashboardMentor extends BaseController
         if ($status === 'Accept' && $mentor && $username && $password) {
             $email->setSubject('Selamat! Pendaftaran Anda Telah Diterima');
             $email->setMessage("
-            Kepada Yth. {$peserta['nama']},
+        <html>
+        <head>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    line-height: 1.6;
+                }
+                table {
+                    border-collapse: collapse;
+                    width: 100%;
+                    margin-bottom: 20px;
+                }
+                th, td {
+                    border: 1px solid #ddd;
+                    padding: 8px;
+                    text-align: left;
+                }
+                th {
+                    background-color: #f2f2f2;
+                }
+                .button {
+                    background-color: #4CAF50;
+                    color: white;
+                    padding: 10px 20px;
+                    text-decoration: none;
+                    font-size: 16px;
+                    border-radius: 5px;
+                    display: inline-block;
+                    margin-top: 20px;
+                }
+            </style>
+        </head>
+        <body>
+            <p>Kepada Yth. {$peserta['nama']},</p>
+            <p>Dengan hormat,</p>
+            <p>Kami dengan senang hati menginformasikan bahwa pendaftaran Anda dalam program ini telah diterima.</p>
             
-            Dengan hormat,
-            Kami dengan senang hati menginformasikan bahwa pendaftaran Anda dalam program ini telah diterima.
+            <h4>Informasi Akun Anda:</h4>
+            <p>Username : {$username}</p>
+            <p>Password : {$password}</p>
+            <br>
+            <h4>Informasi Mentor Anda:</h4>
+            <p>Nama : {$mentor['nama']}</p>
+            <p>NIPG : {$mentor['nipg']}</p>
+            <p>Email : {$mentor['email']}</p>
+            <p>Satuan Kerja : {$mentor['division']}</p>
+            <p>Program : {$peserta['tipe']}</p>
+            <br>
+            <p>Silakan login ke sistem kami menggunakan username dan password di atas untuk informasi lebih lanjut dan memulai program ini. Jika Anda memiliki pertanyaan, jangan ragu untuk menghubungi kami.</p>
+            <p>Terima kasih atas partisipasi Anda.</p>
             
-            Berikut adalah informasi terkait akun Anda:
-            - **Username**: {$username}
-            - **Password**: {$password}
-            
-            Berikut juga informasi terkait mentor Anda:
-            - Nama: {$mentor['nama']}
-            - NIPG: {$mentor['nipg']}
-            - Email: {$mentor['email']}
-            - Satuan Kerja: {$mentor['division']}
-            
-            Silakan login ke sistem kami menggunakan username dan password di atas untuk informasi lebih lanjut dan memulai program ini. Jika Anda memiliki pertanyaan, jangan ragu untuk menghubungi kami.
-            
-            Terima kasih atas partisipasi Anda.
-    
-            Hormat kami,
-            Admin Program
+            <p>Hormat kami,<br>Admin Program</p>
+            <a href='" . base_url('login') . "' class='button'>Login ke Sistem</a>
+        </body>
+        </html>
         ");
         } elseif ($status === 'reject') {
             $email->setSubject('Hasil Pendaftaran Program');
             $email->setMessage("
-            Kepada Yth. {$peserta['nama']},
-            
-            Dengan hormat,
-            Kami mengucapkan terima kasih atas minat dan partisipasi Anda dalam program ini. 
-            Namun, dengan berat hati kami sampaikan bahwa pendaftaran Anda belum dapat diterima.
-            
-            Kami mendorong Anda untuk tetap semangat dan terus meningkatkan kemampuan Anda. 
-            Jika ada pertanyaan lebih lanjut, silakan hubungi tim kami.
-    
-            Hormat kami,
-            Admin Program
+        <html>
+        <head>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    line-height: 1.6;
+                }
+            </style>
+        </head>
+        <body>
+            <p>Kepada Yth. {$peserta['nama']},</p>
+            <p>Dengan hormat,</p>
+            <p>Kami mengucapkan terima kasih atas minat dan partisipasi Anda dalam program ini. Namun, dengan berat hati kami sampaikan bahwa pendaftaran Anda belum dapat diterima.</p>
+            <p>Kami mendorong Anda untuk tetap semangat dan terus meningkatkan kemampuan Anda. Jika ada pertanyaan lebih lanjut, silakan hubungi tim kami.</p>
+            <p>Hormat kami,<br>Admin Program</p>
+        </body>
+        </html>
         ");
         }
 
@@ -561,7 +945,7 @@ class DashboardMentor extends BaseController
 
     public function file($file_name)
     {
-        $file_path = WRITEPATH . 'uploads/laporan/' . $file_name; // Gunakan WRITEPATH untuk folder writable
+        $file_path = FCPATH . 'uploads/laporan/' . $file_name; // Gunakan WRITEPATH untuk folder writable
 
         // Debugging: Log the file path
         log_message('debug', 'Looking for file: ' . $file_path);
@@ -589,6 +973,7 @@ class DashboardMentor extends BaseController
 
     public function nilaiBimbingan()
     {
+        helper('date');
         $user_nomor = session()->get('nomor');
         $data['nilai'] = $this->nilaiModel->getNilaiByMentor($user_nomor);
 
@@ -602,6 +987,8 @@ class DashboardMentor extends BaseController
     public function simpan_nilai()
     {
         $id_magang = $this->request->getPost('id_magang');
+
+        // Data yang diterima dari form
         $data = [
             'ketepatan_waktu' => $this->request->getPost('ketepatan_waktu'),
             'sikap_kerja' => $this->request->getPost('sikap_kerja'),
@@ -620,18 +1007,31 @@ class DashboardMentor extends BaseController
             'tgl_input' => date('Y-m-d'),
         ];
 
-        // Memuat model
+        log_message('debug', "ID Magang yang diterima: $id_magang");
+        log_message('debug', 'Data yang diterima untuk simpan_nilai: ' . json_encode($data));
+
+        // Panggil model untuk update nilai
         $model = new NilaiModel();
 
-        // Update data nilai
-        $result = $model->updateNilai($data, $id_magang);
+        if ($model->updateNilai($data, $id_magang)) {
+            log_message('debug', "Nilai berhasil diperbarui untuk id_magang: $id_magang");
 
-        if ($result) {
-            return $this->response->setJSON(['success' => true, 'message' => 'Nilai berhasil diperbarui']);
+            // Update status pada tabel anak_magang menjadi 'Inactive'
+            $anakMagangModel = new AnakMagangModel();
+
+            if ($anakMagangModel->updateStatusInactive($id_magang)) {
+                log_message('debug', "Status anak_magang berhasil diperbarui menjadi Inactive untuk id_magang: $id_magang");
+            } else {
+                log_message('error', "Gagal memperbarui status anak_magang untuk id_magang: $id_magang");
+            }
+
+            return $this->response->setJSON(['success' => true, 'message' => 'Nilai berhasil diperbarui dan status anak_magang diubah']);
         } else {
+            log_message('error', "Gagal memperbarui nilai untuk id_magang: $id_magang");
             return $this->response->setJSON(['success' => false, 'message' => 'Gagal memperbarui nilai']);
         }
     }
+
 
     public function riwayatNilaiBimbingan()
     {

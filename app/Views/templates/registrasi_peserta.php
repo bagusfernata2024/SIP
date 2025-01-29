@@ -1,7 +1,10 @@
 <?php
 $status = session()->getFlashdata('status');
+$email = session()->getFlashdata('email');
 log_message('debug', 'Flashdata status di view: ' . $status);
+log_message('debug', 'Flashdata email di view: ' . $email);
 ?>
+
 <main class="main">
     <!-- Hero Section -->
     <section class="hero section">
@@ -163,12 +166,15 @@ log_message('debug', 'Flashdata status di view: ' . $status);
                                 <script>
                                     document.addEventListener('DOMContentLoaded', function() {
                                         const status = '<?= session()->getFlashdata('status') ?>';
+                                        const emailPeserta = '<?= session()->getFlashdata('email') ?>'; // Ambil email peserta
 
-                                        console.log('status:', status); // Debugging
+                                        console.log('Status:', status); // Debugging status
+                                        console.log('Email Peserta:', emailPeserta); // Debugging email
 
                                         if (status === 'success') {
                                             console.log('Menampilkan modal sukses');
                                             const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+                                            document.getElementById('emailPeserta').innerText = emailPeserta; // Isi email peserta
                                             successModal.show();
                                         } else if (status === 'fail') {
                                             console.log('Menampilkan modal gagal');
@@ -211,12 +217,6 @@ log_message('debug', 'Flashdata status di view: ' . $status);
                                 }
                             </script>
 
-                            <div class="mb-3">
-                                <label for="foto" class="form-label">Foto</label>
-                                <input type="file" class="form-control" id="foto" name="foto" accept="image/*" required>
-                                <div class="invalid-feedback">Unggah Foto.</div>
-                            </div>
-
                             <!-- Minat -->
                             <div class="mb-3">
                                 <label for="minat" class="form-label">Minat Satuan Kerja</label>
@@ -235,14 +235,14 @@ log_message('debug', 'Flashdata status di view: ' . $status);
 
                             <!-- Surat Permohonan -->
                             <div class="mb-3">
-                                <label for="surat_permohonan" class="form-label">Surat Permohonan</label>
+                                <label for="surat_permohonan" class="form-label">Surat Permohonan / Surat Lamaran</label>
                                 <input type="file" class="form-control" id="surat_permohonan" name="surat_permohonan" accept=".pdf" required>
                                 <div class="invalid-feedback">Unggah surat permohonan (PDF).</div>
                             </div>
 
                             <!-- Proposal Magang -->
                             <div class="mb-3">
-                                <label for="proposal_magang" class="form-label">Proposal Magang</label>
+                                <label for="proposal_magang" class="form-label">Proposal Magang / Surat Keterangan Lulus</label>
                                 <input type="file" class="form-control" id="proposal_magang" name="proposal_magang" accept=".pdf" required>
                                 <div class="invalid-feedback">Unggah proposal magang (PDF).</div>
                             </div>
@@ -254,11 +254,10 @@ log_message('debug', 'Flashdata status di view: ' . $status);
                                 <div class="invalid-feedback">Unggah CV (PDF).</div>
                             </div>
 
-                            <!-- Marksheet -->
                             <div class="mb-3">
-                                <label for="marksheet" class="form-label">Marksheet</label>
-                                <input type="file" class="form-control" id="marksheet" name="marksheet" accept=".pdf" required>
-                                <div class="invalid-feedback">Unggah marksheet (PDF).</div>
+                                <label for="foto" class="form-label">Foto</label>
+                                <input type="file" class="form-control" id="foto" name="foto" accept="image/*" required>
+                                <div class="invalid-feedback">Unggah Foto.</div>
                             </div>
 
                             <!-- FC KTP -->
@@ -286,8 +285,10 @@ log_message('debug', 'Flashdata status di view: ' . $status);
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            Pendaftaran Anda berhasil! Kami akan menghubungi Anda segera.
+                            Pendaftaran Anda berhasil. Silahkan menunggu informasi lebih lanjut yang akan dikirim ke email Anda:
+                            <strong id="emailPeserta"></strong>.
                         </div>
+
                         <div class="modal-footer">
                             <button type="button" class="btn btn-success" data-bs-dismiss="modal">OK</button>
                         </div>
@@ -312,6 +313,36 @@ log_message('debug', 'Flashdata status di view: ' . $status);
                     </div>
                 </div>
             </div>
+
+            <?php if (session()->getFlashdata('error_message')): ?>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const errorMessage = '<?= session()->getFlashdata('error_message') ?>';
+                        const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+                        document.getElementById('errorModalBody').innerText = errorMessage; // Masukkan pesan error ke modal
+                        errorModal.show();
+                    });
+                </script>
+            <?php endif; ?>
+
+            <!-- Modal Gagal (Error Message) -->
+            <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title text-danger" id="errorModalLabel">Registrasi Gagal</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body" id="errorModalBody">
+                            <!-- Isi pesan error akan diupdate oleh JavaScript -->
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Coba Lagi</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
 
 
 

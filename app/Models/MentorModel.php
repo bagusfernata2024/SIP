@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use CodeIgniter\Model;
@@ -7,12 +8,19 @@ class MentorModel extends Model
 {
     protected $table = 'mentor';
     protected $primaryKey = 'id_mentor';
-    protected $allowedFields = ['id_mentor' ,'nama', 'nipg', 'posisi', 'direktorat', 'division', 'subsidiaries', 'email', 'gender', 'job'];
+    protected $allowedFields = ['id_mentor', 'nama', 'nipg', 'posisi', 'direktorat', 'division', 'subsidiaries', 'email', 'gender', 'job'];
 
     public function getData()
     {
         return $this->findAll();
     }
+
+    public function getDataDesc()
+    {
+        return $this->orderBy('id_mentor', 'DESC') // Ganti 'id_mentor' dengan kolom yang relevan
+            ->findAll();
+    }
+
 
     public function countMentors()
     {

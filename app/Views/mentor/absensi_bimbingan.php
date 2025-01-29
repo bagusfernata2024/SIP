@@ -1,7 +1,7 @@
 <!-- Begin Page Content -->
 <div class="container-fluid">
     <!-- Page Heading -->
-    <h1 class="h3 mb-2 text-gray-800">Absensi bimbingan</h1>
+    <h1 class="h3 mb-2 text-gray-800">Absensi Bimbingan</h1>
     <p class="mb-4">
         Halaman ini digunakan oleh mentor untuk memverifikasi dan menyetujui absensi mahasiswa bimbingan.
         Mentor dapat memeriksa geolocation yang tercatat untuk memastikan kehadiran mahasiswa sesuai dengan lokasi kegiatan.
@@ -10,7 +10,7 @@
 
     <!-- DataTales Example -->
     <div class="card shadow mb-4">
-        <div class="card-header d-flex py-3">
+        <div class="card-header py-3">
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -46,34 +46,38 @@
                             <?php
                             $no = 1;
                             foreach ($absen as $item):
+                                // Hanya tampilkan data jika jam_masuk atau jam_pulang tidak null
+                                if (!empty($item->jam_masuk) || !empty($item->jam_pulang)):
                             ?>
-                                <?php if ($item->approved == NULL): ?>
-                                    <tr>
-                                        <td><?= $no++; ?></td>
-                                        <td><?= formatTanggalIndo($item->tgl) ?></td>
-                                        <td><?= $item->nama; ?></td>
-                                        <td><?= $item->jam_masuk; ?></td>
-                                        <td><?= $item->jam_pulang; ?></td>
-                                        <td><a href="https://www.google.com/maps?q=<?= $item->latitude_masuk; ?>,<?= $item->longitude_masuk; ?>" target="_Blank">Periksa Lokasi Masuk</a></td>
-                                        <td><a href="https://www.google.com/maps?q=<?= $item->latitude_keluar; ?>,<?= $item->longitude_keluar; ?>" target="_Blank">Periksa Lokasi Keluar</a></td>
-                                        <td><?= $item->deskripsi; ?></td>
-                                        <td>
-                                            <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#confirmModal" onclick="setAction('Y', <?= $item->id_magang; ?>, '<?= $item->tgl; ?>')">
-                                                <i class="fas fa-check" style="color: white;"></i>
-                                            </button>
-                                            <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#confirmModal" onclick="setAction('N', <?= $item->id_magang; ?>, '<?= $item->tgl; ?>')">
-                                                <i class="fas fa-times" style="color: white;"></i>
-                                            </button>
-                                        </td>
-
-                                    </tr>
-                                <?php endif; ?>
-                            <?php endforeach; ?>
+                                    <?php if ($item->approved == NULL or $item->approved == 'N'): ?>
+                                        <tr>
+                                            <td><?= $no++; ?></td>
+                                            <td><?= formatTanggalIndo($item->tgl) ?></td>
+                                            <td><?= $item->nama; ?></td>
+                                            <td><?= $item->jam_masuk; ?></td>
+                                            <td><?= $item->jam_pulang; ?></td>
+                                            <td><a href="https://www.google.com/maps?q=<?= $item->latitude_masuk; ?>,<?= $item->longitude_masuk; ?>" target="_Blank">Periksa Lokasi Masuk</a></td>
+                                            <td><a href="https://www.google.com/maps?q=<?= $item->latitude_keluar; ?>,<?= $item->longitude_keluar; ?>" target="_Blank">Periksa Lokasi Keluar</a></td>
+                                            <td><?= $item->deskripsi; ?></td>
+                                            <td>
+                                                <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#confirmModal" onclick="setAction('Y', <?= $item->id_magang; ?>, '<?= $item->tgl; ?>')">
+                                                    <i class="fas fa-check" style="color: white;"></i>
+                                                </button>
+                                                <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#confirmModal" onclick="setAction('N', <?= $item->id_magang; ?>, '<?= $item->tgl; ?>')">
+                                                    <i class="fas fa-times" style="color: white;"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    <?php endif; ?>
+                            <?php
+                                endif;
+                            endforeach; ?>
                         <?php else: ?>
                             <tr>
-                                <td colspan="4" class="text-center">Tidak ada absensi ditemukan</td>
+                                <td colspan="9" class="text-center">Tidak ada absensi ditemukan</td>
                             </tr>
                         <?php endif; ?>
+
                     </tbody>
                 </table>
             </div>
@@ -111,7 +115,6 @@
         actionValue = action; // Simpan nilai aksi (Y/N)
         selectedTgl = tgl; // Simpan nilai tgl yang dipilih
 
-
         // Update isi modal berdasarkan aksi
         const modalBody = document.getElementById('modalBody');
         modalBody.innerHTML = `Apakah Anda yakin ingin mengirimkan nilai <strong>${action === 'Y' ? 'Approved (Y)' : 'Rejected (N)'}</strong>?`;
@@ -147,6 +150,19 @@
                     console.error('Error:', error); // Menampilkan error jika terjadi kesalahan
                 });
         }
+    });
+
+    // DataTables Initialization
+    $(document).ready(function() {
+        $('#dataTable').DataTable({
+            "order": [
+                [0, 'desc']
+            ], // Mengurutkan berdasarkan kolom No secara descending
+            "columnDefs": [{
+                "targets": 0, // Kolom No harus diurutkan
+                "orderable": true // Memastikan kolom pertama bisa diurutkan
+            }]
+        });
     });
 </script>
 

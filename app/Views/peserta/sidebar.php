@@ -55,6 +55,15 @@
 		</a>
 	</li>
 
+	<li class="nav-item <?= service('uri')->getSegment(2) == 'sertifikat' ? 'active' : ''; ?>">
+		<a class="nav-link" href="<?php echo site_url('dashboard/sertifikat'); ?>">
+			<i class="fas fa-graduation-cap"></i>
+			<span>Sertifikat</span>
+		</a>
+	</li>
+
+
+
 	<!-- Divider -->
 	<hr class="sidebar-divider d-none d-md-block" />
 

@@ -9,11 +9,13 @@ class Login extends BaseController
 {
     protected $session;
     protected $userModel;
+    protected $db;
 
     public function __construct()
     {
         $this->session = session();
         $this->userModel = new UserModel();
+        $this->db = \Config\Database::connect();
     }
 
     public function index()
@@ -24,18 +26,82 @@ class Login extends BaseController
         }
 
         return view('web_templates/header') .
-            view('templates/login_peserta', ['session' => $this->session]) .
+            view('templates/login', ['session' => $this->session]) .
             view('web_templates/footer');
     }
+
+    public function prosesLogin()
+    {
+        $username = $this->request->getPost('username');
+        $password = $this->request->getPost('password');
+
+        // Ambil data user berdasarkan username
+        $user = $this->userModel->getUserWithUsername($username);
+
+        if ($user && password_verify($password, $user['password'])) {
+            // Set data sesi berdasarkan level user
+            $sessionData = [
+                'logged_in' => true,
+                'id' => $user['id'],
+                'nomor' => $user['nomor'],
+                'username' => $user['username'],
+                'level' => $user['level'],
+                'nama' => $user['nama'],
+            ];
+
+            // Jika user adalah peserta
+            if ($user['level'] === 'user') {
+                // Ambil data tambahan dari tabel registrasi
+                $registrasi = $this->db->table('registrasi')
+                    ->select('foto')
+                    ->where('id_register', $user['id_register'])
+                    ->get()
+                    ->getRowArray();
+
+                $sessionData['user_logged_in'] = true;
+                $sessionData['instansi'] = $user['instansi'];
+                $sessionData['email'] = $user['email'];
+                $sessionData['alamat'] = $user['alamat'];
+                $sessionData['notelp'] = $user['notelp'];
+                $sessionData['id_register'] = $user['id_register'];
+                $sessionData['foto'] = $registrasi['foto'] ?? 'default.png';
+
+                $this->session->set($sessionData);
+                return redirect()->to('/dashboard');
+            }
+
+            // Jika user adalah mentor
+            if ($user['level'] === 'mentor') {
+                $sessionData['mentor_logged_in'] = true;
+                $sessionData['foto'] = 'default.jpg';
+                $this->session->set($sessionData);
+                return redirect()->to('/mentor/dashboard');
+            }
+        } else {
+            // Jika username/password salah
+            $this->session->setFlashdata('error', 'Username atau password salah');
+            return redirect()->to('/login');
+        }
+    }
+
 
     public function prosesLoginPeserta()
     {
         $username = $this->request->getPost('username');
         $password = $this->request->getPost('password');
 
+        // Ambil data dari tabel user
         $admin = $this->userModel->getUserWithUsername($username);
 
         if ($admin && password_verify($password, $admin['password'])) {
+            // Ambil data dari tabel registrasi
+            $registrasi = $this->db->table('registrasi')
+                ->select('foto')
+                ->where('id_register', $admin['id_register'])
+                ->get()
+                ->getRowArray();
+
+            // Set data sesi dengan data foto dari tabel registrasi
             $this->session->set([
                 'peserta_logged_in' => true,
                 'id' => $admin['id'],
@@ -47,8 +113,9 @@ class Login extends BaseController
                 'email' => $admin['email'],
                 'alamat' => $admin['alamat'],
                 'notelp' => $admin['notelp'],
+                'id_register' => $admin['id_register'],
+                'foto' => $registrasi['foto'] ?? 'default.png', // Gunakan foto dari tabel registrasi atau default
             ]);
-
             return redirect()->to('/dashboard');
         } else {
             $this->session->setFlashdata('error', 'Username atau password salah');
@@ -135,7 +202,7 @@ class Login extends BaseController
     public function logoutMentor()
     {
         $this->session->destroy();
-        return redirect()->to('/login/mentor');
+        return redirect()->to('/login');
     }
 
     public function logoutPeserta()

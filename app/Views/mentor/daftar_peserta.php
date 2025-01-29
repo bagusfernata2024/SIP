@@ -49,7 +49,7 @@
                                     <td><?= formatTanggalIndo($item->tgl_mulai); ?> - <?= formatTanggalIndo($item->tgl_selesai); ?></td>
                                     <td><?= $item->status ?? 'Waiting'; ?></td>
                                     <td>
-                                        <?php if ($item->status !== 'Aktif'): ?>
+                                        <?php if ($item->status !== 'Aktif' and $item->status !== 'Selesai Magang'): ?>
                                             <button class="btn btn-sm btn-success" title="Terima" onclick="approvePeserta(<?= $item->id_magang; ?>, '<?= $item->id_register; ?>')">
                                                 <i class="fas fa-check"></i>
                                             </button>
@@ -159,6 +159,7 @@
                 })
                 .catch(error => {
                     console.error('Error:', error);
+                    alert('Terjadi kesalahan pada server.');
                 });
         }
     }

@@ -8,8 +8,32 @@ class RegistrasiModel extends Model
 {
     protected $table = 'registrasi';
     protected $primaryKey = 'id_register';
-    protected $allowedFields = ['tipe', 'nomor', 'nama', 'email', 'notelp', 'alamat', 'jk', 'tgl_lahir', 'strata', 'jurusan', 'prodi', 'instansi', 'lama_pkl', 'surat_permohonan', 'proposal_magang', 'cv', 'marksheet', 'tanggal1', 'tanggal2', 'status', 'tgl_regis', 'minat', 'nik', 'fc_ktp', 'tipe_magang', 'email_ap', 'foto'];
+    protected $allowedFields = ['tipe', 'nomor', 'nama', 'email', 'notelp', 'alamat', 'jk', 'tgl_lahir', 'strata', 'jurusan', 'prodi', 'instansi', 'lama_pkl', 'surat_permohonan', 'proposal_magang', 'cv', 'marksheet', 'tanggal1', 'tanggal2', 'status', 'tgl_regis', 'minat', 'nik', 'fc_ktp', 'tipe_magang', 'email_ap', 'foto', 'timeline'];
 
+
+    public function getTimeline($id)
+    {
+        // Mengambil data timeline dari tabel registrasi berdasarkan id_register
+        $result = $this->db->table('registrasi')
+            ->select('timeline')
+            ->where('id_register', $id)
+            ->get()
+            ->getRowArray();
+
+        // Jika data ada, decode JSON timeline dan kembalikan sebagai array
+        if ($result && isset($result['timeline'])) {
+            return json_decode($result['timeline'], true);
+        }
+
+        return []; // Jika tidak ada data, kembalikan array kosong
+    }
+
+    public function getTanggalMagang($idMagang)
+    {
+        return $this->select('tanggal1, tanggal2')
+            ->where('id_magang', $idMagang)
+            ->first();
+    }
 
     public function getByStatus($status = null)
     {
@@ -46,6 +70,66 @@ class RegistrasiModel extends Model
         $this->db->table($this->table)
             ->where('id_register', $id)
             ->update(['status' => $status]);
+    }
+
+    public function updateTimelineAcc($id, $status)
+    {
+        $this->db->table($this->table)
+            ->where('id_register', $id)
+            ->update(['timeline' => $status]);
+    }
+
+    public function updateStatusAccMentor($idRegister, $status)
+    {
+        $builder = $this->db->table('registrasi');
+        $builder->where('id_register', $idRegister);
+        $builder->update(['status' => $status]);
+
+        // Cek apakah ada perubahan pada data dengan menggunakan getAffectedRows
+        $affectedRows = $this->db->affectedRows();
+
+        // Debug query yang dijalankan
+        log_message('debug', 'Query yang dijalankan: ' . $this->db->getLastQuery());
+
+        // Memeriksa apakah ada baris yang terpengaruh
+        if ($affectedRows > 0) {
+            log_message('debug', 'Timeline berhasil diperbarui untuk ID Register: ' . $idRegister);
+            return true; // Berhasil
+        } else {
+            log_message('error', 'Gagal memperbarui timeline untuk ID Register: ' . $idRegister);
+            return false; // Gagal
+        }
+    }
+    
+    public function updateTimelineAccMentor($idRegister, $status)
+    {
+        $builder = $this->db->table('registrasi');
+        $builder->where('id_register', $idRegister);
+        $builder->update(['timeline' => $status]);
+
+        // Cek apakah ada perubahan pada data dengan menggunakan getAffectedRows
+        $affectedRows = $this->db->affectedRows();
+
+        // Debug query yang dijalankan
+        log_message('debug', 'Query yang dijalankan: ' . $this->db->getLastQuery());
+
+        // Memeriksa apakah ada baris yang terpengaruh
+        if ($affectedRows > 0) {
+            log_message('debug', 'Timeline berhasil diperbarui untuk ID Register: ' . $idRegister);
+            return true; // Berhasil
+        } else {
+            log_message('error', 'Gagal memperbarui timeline untuk ID Register: ' . $idRegister);
+            return false; // Gagal
+        }
+    }
+
+    public function updateStatusInactive($id_register)
+    {
+        // Query untuk memperbarui status pada tabel registrasi
+        return $this->db->table('registrasi')
+            ->set('status', 'Inactive')
+            ->where('id_register', $id_register)
+            ->update();
     }
 
 

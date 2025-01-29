@@ -14,7 +14,7 @@
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <?php if ($id_magang != NULL) : ?>
+                <?php if ($id_magang != NULL): ?>
                     <?php if ($nilai_akhir != NULL): ?>
                         <table class="table table-bordered">
                             <thead>
@@ -25,97 +25,101 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php foreach ($nilai_akhir as $nilai): ?>
-                                    <tr>
-                                        <td>1</td>
-                                        <td>Ketepatan Waktu</td>
-                                        <td><?= $nilai->ketepatan_waktu ?></td>
-                                    </tr>
-                                    <tr>
-                                        <td>2</td>
-                                        <td>Sikap Kerja</td>
-                                        <td><?= $nilai->sikap_kerja ?></td>
-                                    </tr>
-                                    <tr>
-                                        <td>3</td>
-                                        <td>Tanggungjawab</td>
-                                        <td><?= $nilai->tanggung_jawab ?></td>
-                                    </tr>
-                                    <tr>
-                                        <td>4</td>
-                                        <td>Kehadiran</td>
-                                        <td><?= $nilai->kehadiran ?></td>
-                                    </tr>
-                                    <tr>
-                                        <td>5</td>
-                                        <td>Kemampuan Kerja</td>
-                                        <td><?= $nilai->kemampuan_kerja ?></td>
-                                    </tr>
-                                    <tr>
-                                        <td>6</td>
-                                        <td>Keterampilan Kerja</td>
-                                        <td><?= $nilai->keterampilan_kerja ?></td>
-                                    </tr>
-                                    <tr>
-                                        <td>7</td>
-                                        <td>Kualitas Hasil</td>
-                                        <td><?= $nilai->kualitas_hasil ?></td>
-                                    </tr>
-                                    <tr>
-                                        <td>8</td>
-                                        <td>Kemampuan Komunikasi</td>
-                                        <td><?= $nilai->kemampuan_komunikasi ?></td>
-                                    </tr>
-                                    <tr>
-                                        <td>9</td>
-                                        <td>Kerjasama</td>
-                                        <td><?= $nilai->kerjasama ?></td>
-                                    </tr>
-                                    <tr>
-                                        <td>10</td>
-                                        <td>Kerajinan</td>
-                                        <td><?= $nilai->kerajinan ?></td>
-                                    </tr>
-                                    <tr>
-                                        <td>11</td>
-                                        <td>Percaya diri</td>
-                                        <td><?= $nilai->percaya_diri ?></td>
-                                    </tr>
-                                    <tr>
-                                        <td>12</td>
-                                        <td>Mematuhi Aturan</td>
-                                        <td><?= $nilai->mematuhi_aturan ?></td>
-                                    </tr>
-                                    <tr>
-                                        <td>13</td>
-                                        <td>Penampilan</td>
-                                        <td><?= $nilai->penampilan ?></td>
-                                    </tr>
-                                    <tr>
-                                        <td>14</td>
-                                        <td>Perilaku</td>
-                                        <td><?= $nilai->perilaku ?></td>
-                                    </tr>
-                                <?php endforeach; ?>
+                                <tr>
+                                    <td>1</td>
+                                    <td>Ketepatan Waktu</td>
+                                    <td><?= isset($nilai_akhir['ketepatan_waktu']) ? $nilai_akhir['ketepatan_waktu'] : '-' ?></td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td>Sikap Kerja</td>
+                                    <td><?= isset($nilai_akhir['sikap_kerja']) ? $nilai_akhir['sikap_kerja'] : '-' ?></td>
+                                </tr>
+                                <tr>
+                                    <td>3</td>
+                                    <td>Tanggung Jawab</td>
+                                    <td><?= isset($nilai_akhir['tanggung_jawab']) ? $nilai_akhir['tanggung_jawab'] : '-' ?></td>
+                                </tr>
+                                <tr>
+                                    <td>4</td>
+                                    <td>Kehadiran</td>
+                                    <td><?= isset($nilai_akhir['kehadiran']) ? $nilai_akhir['kehadiran'] : '-' ?></td>
+                                </tr>
+                                <tr>
+                                    <td>5</td>
+                                    <td>Kemampuan Kerja</td>
+                                    <td><?= isset($nilai_akhir['kemampuan_kerja']) ? $nilai_akhir['kemampuan_kerja'] : '-' ?></td>
+                                </tr>
+                                <tr>
+                                    <td>6</td>
+                                    <td>Keterampilan Kerja</td>
+                                    <td><?= isset($nilai_akhir['keterampilan_kerja']) ? $nilai_akhir['keterampilan_kerja'] : '-' ?></td>
+                                </tr>
+                                <tr>
+                                    <td>7</td>
+                                    <td>Kualitas Hasil</td>
+                                    <td><?= isset($nilai_akhir['kualitas_hasil']) ? $nilai_akhir['kualitas_hasil'] : '-' ?></td>
+                                </tr>
+                                <tr>
+                                    <td>8</td>
+                                    <td>Kemampuan Komunikasi</td>
+                                    <td><?= isset($nilai_akhir['kemampuan_komunikasi']) ? $nilai_akhir['kemampuan_komunikasi'] : '-' ?></td>
+                                </tr>
+                                <tr>
+                                    <td>9</td>
+                                    <td>Kerjasama</td>
+                                    <td><?= isset($nilai_akhir['kerjasama']) ? $nilai_akhir['kerjasama'] : '-' ?></td>
+                                </tr>
+                                <tr>
+                                    <td>10</td>
+                                    <td>Kerajinan</td>
+                                    <td><?= isset($nilai_akhir['kerajinan']) ? $nilai_akhir['kerajinan'] : '-' ?></td>
+                                </tr>
+                                <tr>
+                                    <td>11</td>
+                                    <td>Percaya Diri</td>
+                                    <td><?= isset($nilai_akhir['percaya_diri']) ? $nilai_akhir['percaya_diri'] : '-' ?></td>
+                                </tr>
+                                <tr>
+                                    <td>12</td>
+                                    <td>Mematuhi Aturan</td>
+                                    <td><?= isset($nilai_akhir['mematuhi_aturan']) ? $nilai_akhir['mematuhi_aturan'] : '-' ?></td>
+                                </tr>
+                                <tr>
+                                    <td>13</td>
+                                    <td>Penampilan</td>
+                                    <td><?= isset($nilai_akhir['penampilan']) ? $nilai_akhir['penampilan'] : '-' ?></td>
+                                </tr>
+                                <tr>
+                                    <td>14</td>
+                                    <td>Perilaku</td>
+                                    <td><?= isset($nilai_akhir['perilaku']) ? $nilai_akhir['perilaku'] : '-' ?></td>
+                                </tr>
+                                <!-- Lanjutkan untuk kolom lainnya -->
                             </tbody>
                         </table>
-                    <?php elseif ($id_magang == NULL) : ?>
-                        <div class="alert alert-warning" role="alert">
-                            <strong>Pendaftaran belum diterima</strong>
-                        </div>
-                        <!-- Tombol Cetak Nilai -->
                         <div class="mt-3">
-                            <a href="<?php echo base_url('dashboard/cetak_nilai') ?>" target="_Blank" class="btn btn-success btn-sm">
+                            <a href="<?php echo base_url('dashboard/cetak_nilai') ?>" target="_blank" class="btn btn-success btn-sm">
                                 <i class="fas fa-print"></i> Cetak
                             </a>
+
+                            <?php
+                            // Periksa apakah semua nilai tidak null
+                            $allFieldsFilled = !in_array(null, array_values($nilai_akhir));
+                            if ($allFieldsFilled): ?>
+                                <a href="<?php echo base_url('dashboard/generate_sertifikat') ?>" target="_blank" class="btn btn-warning btn-sm">
+                                    <i class="fas fa-file-pdf"></i> Sertifikat
+                                </a>
+                            <?php endif; ?>
                         </div>
-                    <?php endif ?>
-                    <div class="alert alert-warning" role="alert">
-                        <strong>Nilai anda belum diberikan</strong> (Hubungi mentor jika terjadi kesalahan).
-                    </div>
+                    <?php else: ?>
+                        <div class="alert alert-warning" role="alert">
+                            <strong>Nilai anda belum diberikan</strong> (Hubungi mentor jika terjadi kesalahan).
+                        </div>
+                    <?php endif; ?>
                 <?php else: ?>
                     <div class="alert alert-warning" role="alert">
-                        <strong>Nilai anda belum diberikan</strong> (Hubungi mentor jika terjadi kesalahan).
+                        <strong>Pendaftaran belum diterima</strong>
                     </div>
                 <?php endif; ?>
             </div>

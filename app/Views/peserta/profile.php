@@ -11,7 +11,11 @@
         <div class="card-body">
             <div class="row">
                 <div class="col-lg-3 text-center">
-                    <i class="fas fa-user-circle fa-2x" alt="Profile Icon" style="font-size:100px"></i>
+                    <img
+                        src="<?= base_url('uploads/' . session()->get('foto')); ?>"
+                        alt="Profile Picture"
+                        class="img-profile rounded-circle"
+                        style="width: 100px; height: 100px;">
                 </div>
                 <div class="col-lg-9">
                     <table class="table table-borderless">
@@ -71,7 +75,11 @@
         <div class="card-body">
             <div class="row">
                 <div class="col-lg-3 text-center">
-                    <i class="fas fa-user-circle fa-2x" alt="Profile Icon" style="font-size:100px"></i>
+                    <img
+                        src="<?= base_url('uploads/' . session()->get('foto')); ?>"
+                        alt="Profile Picture"
+                        class="img-profile rounded-circle"
+                        style="width: 100px; height: 100px;">
                 </div>
                 <div class="col-lg-9">
                     <table class="table table-borderless">
