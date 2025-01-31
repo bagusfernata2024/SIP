@@ -7,6 +7,7 @@ use App\Models\AnakMagangModel;
 use App\Models\LaporanModel;
 use App\Models\NilaiModel;
 use App\Models\PesertaModel;
+use App\Models\RegistrasiModel;
 use CodeIgniter\Controller;
 use App\Libraries\PdfGenerator;
 use Dompdf\Dompdf;
@@ -23,6 +24,8 @@ class Dashboard extends BaseController
     protected $pesertaModel;
     protected $laporanModel;
     protected $pdfgenerator;
+    protected $registrasiModel;
+
 
     public function __construct()
     {
@@ -33,21 +36,29 @@ class Dashboard extends BaseController
         $this->pesertaModel = new PesertaModel();
         $this->laporanModel = new LaporanModel();
         $this->pdfgenerator = new PdfGenerator();
+        $this->registrasiModel = new RegistrasiModel();
 
-        if (!$this->session->get('peserta_logged_in')) {
-            return redirect()->to('login');
-        }
+        // if (!$this->session->get('peserta_logged_in')) {
+        //     return redirect()->to('login');
+        // }
 
-        if ($this->session->get('level') !== 'user') {
-            $this->session->setFlashdata('error', 'Anda tidak memiliki akses ke halaman ini.');
-            $this->session->destroy();
-            return redirect()->to('login');
-        }
+        // if ($this->session->get('level') !== 'user') {
+        //     $this->session->setFlashdata('error', 'Anda tidak memiliki akses ke halaman ini.');
+        //     $this->session->destroy();
+        //     return redirect()->to('login');
+        // }
     }
 
     public function index()
     {
         $user_nomor = $this->session->get('nomor');
+
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'user') {
+            return view('no_access');
+        }
 
         $total_absen_yang_belum_confirm = $this->absensiModel->getAbsenByPesertaCountNotYetConfirm($user_nomor);
 
@@ -62,6 +73,12 @@ class Dashboard extends BaseController
 
     public function absensi()
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'user') {
+            return view('no_access');
+        }
         // Ambil id_register dari session
         $id_register = $this->session->get('id_register');
 
@@ -196,6 +213,12 @@ class Dashboard extends BaseController
     // Helper untuk generate range tanggal
     private function generateTanggalRange($startDate, $endDate)
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'user') {
+            return view('no_access');
+        }
         $start = new \DateTime($startDate);
         $end = new \DateTime($endDate);
         $end->modify('+1 day'); // Tambahkan 1 hari untuk menyertakan tanggal akhir
@@ -270,6 +293,12 @@ class Dashboard extends BaseController
 
     public function updateDeskripsi()
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'user') {
+            return view('no_access');
+        }
         $id_absen = $this->request->getPost('id_absen');
         $deskripsi = $this->request->getPost('deskripsi');
 
@@ -312,6 +341,12 @@ class Dashboard extends BaseController
 
     public function checkIn()
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'user') {
+            return view('no_access');
+        }
         $id_register = $this->session->get('id_register'); // Ambil id_register dari sesi
         $id_magang = $this->anakMagangModel->getIdMagangByRegister($id_register); // Cari id_magang berdasarkan id_register
         $tgl = date('Y-m-d'); // Tanggal hari ini
@@ -361,6 +396,12 @@ class Dashboard extends BaseController
 
     public function checkOut()
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'user') {
+            return view('no_access');
+        }
         $id_register = $this->session->get('id_register'); // Ambil id_register dari session
         $id_magang = $this->anakMagangModel->getIdMagangByRegister($id_register); // Cari id_magang berdasarkan id_register
         $tgl = date('Y-m-d'); // Tanggal hari ini
@@ -439,6 +480,12 @@ class Dashboard extends BaseController
 
     public function laporan()
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'user') {
+            return view('no_access');
+        }
         $user_nomor = $this->session->get('nomor');
 
         $id_magang = $this->anakMagangModel->getIdMagang($user_nomor);
@@ -462,6 +509,12 @@ class Dashboard extends BaseController
 
     public function proses_upload_laporan_akhir()
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'user') {
+            return view('no_access');
+        }
         $session = session();
         $file = $this->request->getFile('file_laporan');
         $id_magang = $this->request->getPost('id');
@@ -506,6 +559,12 @@ class Dashboard extends BaseController
 
     public function file($file_name)
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'user') {
+            return view('no_access');
+        }
         $file_name = rawurldecode($file_name); // Dekode nama file
         $file_path = FCPATH . 'uploads/laporan/' . $file_name;
 
@@ -519,6 +578,12 @@ class Dashboard extends BaseController
 
     public function nilai()
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'user') {
+            return view('no_access');
+        }
         $session = session();
         $user_nomor = $session->get('nomor');
         $id_magang = $this->anakMagangModel->getIdMagang($user_nomor); // Ambil id_magang
@@ -540,6 +605,12 @@ class Dashboard extends BaseController
 
     public function sertifikat()
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'user') {
+            return view('no_access');
+        }
         $user_nomor = $this->session->get('nomor');
         $id_magang = $this->anakMagangModel->getIdMagang($user_nomor);
         $anakMagang = $this->anakMagangModel->find($id_magang);
@@ -631,6 +702,12 @@ class Dashboard extends BaseController
     // Fungsi untuk mengganti bulan dengan nama bulan dalam bahasa Indonesia
     private function formatTanggalIndo($date)
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'user') {
+            return view('no_access');
+        }
         $bulanIndo = [
             '01' => 'Januari',
             '02' => 'Februari',
@@ -656,6 +733,12 @@ class Dashboard extends BaseController
 
     public function generate_sertifikat($id_magang)
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'user') {
+            return view('no_access');
+        }
         // Ambil data peserta magang berdasarkan ID
         $anakMagang = $this->anakMagangModel->getPesertaByIdMagang($id_magang);
 
@@ -734,6 +817,12 @@ class Dashboard extends BaseController
 
     private function convertDocxToPdf($docxFilePath)
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'user') {
+            return view('no_access');
+        }
         // Setup DOMPDF
         $dompdf = new Dompdf();
         $options = new Options();
@@ -757,6 +846,12 @@ class Dashboard extends BaseController
 
     private function convertPhpWordToHtml($phpWord)
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'user') {
+            return view('no_access');
+        }
         $htmlWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'HTML');
         ob_start();
         $htmlWriter->save("php://output");
@@ -767,17 +862,46 @@ class Dashboard extends BaseController
 
     public function cetak_nilai()
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'user') {
+            return view('no_access');
+        }
+
+        helper('date');
+
+
         $session = session();
         $user_nomor = $session->get('nomor');
-        $id_magang = $this->nilaiModel->get_id_magang($user_nomor);
-        $data['nilai_akhir'] = $this->nilaiModel->get_nilai_by_peserta($id_magang);
+        $id_magang = $this->nilaiModel->getIdMagang($user_nomor);
+
+        // Ambil data nilai dan data registrasi
+        $nilai_akhir = $this->nilaiModel->getNilaiByPeserta($id_magang);
+        $registrasi_data = $this->registrasiModel->getRegistrasiByNomor($user_nomor); // Ambil data dari tabel registrasi berdasarkan nomo
+        // Gabungkan data registrasi dan nilai_akhir dalam array
+        $nilai_akhir['nama'] = $registrasi_data['nama'];
+        $nilai_akhir['nomor'] = $registrasi_data['nomor'];
+        $nilai_akhir['instansi'] = $registrasi_data['instansi'];
+        $nilai_akhir['tanggal1'] = $registrasi_data['tanggal1'];
+        $nilai_akhir['tanggal2'] = $registrasi_data['tanggal2'];
+
+        // Kirim data ke view
+        $data['nilai_akhir'] = $nilai_akhir;
 
         // Menggunakan layanan PDF untuk menghasilkan file
         $this->pdfgenerator->generate(view('peserta/cetak_nilai_akhir', $data), 'Data Random', 'A4', 'landscape');
     }
 
+
     public function profile()
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'user') {
+            return view('no_access');
+        }
         helper('date');
 
         $session = session();
@@ -794,6 +918,12 @@ class Dashboard extends BaseController
 
     public function editProfile()
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'user') {
+            return view('no_access');
+        }
         $session = session();
         $user_nomor = $session->get('nomor');
         $id_magang = $this->anakMagangModel->getIdMagang($user_nomor);
@@ -808,6 +938,12 @@ class Dashboard extends BaseController
 
     public function updateProfile()
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'user') {
+            return view('no_access');
+        }
         $session = session();
         $user_nomor = $session->get('nomor'); // Ambil nomor dari session
         $id_register = $this->anakMagangModel->getIdRegister($user_nomor); // Ambil id_register berdasarkan nomor
@@ -854,6 +990,12 @@ class Dashboard extends BaseController
 
     public function editInfoBank()
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'user') {
+            return view('no_access');
+        }
         $session = session(); // Menginisialisasi session
         $user_nomor = $session->get('nomor'); // Mengambil data sesi
         $id_magang = $this->anakMagangModel->getIdMagang($user_nomor);
@@ -869,6 +1011,12 @@ class Dashboard extends BaseController
 
     public function updateBankInfo()
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'user') {
+            return view('no_access');
+        }
         $session = session();
         $user_nomor = $session->get('nomor'); // Mengambil data nomor peserta dari session
         $id_magang = $this->anakMagangModel->getIdMagang($user_nomor); // Mengambil id_magang dari model berdasarkan nomor
@@ -924,6 +1072,12 @@ class Dashboard extends BaseController
 
     public function downloadBukuRekening($file_name)
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'user') {
+            return view('no_access');
+        }
         // Path file yang ingin di-download
         $file_path = FCPATH . 'uploads/buku_rekening/' . $file_name;
 
@@ -952,6 +1106,12 @@ class Dashboard extends BaseController
 
     public function cetak_absensi()
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'user') {
+            return view('no_access');
+        }
         $session = session();
         $user_nomor = $session->get('nomor');
         $id_magang = $this->anakMagangModel->getIdMagang($user_nomor); // Ambil id_magang

@@ -44,7 +44,7 @@
                                 <?php if ($item->perilaku == NULL): ?>
                                     <tr>
                                         <td><?= $no++; ?></td>
-                                        <td><?= $item->nik ?></td>
+                                        <td><?= $item->nomor ?></td>
                                         <td><?= $item->nama; ?></td>
                                         <td><?= $item->instansi ?></td>
                                         <td> <?= formatTanggalIndo($item->tanggal1) ?> - <?= formatTanggalIndo($item->tanggal2) ?></td>
@@ -79,88 +79,103 @@
             <form id="nilaiForm">
                 <div class="modal-body">
                     <input type="hidden" id="idMagang" name="id_magang">
+
                     <div class="mb-3">
                         <div class="alert alert-danger" role="alert">
                             <strong>Berikan nilai rentang 0 - 100</strong>
                             (Pastikan anda memberikan nilai sesuai dengan kinerja peserta magang).
                         </div>
                     </div>
+
                     <!-- Ketepatan Waktu -->
                     <div class="mb-3">
                         <label for="ketepatan_waktu" class="form-label">Ketepatan Waktu</label>
-                        <input type="number" class="form-control" id="ketepatan_waktu" name="ketepatan_waktu" required>
+                        <input type="number" class="form-control" id="ketepatan_waktu" name="ketepatan_waktu" min="0" max="100" step="1" required>
+                        <div class="invalid-feedback">Nilai harus antara 0 hingga 100.</div>
                     </div>
 
                     <!-- Sikap Kerja -->
                     <div class="mb-3">
                         <label for="sikap_kerja" class="form-label">Sikap Kerja</label>
-                        <input type="number" class="form-control" id="sikap_kerja" name="sikap_kerja" required>
+                        <input type="number" class="form-control" id="sikap_kerja" name="sikap_kerja" min="0" max="100" step="1" required>
+                        <div class="invalid-feedback">Nilai harus antara 0 hingga 100.</div>
                     </div>
 
                     <!-- Tanggung Jawab -->
                     <div class="mb-3">
                         <label for="tanggung_jawab" class="form-label">Tanggung Jawab</label>
-                        <input type="number" class="form-control" id="tanggung_jawab" name="tanggung_jawab" required>
+                        <input type="number" class="form-control" id="tanggung_jawab" name="tanggung_jawab" min="0" max="100" step="1" required>
+                        <div class="invalid-feedback">Nilai harus antara 0 hingga 100.</div>
                     </div>
 
                     <!-- Kehadiran -->
                     <div class="mb-3">
                         <label for="kehadiran" class="form-label">Kehadiran</label>
-                        <input type="number" class="form-control" id="kehadiran" name="kehadiran" required>
+                        <input type="number" class="form-control" id="kehadiran" name="kehadiran" min="0" max="100" step="1" required>
+                        <div class="invalid-feedback">Nilai harus antara 0 hingga 100.</div>
                     </div>
 
                     <!-- Kemampuan Kerja -->
                     <div class="mb-3">
                         <label for="kemampuan_kerja" class="form-label">Kemampuan Kerja</label>
-                        <input type="number" class="form-control" id="kemampuan_kerja" name="kemampuan_kerja" required>
+                        <input type="number" class="form-control" id="kemampuan_kerja" name="kemampuan_kerja" min="0" max="100" step="1" required>
+                        <div class="invalid-feedback">Nilai harus antara 0 hingga 100.</div>
                     </div>
 
                     <!-- Keterampilan Kerja -->
                     <div class="mb-3">
                         <label for="keterampilan_kerja" class="form-label">Keterampilan Kerja</label>
-                        <input type="number" class="form-control" id="keterampilan_kerja" name="keterampilan_kerja" required>
+                        <input type="number" class="form-control" id="keterampilan_kerja" name="keterampilan_kerja" min="0" max="100" step="1" required>
+                        <div class="invalid-feedback">Nilai harus antara 0 hingga 100.</div>
                     </div>
 
                     <!-- Kualitas Hasil -->
                     <div class="mb-3">
                         <label for="kualitas_hasil" class="form-label">Kualitas Hasil</label>
-                        <input type="number" class="form-control" id="kualitas_hasil" name="kualitas_hasil" required>
+                        <input type="number" class="form-control" id="kualitas_hasil" name="kualitas_hasil" min="0" max="100" step="1" required>
+                        <div class="invalid-feedback">Nilai harus antara 0 hingga 100.</div>
                     </div>
 
                     <!-- Kemampuan Komunikasi -->
                     <div class="mb-3">
                         <label for="kemampuan_komunikasi" class="form-label">Kemampuan Komunikasi</label>
-                        <input type="number" class="form-control" id="kemampuan_komunikasi" name="kemampuan_komunikasi" required>
+                        <input type="number" class="form-control" id="kemampuan_komunikasi" name="kemampuan_komunikasi" min="0" max="100" step="1" required>
+                        <div class="invalid-feedback">Nilai harus antara 0 hingga 100.</div>
                     </div>
 
                     <!-- Kerjasama -->
                     <div class="mb-3">
                         <label for="kerjasama" class="form-label">Kerjasama</label>
-                        <input type="number" class="form-control" id="kerjasama" name="kerjasama" required>
+                        <input type="number" class="form-control" id="kerjasama" name="kerjasama" min="0" max="100" step="1" required>
+                        <div class="invalid-feedback">Nilai harus antara 0 hingga 100.</div>
                     </div>
 
                     <!-- Kerajinan -->
                     <div class="mb-3">
                         <label for="kerajinan" class="form-label">Kerajinan</label>
-                        <input type="number" class="form-control" id="kerajinan" name="kerajinan" required>
+                        <input type="number" class="form-control" id="kerajinan" name="kerajinan" min="0" max="100" step="1" required>
+                        <div class="invalid-feedback">Nilai harus antara 0 hingga 100.</div>
                     </div>
 
                     <!-- Percaya Diri -->
                     <div class="mb-3">
                         <label for="percaya_diri" class="form-label">Percaya Diri</label>
-                        <input type="number" class="form-control" id="percaya_diri" name="percaya_diri" required>
+                        <input type="number" class="form-control" id="percaya_diri" name="percaya_diri" min="0" max="100" step="1" required>
+                        <div class="invalid-feedback">Nilai harus antara 0 hingga 100.</div>
                     </div>
 
                     <!-- Mematuhi Aturan -->
                     <div class="mb-3">
                         <label for="mematuhi_aturan" class="form-label">Mematuhi Aturan</label>
-                        <input type="number" class="form-control" id="mematuhi_aturan" name="mematuhi_aturan" required>
+                        <input type="number" class="form-control" id="mematuhi_aturan" name="mematuhi_aturan" min="0" max="100" step="1" required>
+                        <div class="invalid-feedback">Nilai harus antara 0 hingga 100.</div>
                     </div>
 
                     <!-- Penampilan -->
                     <div class="mb-3">
                         <label for="penampilan" class="form-label">Penampilan</label>
-                        <input type="number" class="form-control" id="penampilan" name="penampilan" required>
+                        <input type="number" class="form-control" id="penampilan" name="penampilan" min="0" max="100" step="1" required>
+                        <div class="invalid-feedback">Nilai harus antara 0 hingga 100.</div>
                     </div>
 
                     <!-- Perilaku -->
@@ -174,6 +189,7 @@
                         </select>
                     </div>
                 </div>
+
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                     <button type="submit" class="btn btn-success">Simpan</button>

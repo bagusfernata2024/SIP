@@ -22,7 +22,7 @@
                 </div>
                 <div class="form-group">
                     <label for="notelp">Telepon</label>
-                    <input type="text" class="form-control" id="notelp" name="notelp" value="<?= $data->notelp ?>">
+                    <input type="number" class="form-control" id="notelp" name="notelp" value="<?= $data->notelp ?>">
                 </div>
                 <div class="form-group">
                     <label for="alamat">Alamat</label>
@@ -38,14 +38,13 @@
                             <p class="text-muted">Foto profil belum diunggah</p>
                         <?php endif; ?>
                     </div>
-                    <input type="file" class="form-control-file" id="foto" name="foto">
+                    <input type="file" class="form-control-file" id="foto" name="foto" accept="image/*">
                     <!-- Hidden input untuk menyimpan nama file foto lama -->
                     <input type="hidden" name="foto_lama" value="<?= $data->foto ?>">
                 </div>
+
                 <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
             </form>
-
-
         </div>
     </div>
 </div>

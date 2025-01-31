@@ -149,7 +149,7 @@ class RegistrasiModel extends Model
     public function getUserFiles($id)
     {
         $query = $this->db->table($this->table)
-            ->select('surat_permohonan, proposal_magang, cv, marksheet, fc_ktp')
+            ->select('surat_permohonan, proposal_magang, cv, fc_ktp')
             ->where('id_register', $id)
             ->get();
 
@@ -173,5 +173,8 @@ class RegistrasiModel extends Model
             ->countAllResults();
     }
 
-    
+    public function getRegistrasiByNomor($nomor)
+    {
+        return $this->where('nomor', $nomor)->first();  // Mengambil data pertama yang sesuai dengan nomor
+    }    
 }

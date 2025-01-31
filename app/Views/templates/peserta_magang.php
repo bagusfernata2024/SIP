@@ -50,8 +50,7 @@
                                     if ($item['tanggal1'] > $current_date) {
                                         $status_class = 'bg-warning text-light';
                                         $status_text = 'Belum Aktif';
-                                    }
-                                    else if($item['tanggal2'] < $current_date){
+                                    } else if ($item['tanggal2'] < $current_date) {
                                         $status_class = 'bg-info text-light';
                                         $status_text = 'Selesai Magang';
                                     } else {
@@ -83,13 +82,15 @@
                                     <td>
                                         <a href="<?php echo site_url('admin/dashboard/detail_data_peserta/' . $item['id_magang']); ?>">
                                             <button class="btn btn-success btn-sm">
-                                                <i class="fas fa-search" style="color: white;"></i>
+                                                <i class="fas fa-search" style="color: white; font-size: 9px;"></i>
                                             </button>
                                         </a>
+                                        <br>
+                                        <br>
                                         <!-- Tombol Generate Sertifikat -->
                                         <a href="<?= site_url('admin/dashboard/generateSertifikat/' . $item['id_magang']); ?>" target="_blank">
                                             <button class="btn btn-warning btn-sm">
-                                                <i class="fas fa-file-pdf" style="color: white;"></i>
+                                                <i class="fas fa-file-pdf" style="color: white; font-size: 12px;"></i>
                                             </button>
                                         </a>
                                     </td>

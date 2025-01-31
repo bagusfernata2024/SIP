@@ -5,7 +5,7 @@
 	<!-- Sidebar - Brand -->
 	<a
 		class="sidebar-brand d-flex align-items-center justify-content-center"
-		href="<?php echo base_url() ?>">
+		href="<?php echo base_url('admin/dashboard') ?>">
 		<div class="sidebar-brand-icon rotate-n-15">
 			<i class="fas fa-gas-pump"></i>
 		</div>

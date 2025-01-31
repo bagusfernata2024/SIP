@@ -1,7 +1,7 @@
 <!-- Sidebar -->
 <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 	<!-- Sidebar - Brand -->
-	<a class="sidebar-brand d-flex align-items-center justify-content-center" href="<?php echo base_url() ?>">
+	<a class="sidebar-brand d-flex align-items-center justify-content-center" href=""<?php echo site_url('mentor/dashboard'); ?>">
 		<div class="sidebar-brand-icon rotate-n-15">
 			<i class="fas fa-gas-pump"></i>
 		</div>

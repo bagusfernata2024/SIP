@@ -147,23 +147,12 @@
         <!-- Data Diri -->
         <div class="data-diri">
             <h3>Data Diri Peserta Magang</h3>
-            <?php foreach ($nilai_akhir as $index => $data): ?>
-                <p><strong>Nama:</strong> <?= $data->nama ?></p>
-                <p><strong>NIM:</strong> <?= $data->nomor ?></p>
-                <p><strong>Instansi:</strong> <?= $data->instansi ?></p>
-                <p><strong>Periode Magang:</strong> <?= formatTanggalIndo($data->tanggal1) . ' - ' . formatTanggalIndo($data->tanggal2) ?></p>
-                </p>
-            <?php endforeach ?>
-        </div>
 
-        <!-- Data Mentor -->
-        <div class="data-mentor">
-            <h3>Data Mentor</h3>
-            <?php foreach ($nilai_akhir as $index => $data): ?>
-                <p><strong>Mentor:</strong> <?= $data->nama ?></p>
-                <p><strong>NIPG:</strong> <?= $data->nipg ?></p>
-                <p><strong>Subsidiaries:</strong> <?= $data->subsidiaries ?></p>
-            <?php endforeach ?>
+                <p><strong>Nama:</strong> <?= $nilai_akhir['nama'] ?></p>
+                <p><strong>NIM:</strong> <?= $nilai_akhir['nomor'] ?></p>
+                <p><strong>Instansi:</strong> <?= $nilai_akhir['instansi'] ?></p>
+                <p><strong>Periode Magang:</strong> <?= formatTanggalIndo($nilai_akhir['tanggal1']) . ' - ' . formatTanggalIndo($nilai_akhir['tanggal2']) ?></p>
+
         </div>
 
         <div class="card">
@@ -181,78 +170,76 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach ($nilai_akhir as $index => $nilai): ?>
                                 <tr>
-                                    <td><?= $index + 1 ?></td>
+                                    <td>1</td>
                                     <td>Ketepatan Waktu</td>
-                                    <td><?= $nilai->ketepatan_waktu ?></td>
+                                    <td><?= $nilai_akhir['ketepatan_waktu'] ?></td>
                                 </tr>
                                 <tr>
-                                    <td><?= $index + 2 ?></td>
+                                    <td>2</td>
                                     <td>Sikap Kerja</td>
-                                    <td><?= $nilai->sikap_kerja ?></td>
+                                    <td><?= $nilai_akhir['sikap_kerja'] ?></td>
                                 </tr>
                                 <tr>
-                                    <td><?= $index + 3 ?></td>
+                                    <td>3</td>
                                     <td>Tanggungjawab</td>
-                                    <td><?= $nilai->tanggung_jawab ?></td>
+                                    <td><?= $nilai_akhir['tanggung_jawab'] ?></td>
                                 </tr>
                                 <tr>
-                                    <td><?= $index + 4 ?></td>
+                                    <td>4</td>
                                     <td>Kehadiran</td>
-                                    <td><?= $nilai->kehadiran ?></td>
+                                    <td><?= $nilai_akhir['kehadiran'] ?></td>
                                 </tr>
                                 <tr>
-                                    <td><?= $index + 5 ?></td>
+                                    <td>5</td>
                                     <td>Kemampuan Kerja</td>
-                                    <td><?= $nilai->kemampuan_kerja ?></td>
+                                    <td><?= $nilai_akhir['kemampuan_kerja'] ?></td>
                                 </tr>
                                 <tr>
-                                    <td><?= $index + 6 ?></td>
+                                    <td>6</td>
                                     <td>Keterampilan Kerja</td>
-                                    <td><?= $nilai->keterampilan_kerja ?></td>
+                                    <td><?= $nilai_akhir['keterampilan_kerja'] ?></td>
                                 </tr>
                                 <tr>
-                                    <td><?= $index + 7 ?></td>
+                                    <td>7</td>
                                     <td>Kualitas Hasil</td>
-                                    <td><?= $nilai->kualitas_hasil ?></td>
+                                    <td><?= $nilai_akhir['kualitas_hasil'] ?></td>
                                 </tr>
                                 <tr>
-                                    <td><?= $index + 8 ?></td>
+                                    <td>8</td>
                                     <td>Kemampuan Komunikasi</td>
-                                    <td><?= $nilai->kemampuan_komunikasi ?></td>
+                                    <td><?= $nilai_akhir['kemampuan_komunikasi'] ?></td>
                                 </tr>
                                 <tr>
-                                    <td><?= $index + 9 ?></td>
+                                    <td>9</td>
                                     <td>Kerjasama</td>
-                                    <td><?= $nilai->kerjasama ?></td>
+                                    <td><?= $nilai_akhir['kerjasama'] ?></td>
                                 </tr>
                                 <tr>
-                                    <td><?= $index + 10 ?></td>
+                                    <td>10</td>
                                     <td>Kerajinan</td>
-                                    <td><?= $nilai->kerajinan ?></td>
+                                    <td><?= $nilai_akhir['kerajinan'] ?></td>
                                 </tr>
                                 <tr>
-                                    <td><?= $index + 11 ?></td>
+                                    <td>11</td>
                                     <td>Percaya diri</td>
-                                    <td><?= $nilai->percaya_diri ?></td>
+                                    <td><?= $nilai_akhir['percaya_diri'] ?></td>
                                 </tr>
                                 <tr>
-                                    <td><?= $index + 12 ?></td>
+                                    <td>12</td>
                                     <td>Mematuhi Aturan</td>
-                                    <td><?= $nilai->mematuhi_aturan ?></td>
+                                    <td><?= $nilai_akhir['mematuhi_aturan'] ?></td>
                                 </tr>
                                 <tr>
-                                    <td><?= $index + 13 ?></td>
+                                    <td>13</td>
                                     <td>Penampilan</td>
-                                    <td><?= $nilai->penampilan ?></td>
+                                    <td><?= $nilai_akhir['penampilan'] ?></td>
                                 </tr>
                                 <tr>
-                                    <td><?= $index + 14 ?></td>
+                                    <td>14</td>
                                     <td>Perilaku</td>
-                                    <td><?= $nilai->perilaku ?></td>
+                                    <td><?= $nilai_akhir['perilaku'] ?></td>
                                 </tr>
-                            <?php endforeach; ?>
                         </tbody>
                     </table>
                 </div>

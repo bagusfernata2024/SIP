@@ -146,9 +146,9 @@
                                         <td><?= $absen['statuss'] ?></td>
                                         <td>
                                             <?php if ($absen['approved'] === 'Y'): ?>
-                                                <span class="badge bg-success">Diterima</span>
-                                            <?php elseif ($absen['approved'] === 'R'): ?>
-                                                <span class="badge bg-danger">Ditolak</span>
+                                                <span class="badge bg-success text-light">Diterima</span>
+                                            <?php elseif ($absen['approved'] === 'N'): ?>
+                                                <span class="badge bg-danger text-light">Ditolak</span>
                                             <?php else: ?>
                                                 <span class="text-muted">-</span>
                                             <?php endif; ?>

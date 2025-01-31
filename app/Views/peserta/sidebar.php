@@ -5,7 +5,7 @@
 	<!-- Sidebar - Brand -->
 	<a
 		class="sidebar-brand d-flex align-items-center justify-content-center"
-		href="<?php echo base_url() ?>">
+		href="<?php echo site_url('dashboard'); ?>">
 		<div class="sidebar-brand-icon rotate-n-15">
 			<i class="fas fa-gas-pump"></i>
 		</div>
@@ -17,7 +17,7 @@
 
 	<!-- Nav Item - Dashboard -->
 	<li class="nav-item <?= service('uri')->getSegment(1) == 'dashboard' && service('uri')->getSegment(2) == '' ? 'active' : ''; ?>">
-		<a class="nav-link" href="<?php echo site_url('dashboard?status=null'); ?>">
+		<a class="nav-link" href="<?php echo site_url('dashboard'); ?>">
 			<i class="fa fa-tachometer-alt"></i>
 			<span>Dashboard</span></a>
 	</li>
@@ -27,6 +27,12 @@
 	<hr class="sidebar-divider" />
 
 	<!-- Heading -->
+	<div class="sidebar-heading">Akun</div>
+	<li class="nav-item <?= service('uri')->getSegment(2) == 'profile' ? 'active' : ''; ?>">
+		<a class="nav-link" href="<?php echo site_url('dashboard/profile'); ?>">
+			<i class="fas fa-user fa-sm fa-fw"></i>
+			<span>Profile</span></a>
+	</li>
 	<div class="sidebar-heading">Aktivitas</div>
 	<!-- Nav Item - Absensi/Kegiatan -->
 	<li class="nav-item <?= service('uri')->getSegment(2) == 'absensi' ? 'active' : ''; ?>">

@@ -16,7 +16,8 @@
         <div class="card-body">
             <div class="row">
                 <div class="col-lg-3 text-center">
-                    <i class="fas fa-user-circle fa-2x" alt="Profile Icon" style="font-size:100px"></i>
+                    <!-- Menampilkan foto peserta jika ada -->
+                    <img src="<?= base_url('uploads/' . $detail_peserta[0]->foto); ?>" alt="Profile Icon" class="rounded-circle" style="width: 100px; height: 100px;">
                 </div>
                 <div class="col-lg-9">
                     <table class="table table-borderless">
@@ -51,6 +52,7 @@
                                     <?php endif; ?>
                                 </td>
                             </tr>
+                            <?php if ($detail_peserta[0]->tgl_perpanjangan == null):?>
                             <tr>
                                 <td colspan="2">
                                     <form action="<?= base_url('admin/dashboard/perpanjang_magang') ?>" method="post">
@@ -63,6 +65,7 @@
                                     </form>
                                 </td>
                             </tr>
+                            <?php endif; ?>
                         </tbody>
                     </table>
                 </div>

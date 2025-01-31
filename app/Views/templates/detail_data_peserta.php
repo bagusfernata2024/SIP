@@ -270,37 +270,33 @@
                         <tr>
                             <td>1</td>
                             <td>Surat Permohonan</td>
-                            <td><?php echo $detail_peserta[0]->surat_permohonan ?></td>
+                            <td><?php echo !empty($detail_peserta[0]->surat_permohonan) ? $detail_peserta[0]->surat_permohonan : 'Tidak Ada'; ?></td>
                             <td>
-                                <a href="<?php echo base_url('admin/dashboard/file/' . $detail_peserta[0]->surat_permohonan); ?>"
-                                    class="btn btn-primary btn-sm" download>Download</a>
+                                <a href="<?= base_url('uploads/' . $detail_peserta[0]->surat_permohonan); ?>" class="btn btn-primary btn-sm" download>Download</a>
                             </td>
                         </tr>
                         <tr>
                             <td>2</td>
                             <td>Proposal Magang</td>
-                            <td><?php echo $detail_peserta[0]->proposal_magang ?></td>
+                            <td><?php echo !empty($detail_peserta[0]->proposal_magang) ? $detail_peserta[0]->proposal_magang : 'Tidak Ada'; ?></td>
                             <td>
-                                <a href="<?php echo base_url('admin/dashboard/file/' . $detail_peserta[0]->proposal_magang); ?>"
-                                    class="btn btn-primary btn-sm" download>Download</a>
+                                <a href="<?= base_url('uploads/' . $detail_peserta[0]->proposal_magang); ?>" class="btn btn-primary btn-sm" download>Download</a>
                             </td>
                         </tr>
                         <tr>
                             <td>3</td>
                             <td>Curriculum Vitae (CV)</td>
-                            <td><?php echo $detail_peserta[0]->cv ?></td>
+                            <td><?php echo !empty($detail_peserta[0]->cv) ? $detail_peserta[0]->cv : 'Tidak Ada'; ?></td>
                             <td>
-                                <a href="<?php echo base_url('admin/dashboard/file/' . $detail_peserta[0]->cv); ?>"
-                                    class="btn btn-primary btn-sm" download>Download</a>
+                                <a href="<?= base_url('uploads/' . $detail_peserta[0]->cv); ?>" class="btn btn-primary btn-sm" download>Download</a>
                             </td>
                         </tr>
                         <tr>
                             <td>4</td>
                             <td>Fotocopy KTP</td>
-                            <td><?php echo $detail_peserta[0]->fc_ktp; ?></td>
+                            <td><?php echo !empty($detail_peserta[0]->fc_ktp) ? $detail_peserta[0]->fc_ktp : 'Tidak Ada'; ?></td>
                             <td>
-                                <a href="<?php echo base_url('admin/dashboard/file/' . $detail_peserta[0]->fc_ktp); ?>"
-                                    class="btn btn-primary btn-sm" download>Download</a>
+                                <a href="<?= base_url('uploads/' . $detail_peserta[0]->fc_ktp); ?>" class="btn btn-primary btn-sm" download>Download</a>
                             </td>
                         </tr>
 
@@ -324,7 +320,6 @@
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col-lg-3 text-center">
-                                        <i class="fas fa-user-circle fa-2x" alt="Profile Icon" style="font-size:100px"></i>
                                     </div>
                                     <div class="col-lg-9">
                                         <table class="table table-borderless">

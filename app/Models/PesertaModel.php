@@ -28,7 +28,6 @@ class PesertaModel extends Model
     }
 
 
-
     public function getPesertaByMentor($user_nomor)
     {
         return $this->db->table('anak_magang')
@@ -179,5 +178,33 @@ class PesertaModel extends Model
             ->where('id_register', $id_magang)
             ->get()
             ->getRowArray(); // Asumsikan kolom timeline berisi data yang dapat diproses
+    }
+
+    public function updateTglPerpanjanganRegistrasi($id_magang, $data)
+    {
+        return $this->db->table('registrasi')->update($data, ['id_register' => $id_magang]);
+    }
+
+    public function updateTglPerpanjanganAnakMagang($id_magang, $data)
+    {
+        return $this->db->table('anak_magang')->update($data, ['id_magang' => $id_magang]);
+    }
+
+    public function tambahAbsensi($data_absen)
+    {
+        return $this->db->table('absen')->insert($data_absen);
+    }
+
+    public function getDetailPesertaByIdMagang($id_magang)
+    {
+        return $this->db->table('anak_magang')->where('id_magang', $id_magang)->get()->getRowArray();
+    }
+
+    public function checkAbsensiExists($id_magang, $tanggal)
+    {
+        return $this->db->table('absen')
+            ->where('id_magang', $id_magang)
+            ->where('tgl', $tanggal)
+            ->countAllResults() > 0; // Mengembalikan true jika sudah ada, false jika belum ada
     }
 }

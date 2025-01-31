@@ -13,11 +13,12 @@ use App\Models\DetailRegisModel;
 use App\Models\MentorModel;
 use App\Models\UserModel;
 use App\Libraries\PdfGenerator;
-
 use App\Controllers\BaseController;
+
 
 class DashboardMentor extends BaseController
 {
+    protected $session;
     protected $absensiModel;
     protected $anakMagangModel;
     protected $laporanModel;
@@ -41,21 +42,28 @@ class DashboardMentor extends BaseController
         $this->mentorModel = new MentorModel();
         $this->userModel = new UserModel();
         $this->pdfgenerator = new PdfGenerator();
+        $this->session = session();
 
-        // Session check
-        if (!session()->get('mentor_logged_in')) {
-            return redirect()->to('login/mentor');
-        }
+        // // Session check
+        // if (!session()->get('mentor_logged_in')) {
+        //     return redirect()->to('login/mentor');
+        // }
 
-        if (session()->get('level') !== 'mentor') {
-            session()->setFlashdata('error', 'Anda tidak memiliki akses ke halaman ini.');
-            session()->destroy();
-            return redirect()->to('login/mentor');
-        }
+        // if (session()->get('level') !== 'mentor') {
+        //     session()->setFlashdata('error', 'Anda tidak memiliki akses ke halaman ini.');
+        //     session()->destroy();
+        //     return redirect()->to('login/mentor');
+        // }
     }
 
     public function index()
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'mentor') {
+            return view('no_access');
+        }
         $user_nomor = session()->get('nomor');
 
         // Fetch data
@@ -85,6 +93,18 @@ class DashboardMentor extends BaseController
 
     public function daftarPeserta()
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'mentor') {
+            return view('no_access');
+        }
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'mentor') {
+            return view('no_access');
+        }
         helper('date');
         $user_nomor = session()->get('nomor');
         $data['peserta'] = $this->pesertaModel->getPesertaByMentor($user_nomor);
@@ -227,6 +247,12 @@ class DashboardMentor extends BaseController
     // Approve + Insert Nilai + Insert Absen
     public function approve_peserta()
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'mentor') {
+            return view('no_access');
+        }
         helper('date');
 
         if ($this->request->isAJAX()) {
@@ -517,6 +543,12 @@ class DashboardMentor extends BaseController
 
     private function sendEmailToPeserta($peserta, $status, $mentor = null, $username = null, $password = null)
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'mentor') {
+            return view('no_access');
+        }
         $email = \Config\Services::email();
 
         if (empty($peserta['email'])) {
@@ -792,6 +824,12 @@ class DashboardMentor extends BaseController
 
     public function absensiBimbingan()
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'mentor') {
+            return view('no_access');
+        }
         helper('date');
         $user_nomor = session()->get('nomor');
         $data['absen'] = $this->absensiModel->getAbsenByMentor($user_nomor);
@@ -805,6 +843,12 @@ class DashboardMentor extends BaseController
 
     public function updateStatusAbsensi()
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'mentor') {
+            return view('no_access');
+        }
         if ($this->request->isAJAX()) {
             $data = $this->request->getJSON();
 
@@ -831,6 +875,12 @@ class DashboardMentor extends BaseController
 
     public function rekapAbsensiBimbingan()
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'mentor') {
+            return view('no_access');
+        }
         helper('date');
         $user_nomor = session()->get('nomor');
         $data['peserta'] = $this->pesertaModel->getPesertaByMentor($user_nomor);
@@ -844,6 +894,12 @@ class DashboardMentor extends BaseController
 
     public function detailRekapAbsensiBimbingan($id_magang)
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'mentor') {
+            return view('no_access');
+        }
         helper('date');
         $user_nomor = session()->get('nomor');
 
@@ -877,6 +933,12 @@ class DashboardMentor extends BaseController
 
     public function cetakDetailRekapAbsensiBimbingan($id_magang)
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'mentor') {
+            return view('no_access');
+        }
         helper('date');
 
         $user_nomor = session()->get('nomor');
@@ -911,6 +973,12 @@ class DashboardMentor extends BaseController
 
     public function laporanBimbingan()
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'mentor') {
+            return view('no_access');
+        }
         $user_nomor = session()->get('nomor');
         $data['laporan'] = $this->anakMagangModel->getLaporanAkhirByMentor($user_nomor);
         return view('mentor/header') .
@@ -922,6 +990,12 @@ class DashboardMentor extends BaseController
 
     public function updateStatusLaporanAkhir()
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'mentor') {
+            return view('no_access');
+        }
         // Ambil data yang dikirim oleh frontend
         $data = $this->request->getJSON();
 
@@ -945,6 +1019,12 @@ class DashboardMentor extends BaseController
 
     public function file($file_name)
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'mentor') {
+            return view('no_access');
+        }
         $file_path = FCPATH . 'uploads/laporan/' . $file_name; // Gunakan WRITEPATH untuk folder writable
 
         // Debugging: Log the file path
@@ -960,6 +1040,12 @@ class DashboardMentor extends BaseController
 
     public function riwayatLaporanBimbingan()
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'mentor') {
+            return view('no_access');
+        }
         $user_nomor = session()->get('nomor');
         $data['laporan'] = $this->anakMagangModel->getLaporanAkhirByMentor($user_nomor);
 
@@ -973,6 +1059,12 @@ class DashboardMentor extends BaseController
 
     public function nilaiBimbingan()
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'mentor') {
+            return view('no_access');
+        }
         helper('date');
         $user_nomor = session()->get('nomor');
         $data['nilai'] = $this->nilaiModel->getNilaiByMentor($user_nomor);
@@ -986,6 +1078,12 @@ class DashboardMentor extends BaseController
 
     public function simpan_nilai()
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'mentor') {
+            return view('no_access');
+        }
         $id_magang = $this->request->getPost('id_magang');
 
         // Data yang diterima dari form
@@ -1032,9 +1130,14 @@ class DashboardMentor extends BaseController
         }
     }
 
-
     public function riwayatNilaiBimbingan()
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'mentor') {
+            return view('no_access');
+        }
         helper('date');
         $user_nomor = session()->get('nomor');
 
@@ -1058,6 +1161,12 @@ class DashboardMentor extends BaseController
 
     public function detailRiwayatNilaiBimbingan($id_magang)
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'mentor') {
+            return view('no_access');
+        }
         helper('date');
 
         $user_nomor = session()->get('nomor');
@@ -1084,6 +1193,12 @@ class DashboardMentor extends BaseController
 
     private function hitungTotalNilai($item)
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'mentor') {
+            return view('no_access');
+        }
         $total = 0;
 
         $total += $item->ketepatan_waktu;
@@ -1120,6 +1235,12 @@ class DashboardMentor extends BaseController
 
     public function cetakDetailRiwayatNilaiBimbingan()
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'mentor') {
+            return view('no_access');
+        }
         helper('date');
 
         $user_nomor = session()->get('nomor');

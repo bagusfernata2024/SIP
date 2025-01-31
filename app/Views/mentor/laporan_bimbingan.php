@@ -73,10 +73,10 @@
                                                             </td>
                                                             <td>
                                                                 <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#confirmModal" onclick="setAction('Y', <?= $item->id_magang; ?>)">
-                                                                    <i class="fas fa-check" style="color: white;"></i>
+                                                                    <i class="fas fa-check-circle fa-sm" style="color: white;"></i> <!-- Ikon lebih kecil -->
                                                                 </button>
                                                                 <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#confirmModal" onclick="setAction('N', <?= $item->id_magang; ?>)">
-                                                                    <i class="fas fa-times" style="color: white;"></i>
+                                                                    <i class="fas fa-times-circle fa-sm" style="color: white;"></i> <!-- Ikon lebih kecil -->
                                                                 </button>
                                                             </td>
 

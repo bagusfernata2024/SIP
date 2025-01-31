@@ -56,7 +56,7 @@ log_message('debug', 'Flashdata email di view: ' . $email);
                             <!-- Nomor Telepon -->
                             <div class="mb-3">
                                 <label for="notelp" class="form-label">Nomor Telepon</label>
-                                <input type="tel" class="form-control" id="notelp" name="notelp" required>
+                                <input type="number" class="form-control" id="notelp" name="notelp" required>
                                 <div class="invalid-feedback">Nomor telepon wajib diisi.</div>
                             </div>
 

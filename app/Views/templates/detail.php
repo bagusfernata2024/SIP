@@ -247,9 +247,9 @@
                             <td style="color:white">
                                 <span class="badge 
                                     <?php
-                                    if ($detail['status'] === 'Accept') echo 'bg-success';
-                                    elseif ($detail['status'] === 'reject') echo 'bg-danger';
-                                    else echo 'bg-warning text-dark';
+                                    if ($detail['status'] === 'Accept') echo 'bg-success text-light';
+                                    elseif ($detail['status'] === 'reject') echo 'bg-danger text-light';
+                                    else echo 'bg-warning text-light';
                                     ?>">
                                     <?php echo $detail['status'] ? ucfirst($detail['status']) : 'Belum Diterima'; ?>
                                 </span>

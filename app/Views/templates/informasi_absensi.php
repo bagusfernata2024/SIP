@@ -14,8 +14,13 @@
     <div class="card shadow mb-4">
         <div class="card-header py-3 mb-4">
             <h6 class="m-0 font-weight-bold text-primary">
-                Detail riwayat absensi <?= $peserta[0]->nama ?> | <?= $peserta[0]->nomor ?> | <?= $peserta[0]->instansi ?>
+                <?php if (!empty($peserta) && isset($peserta[0])): ?>
+                    Detail riwayat absensi <?= $peserta[0]->nama ?> | <?= $peserta[0]->nomor ?> | <?= $peserta[0]->instansi ?>
+                <?php else: ?>
+                    Tidak ada data peserta yang ditemukan.
+                <?php endif; ?>
             </h6>
+
         </div>
         <div class="container-fluid">
             <!-- Form Filter -->
@@ -78,17 +83,25 @@
                     </tfoot>
                     <tbody>
                         <?php $no = 0 ?>
-                        <?php foreach ($peserta as $absen): ?>
+                        <?php if (!empty($peserta)): ?>
+                            <?php $no = 0 ?>
+                            <?php foreach ($peserta as $absen): ?>
+                                <tr>
+                                    <td><?= $no = $no + 1 ?></td>
+                                    <td><?= $absen->tgl ?></td>
+                                    <td><?= $absen->jam_masuk ?></td>
+                                    <td><?= $absen->jam_pulang ?></td>
+                                    <td><?= $absen->latitude_masuk ?>, <?= $absen->longitude_masuk ?></td>
+                                    <td><?= $absen->latitude_keluar ?>, <?= $absen->longitude_keluar ?></td>
+                                    <td><?= $absen->approved ?></td>
+                                </tr>
+                            <?php endforeach ?>
+                        <?php else: ?>
                             <tr>
-                                <td><?= $no = $no + 1 ?></td>
-                                <td><?= $absen->tgl ?></td>
-                                <td><?= $absen->jam_masuk ?></td>
-                                <td><?= $absen->jam_pulang ?></td>
-                                <td><?= $absen->latitude_masuk ?>, <?= $absen->longitude_masuk ?></td>
-                                <td><?= $absen->latitude_keluar ?>, <?= $absen->longitude_keluar ?></td>
-                                <td><?= $absen->approved ?></td>
+                                <td colspan="7" class="text-center">Tidak ada riwayat absensi ditemukan untuk peserta ini</td>
                             </tr>
-                        <?php endforeach ?>
+                        <?php endif; ?>
+
                     </tbody>
                 </table>
             </div>

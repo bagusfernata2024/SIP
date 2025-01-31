@@ -7,7 +7,7 @@
     <br>
     <div class="card shadow mb-4">
         <div cFlass="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Detail Data Mentor</h6>
+            <h6 class="mt-3 ml-3 font-weight-bold text-primary">Detail Data Mentor</h6>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -97,7 +97,7 @@
                                 ?>
                                     <tr>
                                         <td><?= $no++; ?></td>
-                                        <td>202131152</td>
+                                        <td><?= $item->nomor; ?></td>
                                         <td><?= $item->nama_peserta; ?></td>
                                         <td><?= $item->instansi; ?></td>
                                         <td><?= formatTanggalIndo($item->tanggal1); ?> - <?= formatTanggalIndo($item->tanggal2); ?></td>

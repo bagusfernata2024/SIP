@@ -102,15 +102,6 @@
                             <a href="<?php echo base_url('dashboard/cetak_nilai') ?>" target="_blank" class="btn btn-success btn-sm">
                                 <i class="fas fa-print"></i> Cetak
                             </a>
-
-                            <?php
-                            // Periksa apakah semua nilai tidak null
-                            $allFieldsFilled = !in_array(null, array_values($nilai_akhir));
-                            if ($allFieldsFilled): ?>
-                                <a href="<?php echo base_url('dashboard/generate_sertifikat') ?>" target="_blank" class="btn btn-warning btn-sm">
-                                    <i class="fas fa-file-pdf"></i> Sertifikat
-                                </a>
-                            <?php endif; ?>
                         </div>
                     <?php else: ?>
                         <div class="alert alert-warning" role="alert">

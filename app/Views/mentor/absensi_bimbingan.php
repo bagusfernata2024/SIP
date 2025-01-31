@@ -49,7 +49,7 @@
                                 // Hanya tampilkan data jika jam_masuk atau jam_pulang tidak null
                                 if (!empty($item->jam_masuk) || !empty($item->jam_pulang)):
                             ?>
-                                    <?php if ($item->approved == NULL or $item->approved == 'N'): ?>
+                                    <?php if ($item->approved == NULL): ?>
                                         <tr>
                                             <td><?= $no++; ?></td>
                                             <td><?= formatTanggalIndo($item->tgl) ?></td>
@@ -60,11 +60,14 @@
                                             <td><a href="https://www.google.com/maps?q=<?= $item->latitude_keluar; ?>,<?= $item->longitude_keluar; ?>" target="_Blank">Periksa Lokasi Keluar</a></td>
                                             <td><?= $item->deskripsi; ?></td>
                                             <td>
+                                                <!-- Tombol Y -->
                                                 <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#confirmModal" onclick="setAction('Y', <?= $item->id_magang; ?>, '<?= $item->tgl; ?>')">
-                                                    <i class="fas fa-check" style="color: white;"></i>
+                                                    <i class="fas fa-check-circle fa-sm" style="color: white;"></i> <!-- Ikon lebih kecil -->
                                                 </button>
+                                               
+                                                <!-- Tombol N -->
                                                 <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#confirmModal" onclick="setAction('N', <?= $item->id_magang; ?>, '<?= $item->tgl; ?>')">
-                                                    <i class="fas fa-times" style="color: white;"></i>
+                                                    <i class="fas fa-times-circle fa-sm" style="color: white;"></i> <!-- Ikon lebih kecil -->
                                                 </button>
                                             </td>
                                         </tr>

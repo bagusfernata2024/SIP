@@ -19,16 +19,17 @@
         </div>
         <!-- Data Diri -->
         <div class="data-diri">
-            <h3>Data Diri Peserta Magang</h3>
+            <br>
+            <h3 style="margin-left: 20px;">Data Diri Peserta Magang</h3>
             <?php foreach ($nilai_akhir as $index => $data): ?>
-                <p><strong>Nama:</strong> <?= $data->nama ?></p>
-                <p><strong>NIM:</strong> <?= $data->nomor ?></p>
-                <p><strong>Instansi:</strong> <?= $data->instansi ?></p>
-                <p><strong>Periode Magang:</strong> <?= formatTanggalIndo($data->tgl_mulai) . ' - ' . formatTanggalIndo($data->tgl_selesai) ?></p>
+                <p style="margin-left: 20px;"><strong>Nama:</strong> <?= $data->nama ?></p>
+                <p style="margin-left: 20px;"><strong>NIM:</strong> <?= $data->nomor ?></p>
+                <p style="margin-left: 20px;"><strong>Instansi:</strong> <?= $data->instansi ?></p>
+                <p style="margin-left: 20px;"><strong>Periode Magang:</strong> <?= formatTanggalIndo($data->tgl_mulai) . ' - ' . formatTanggalIndo($data->tgl_selesai) ?></p>
                 <?php if ($data->tgl_perpanjangan != NULL): ?>
-                    <p><strong>Perpanjangan Magang:</strong> <?= formatTanggalIndo($data->tgl_perpanjangan) ?></p>
+                    <p style="margin-left: 20px;"><strong>Perpanjangan Magang:</strong> <?= formatTanggalIndo($data->tgl_perpanjangan) ?></p>
                 <?php elseif ($data->tgl_perpanjangan == NULL) : ?>
-                    <p><strong>Perpanjangan Magang:</strong> Tidak diperpanjang</p>
+                    <p style="margin-left: 20px;"><strong>Perpanjangan Magang:</strong> Tidak diperpanjang</p>
                 <?php endif; ?>
             <?php endforeach ?>
         </div>

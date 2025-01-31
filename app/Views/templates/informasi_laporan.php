@@ -60,7 +60,9 @@
                                                         <td>Laporan Akhir</td>
                                                         <td><?php echo $laporan->laporan_akhir ?></td>
                                                         <td>
-                                                            <a href="<?php echo base_url('admin/dashboard/file_laporan/' . $laporan->laporan_akhir); ?>" class="btn btn-primary btn-sm">Download</a>
+                                                            <a href="<?php echo base_url('admin/dashboard/file/' . $laporan->laporan_akhir); ?>"
+                                                                class="btn btn-primary btn-sm">Download</a>
+
                                                         </td>
                                                     </tr>
                                                     <br>

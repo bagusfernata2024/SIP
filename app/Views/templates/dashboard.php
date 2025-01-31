@@ -186,7 +186,7 @@
 									} elseif ($register['status'] === 'reject') {
 										echo '<span class="badge bg-danger">Ditolak</span>';
 									} else {
-										echo '<span class="badge bg-warning text-dark">Belum Diterima</span>';
+										echo '<span class="badge bg-warning text-light">Belum Diterima</span>';
 									}
 									?>
 								</td>

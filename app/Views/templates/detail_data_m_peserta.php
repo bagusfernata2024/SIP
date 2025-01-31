@@ -34,7 +34,7 @@
                                         <label for="status">Pilih Status</label>
                                         <select class="form-control" id="status" name="status">
                                             <option value="Aktif">Aktif</option>
-                                            <option value="Tidak Aktif">Tidak Aktif</option>
+                                            <option value="Selesai Magang">Selesai Magang</option>
                                         </select>
                                     </div>
                                 </div>
@@ -52,9 +52,9 @@
                     <td>
                         <?php
                         if ($detail_peserta[0]->status === 'Aktif') {
-                            echo '<span class="badge bg-success text-white">Aktif Magang</span>';
-                        } elseif ($detail_peserta[0]->status === 'Tidak Aktif') {
-                            echo '<span class="badge bg-danger text-white">Selesai Magang</span>';
+                            echo '<span class="badge bg-success text-white">Aktif</span>';
+                        } elseif ($detail_peserta[0]->status === 'Selesai Magang') {
+                            echo '<span class="badge bg-info text-white">Selesai Magang</span>';
                         } else {
                             echo '<span class="badge bg-warning text-white">Belum Diterima</span>';
                         }
@@ -260,9 +260,10 @@
                             <td style="color:white">
                                 <span class="badge 
                                 <?php
-                                if ($detail_peserta[0]->status === 'Accept') echo 'bg-success';
-                                elseif ($detail_peserta[0]->status === 'reject') echo 'bg-danger';
-                                else echo 'bg-warning text-dark';
+                                if ($detail_peserta[0]->status === 'Aktif') echo 'bg-success text-white';
+                                elseif ($detail_peserta[0]->status === 'reject') echo 'bg-danger text-white';
+                                elseif ($detail_peserta[0]->status === 'Selesai Magang') echo 'bg-info text-white';
+                                else echo 'bg-info text-white';
                                 ?>">
                                     <?php echo $detail_peserta[0]->status ? ucfirst($detail_peserta[0]->status) : 'Belum Diterima'; ?>
                                 </span>
@@ -297,42 +298,33 @@
                         <tr>
                             <td>1</td>
                             <td>Surat Permohonan</td>
-                            <td><?php echo $detail_peserta[0]->surat_permohonan ?></td>
+                            <td><?php echo !empty($detail_peserta[0]->surat_permohonan) ? $detail_peserta[0]->surat_permohonan : 'Tidak Ada'; ?></td>
                             <td>
-                                <a href="<?= $detail_peserta[0]->surat_permohonan; ?>" class="btn btn-primary btn-sm" download>Download</a>
+                                <a href="<?= base_url('uploads/' . $detail_peserta[0]->surat_permohonan); ?>" class="btn btn-primary btn-sm" download>Download</a>
                             </td>
-
                         </tr>
                         <tr>
                             <td>2</td>
                             <td>Proposal Magang</td>
-                            <td><?php echo $detail_peserta[0]->proposal_magang ?></td>
+                            <td><?php echo !empty($detail_peserta[0]->proposal_magang) ? $detail_peserta[0]->proposal_magang : 'Tidak Ada'; ?></td>
                             <td>
-                                <a href="<?= $detail_peserta[0]->proposal_magang; ?>" class="btn btn-primary btn-sm" download>Download</a>
+                                <a href="<?= base_url('uploads/' . $detail_peserta[0]->proposal_magang); ?>" class="btn btn-primary btn-sm" download>Download</a>
                             </td>
                         </tr>
                         <tr>
                             <td>3</td>
                             <td>Curriculum Vitae (CV)</td>
-                            <td><?php echo $detail_peserta[0]->cv ?></td>
+                            <td><?php echo !empty($detail_peserta[0]->cv) ? $detail_peserta[0]->cv : 'Tidak Ada'; ?></td>
                             <td>
-                                <a href="<?= $detail_peserta[0]->cv; ?>" class="btn btn-primary btn-sm" download>Download</a>
+                                <a href="<?= base_url('uploads/' . $detail_peserta[0]->cv); ?>" class="btn btn-primary btn-sm" download>Download</a>
                             </td>
                         </tr>
                         <tr>
                             <td>4</td>
-                            <td>Marksheet</td>
-                            <td><?php echo $detail_peserta[0]->marksheet; ?></td>
-                            <td>
-                                <a href="<?= $detail_peserta[0]->marksheet; ?>" class="btn btn-primary btn-sm" download>Download</a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>5</td>
                             <td>Fotocopy KTP</td>
-                            <td><?php echo $detail_peserta[0]->fc_ktp; ?></td>
+                            <td><?php echo !empty($detail_peserta[0]->fc_ktp) ? $detail_peserta[0]->fc_ktp : 'Tidak Ada'; ?></td>
                             <td>
-                                <a href="<?= $detail_peserta[0]->fc_ktp; ?>" class="btn btn-primary btn-sm" download>Download</a>
+                                <a href="<?= base_url('uploads/' . $detail_peserta[0]->fc_ktp); ?>" class="btn btn-primary btn-sm" download>Download</a>
                             </td>
                         </tr>
 
@@ -356,7 +348,6 @@
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col-lg-3 text-center">
-                                        <i class="fas fa-user-circle fa-2x" alt="Profile Icon" style="font-size:100px"></i>
                                     </div>
                                     <div class="col-lg-9">
                                         <table class="table table-borderless">

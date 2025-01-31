@@ -43,6 +43,7 @@ $routes->post('/registrasi/validateEmail', 'Registrasi::validateEmail');
 $routes->get('/registrasi/registrasi_mentor', 'Registrasi::registrasiMentor');
 $routes->post('/registrasi/proses_registrasi_mentor', 'Registrasi::prosesRegistrasiMentor');
 
+
 //Dashboard Admin
 $routes->get('/admin/dashboard', 'Admin\Dashboard::index');
 $routes->get('/admin/dashboard/data_mentor', 'Admin\Dashboard::data_mentor');
@@ -69,10 +70,6 @@ $routes->get('/admin/dashboard/informasi_nilai_akhir/(:num)', 'Admin\Dashboard::
 $routes->get('/admin/dashboard/exportToExcel', 'Admin\Dashboard::exportToExcel');
 $routes->get('/admin/dashboard/generateSertifikat/(:num)', 'Admin\Dashboard::generateSertifikat/$1');
 $routes->get('/admin/dashboard/download_buku_rekening/(:any)', 'Admin\Dashboard::download_buku_rekening/$1');
-
-
-
-
 // $routes->get('/admin/dashboard/perpanjang_peserta/(:num)', 'Admin\Dashboard::perpanjang_peserta/$1');
 // $routes->post('/admin/dashboard/perpanjang_magang/(:num)', 'Admin\Dashboard::perpanjang_magang/$1');
 
@@ -88,6 +85,7 @@ $routes->get('/dashboard/download_buku_rekening/(:any)', 'Dashboard::downloadBuk
 $routes->get('/dashboard/absensi', 'Dashboard::Absensi');
 $routes->get('/peserta/laporan', 'Dashboard::Laporan');
 $routes->get('/dashboard/nilai', 'Dashboard::Nilai');
+$routes->get('/dashboard/cetak_nilai', 'Dashboard::cetak_nilai');
 $routes->post('/dashboard/checkIn', 'Dashboard::checkIn');
 $routes->post('/dashboard/checkOut', 'Dashboard::checkOut');
 $routes->post('/dashboard/proses_upload_laporan_akhir', 'Dashboard::proses_upload_laporan_akhir');
@@ -118,17 +116,3 @@ $routes->post('/mentor/dashboard/simpan_nilai', 'DashboardMentor::simpan_nilai')
 $routes->get('/mentor/dashboard/riwayat_nilai_bimbingan', 'DashboardMentor::riwayatNilaiBimbingan');
 $routes->get('/mentor/dashboard/detail_riwayat_nilai_bimbingan/(:num)', 'DashboardMentor::detailRiwayatNilaiBimbingan/$1');
 $routes->get('mentor/dashboard/cetak_detail_riwayat_nilai_bimbingan/(:num)', 'DashboardMentor::cetakDetailRiwayatNilaiBimbingan/$1');
-
-
-
-
-
-
-
-
-
-
-
-
-
-
