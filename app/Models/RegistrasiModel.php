@@ -8,7 +8,7 @@ class RegistrasiModel extends Model
 {
     protected $table = 'registrasi';
     protected $primaryKey = 'id_register';
-    protected $allowedFields = ['tipe', 'nomor', 'nama', 'email', 'notelp', 'alamat', 'jk', 'tgl_lahir', 'strata', 'jurusan', 'prodi', 'instansi', 'lama_pkl', 'surat_permohonan', 'proposal_magang', 'cv', 'marksheet', 'tanggal1', 'tanggal2', 'status', 'tgl_regis', 'minat', 'nik', 'fc_ktp', 'tipe_magang', 'email_ap', 'foto', 'timeline'];
+    protected $allowedFields = ['tipe', 'nomor', 'nama', 'email', 'notelp', 'alamat', 'jk', 'tgl_lahir', 'strata', 'jurusan', 'prodi', 'instansi', 'lama_pkl', 'surat_permohonan', 'proposal_magang', 'cv', 'marksheet', 'tanggal1', 'tanggal2', 'status', 'tgl_regis', 'minat', 'nik', 'fc_ktp', 'tipe_magang', 'email_ap', 'foto', 'timeline', 'no_sertif'];
 
 
     public function getTimeline($id)
@@ -177,4 +177,9 @@ class RegistrasiModel extends Model
     {
         return $this->where('nomor', $nomor)->first();  // Mengambil data pertama yang sesuai dengan nomor
     }    
+
+    public function getRegistrasiById($id)
+    {
+        return $this->where('id_register', $id)->first();
+    }
 }

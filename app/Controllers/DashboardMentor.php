@@ -614,7 +614,7 @@ class DashboardMentor extends BaseController
             <p>Terima kasih atas partisipasi Anda.</p>
             
             <p>Hormat kami,<br>Admin Program</p>
-            <a href='" . base_url('login') . "' class='button'>Login ke Sistem</a>
+            <p><a href='" . base_url('login') . "'>Login</a></p>
         </body>
         </html>
         ");

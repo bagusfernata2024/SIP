@@ -88,7 +88,7 @@
                                         <br>
                                         <br>
                                         <!-- Tombol Generate Sertifikat -->
-                                        <a href="<?= site_url('admin/dashboard/generateSertifikat/' . $item['id_magang']); ?>" target="_blank">
+                                        <a href="<?= site_url('admin/dashboard/sertifikat/' . $item['id_register']); ?>">
                                             <button class="btn btn-warning btn-sm">
                                                 <i class="fas fa-file-pdf" style="color: white; font-size: 12px;"></i>
                                             </button>

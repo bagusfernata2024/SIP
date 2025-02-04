@@ -614,10 +614,10 @@ class Dashboard extends BaseController
         $user_nomor = $this->session->get('nomor');
         $id_magang = $this->anakMagangModel->getIdMagang($user_nomor);
         $anakMagang = $this->anakMagangModel->find($id_magang);
-
+        $user_register = $this->registrasiModel->getRegistrasiById($this->session->get('id_register'));
         if ($id_magang != NULL) {
             // Periksa apakah tgl_selesai sudah terlewati
-            if (empty($anakMagang['tgl_selesai']) || strtotime($anakMagang['tgl_selesai']) > time()) {
+            if (empty($anakMagang['tgl_selesai']) || strtotime($anakMagang['tgl_selesai']) > time() || $user_register['no_sertif'] == null) {
                 // Jika program belum selesai, tampilkan pesan
                 $data['is_completed'] = false;
                 $data['message'] = 'Program belum selesai';
@@ -632,233 +632,13 @@ class Dashboard extends BaseController
 
         $data['id_magang'] = $id_magang; // Tambahkan ini agar tersedia di view
         $data['anakMagangModel'] = $this->anakMagangModel;
-
+        $data['anakMagang'] = $anakMagang;
         return view('peserta/header') .
             view('peserta/sidebar') .
             view('peserta/topbar') .
             view('peserta/sertifikat', $data) . // Pastikan $data dikirim ke view
             view('peserta/footer');
     }
-
-    // public function sertifikat($id_magang)
-    // {
-    //     // Ambil data anak magang berdasarkan id_magang
-    //     $anakMagang = $this->anakMagangModel->where('id_magang', $id_magang)->first();
-
-    //     // Pastikan data ditemukan
-    //     if ($anakMagang) {
-    //         // Cek apakah kegiatan sudah selesai (tgl_selesai terisi)
-    //         if (!empty($anakMagang['tgl_selesai'])) {
-    //             // Data sudah ada dan kegiatan sudah selesai, tampilkan halaman sertifikat
-    //             return view('dashboard/sertifikat', [
-    //                 'nama_peserta' => $anakMagang['nama'],
-    //                 'tgl_selesai' => $anakMagang['tgl_selesai'],
-    //                 'mentor_name' => $anakMagang['mentor_name']
-    //             ]);
-    //         } else {
-    //             // Jika kegiatan belum selesai, tampilkan pesan error
-    //             return redirect()->to('/dashboard')->with('error', 'Kegiatan belum selesai, sertifikat tidak dapat dicetak.');
-    //         }
-    //     } else {
-    //         // Jika data anak magang tidak ditemukan
-    //         return redirect()->to('/dashboard')->with('error', 'Data peserta tidak ditemukan.');
-    //     }
-    // }
-
-    // public function generateSertifikat()
-    // {
-    //     $session = session();
-    //     $user_nomor = $session->get('nomor');
-    //     $id_magang = $this->anakMagangModel->getIdMagang($user_nomor); // Ambil id_magang
-
-    //     if ($id_magang != NULL) {
-    //         // Ambil nilai akhir berdasarkan id_magang
-    //         $nilai_akhir = $this->nilaiModel->getNilaiByPeserta($id_magang);
-
-    //         // Cek apakah nilai lengkap (tidak ada yang null)
-    //         if ($nilai_akhir && !in_array(null, array_values($nilai_akhir))) {
-    //             // Cek apakah tgl_selesai sudah ada
-    //             $anakMagang = $this->anakMagangModel->find($id_magang);
-    //             if ($anakMagang && $anakMagang['tgl_selesai'] != NULL) {
-    //                 // Tampilkan view sertifikat
-    //                 return view('sertifikat_template', [
-    //                     'nama_peserta' => $anakMagang['nama'], // Nama peserta
-    //                     'tgl_selesai' => $anakMagang['tgl_selesai'],
-    //                     'nilai_akhir' => $nilai_akhir // Mengirimkan nilai untuk sertifikat
-    //                 ]);
-    //             } else {
-    //                 // Tanggal selesai belum ada
-    //                 return redirect()->to('/dashboard')->with('error', 'Kegiatan belum selesai. Sertifikat tidak dapat dicetak.');
-    //             }
-    //         } else {
-    //             // Nilai belum lengkap
-    //             return redirect()->to('/dashboard')->with('error', 'Nilai Anda belum lengkap. Sertifikat tidak dapat dicetak.');
-    //         }
-    //     } else {
-    //         return redirect()->to('/dashboard')->with('error', 'Data peserta tidak ditemukan.');
-    //     }
-    // }
-
-    // Fungsi untuk mengganti bulan dengan nama bulan dalam bahasa Indonesia
-    private function formatTanggalIndo($date)
-    {
-        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
-        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
-
-        if ($user_level !== 'user') {
-            return view('no_access');
-        }
-        $bulanIndo = [
-            '01' => 'Januari',
-            '02' => 'Februari',
-            '03' => 'Maret',
-            '04' => 'April',
-            '05' => 'Mei',
-            '06' => 'Juni',
-            '07' => 'Juli',
-            '08' => 'Agustus',
-            '09' => 'September',
-            '10' => 'Oktober',
-            '11' => 'November',
-            '12' => 'Desember'
-        ];
-
-        $dateObj = new \DateTime($date);
-        $bulan = $dateObj->format('m');
-        $tahun = $dateObj->format('Y');
-        $hari = $dateObj->format('d');
-
-        return $hari . ' ' . $bulanIndo[$bulan] . ' ' . $tahun;
-    }
-
-    public function generate_sertifikat($id_magang)
-    {
-        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
-        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
-
-        if ($user_level !== 'user') {
-            return view('no_access');
-        }
-        // Ambil data peserta magang berdasarkan ID
-        $anakMagang = $this->anakMagangModel->getPesertaByIdMagang($id_magang);
-
-        // Path ke template sertifikat
-        $templatePath = FCPATH . 'templates/sertifikat_template.docx';
-
-        // Cek apakah template tersedia
-        if (!file_exists($templatePath)) {
-            return redirect()->to('/dashboard/sertifikat')->with('error', 'Template sertifikat tidak ditemukan.');
-        }
-
-        // Load template DOCX
-        $templateProcessor = new TemplateProcessor($templatePath);
-
-        // Ganti placeholder dengan data dari database
-        $templateProcessor->setValue('NAMA', htmlspecialchars($anakMagang['nama']));
-        $templateProcessor->setValue('TGL_MULAI', date('d F Y', strtotime($anakMagang['tanggal1'])));
-        $templateProcessor->setValue('TGL_SELESAI', date('d F Y', strtotime($anakMagang['tanggal2'])));
-        $templateProcessor->setValue('CURRENT_DATE', date('Y-m-d'));
-
-        // Simpan dokumen baru
-        $outputPath = FCPATH . 'generated/sertifikat_' . $anakMagang['id_magang'] . '.docx';
-        $templateProcessor->saveAs($outputPath);
-
-        // Download file
-        return $this->response->download($outputPath, null)->setFileName('Sertifikat_' . $anakMagang['nama'] . '.docx');
-    }
-
-    // public function generate_sertifikat($id_magang)
-    // {
-    //     $session = session();
-    //     $user_nomor = $session->get('nomor');
-    //     $id_magang = $this->anakMagangModel->getIdMagang($user_nomor); // Ambil id_magang
-    //     $anakMagang = $this->anakMagangModel->getAnakMagangWithNama($id_magang);
-    //     $nama = isset($anakMagang['nama']) ? strval($anakMagang['nama']) : 'Tidak Ada Nama';
-
-    //     if ($id_magang != NULL) {
-    //         // Ambil data nilai akhir berdasarkan id_magang
-    //         $nilai_akhir = $this->nilaiModel->getNilaiByPeserta($id_magang);
-
-    //         // Ambil data peserta
-    //         $peserta = $this->anakMagangModel->getPesertaByIdMagang($id_magang);
-    //         // Path ke template sertifikat
-    //         $templatePath = FCPATH . 'templates/sertifikat_template.docx';
-
-    //         // Cek apakah template tersedia
-    //         if (!file_exists($templatePath)) {
-    //             return redirect()->to('/dashboard/sertifikat')->with('error', 'Template sertifikat tidak ditemukan.');
-    //         }
-
-    //         // Load template DOCX
-    //         $templateProcessor = new TemplateProcessor($templatePath);
-
-    //         // Ganti placeholder dengan data dari database
-    //         $templateProcessor->setValue('NAMA', $peserta['nama']);
-    //         $templateProcessor->setValue('TGL_MULAI', $this->formatTanggalIndo($peserta['tanggal1']));
-    //         $templateProcessor->setValue('TGL_SELESAI', $this->formatTanggalIndo($peserta['tanggal2']));
-    //         $templateProcessor->setValue('CURRENT_DATE', $this->formatTanggalIndo(date('Y-m-d')));
-
-    //         // Simpan dokumen sementara di server
-    //         $tempFilePath = FCPATH . 'generated/sertifikat_' . $peserta['id_magang'] . '.docx';
-    //         $templateProcessor->saveAs($tempFilePath);
-
-    //         // Mengkonversi DOCX menjadi PDF
-    //         $pdf = $this->convertDocxToPdf($tempFilePath);
-
-    //         // Hapus file DOCX sementara setelah konversi
-    //         unlink($tempFilePath);
-
-    //         // Output PDF untuk diunduh
-    //         return $this->response->download($pdf, null)->setFileName('Sertifikat_' . $nama . '.pdf');
-    //     } else {
-    //         return redirect()->to('dashboard/sertifikat')->with('error', 'Peserta tidak ditemukan.');
-    //     }
-    // }
-
-    private function convertDocxToPdf($docxFilePath)
-    {
-        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
-        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
-
-        if ($user_level !== 'user') {
-            return view('no_access');
-        }
-        // Setup DOMPDF
-        $dompdf = new Dompdf();
-        $options = new Options();
-        $options->set('isHtml5ParserEnabled', true);
-        $dompdf->setOptions($options);
-
-        // Membaca file DOCX dan mengonversinya menjadi HTML
-        $phpWord = \PhpOffice\PhpWord\IOFactory::load($docxFilePath);
-        $html = $this->convertPhpWordToHtml($phpWord);
-
-        // Load HTML ke DOMPDF
-        $dompdf->loadHtml($html);
-        $dompdf->render();
-
-        // Output PDF ke file
-        $outputPath = FCPATH . 'generated/sertifikat_' . time() . '.pdf';
-        file_put_contents($outputPath, $dompdf->output());
-
-        return $outputPath;
-    }
-
-    private function convertPhpWordToHtml($phpWord)
-    {
-        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
-        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
-
-        if ($user_level !== 'user') {
-            return view('no_access');
-        }
-        $htmlWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'HTML');
-        ob_start();
-        $htmlWriter->save("php://output");
-        return ob_get_clean();
-    }
-
-
 
     public function cetak_nilai()
     {
@@ -986,8 +766,6 @@ class Dashboard extends BaseController
         return redirect()->to('dashboard/profile');
     }
 
-
-
     public function editInfoBank()
     {
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
@@ -1067,9 +845,6 @@ class Dashboard extends BaseController
         return redirect()->to('dashboard/profile');
     }
 
-
-
-
     public function downloadBukuRekening($file_name)
     {
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
@@ -1142,5 +917,27 @@ class Dashboard extends BaseController
 
         // Output file PDF ke browser
         $dompdf->stream("absensi_" . $user_nomor . ".pdf", ["Attachment" => false]);
+    }
+
+    public function cetak($id)
+    {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'user') {
+            return view('no_access');
+        }
+        $registrasiModel = new RegistrasiModel();
+        $user_nomor = $this->session->get('nomor');
+        // Ambil data nilai dan data registrasi
+        $registrasi_data = $this->registrasiModel->getRegistrasiById($id); // Ambil data dari tabel registrasi berdasarkan nomo
+
+        $data['registrasi'] = $registrasi_data;
+
+        if (!$data['registrasi']) {
+            return redirect()->to('/')->with('error', 'Data tidak ditemukan.');
+        }
+
+        return view('cetak_sertifikat', $data);
     }
 }

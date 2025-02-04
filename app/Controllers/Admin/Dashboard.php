@@ -30,9 +30,6 @@ class Dashboard extends BaseController
     protected $nilaiModel;
     protected $pesertaModel;
     protected $anakMagangModel;
-
-
-
     public function __construct()
     {
         $this->session = session();
@@ -41,18 +38,6 @@ class Dashboard extends BaseController
         $this->nilaiModel = new NilaiModel();
         $this->pesertaModel = new PesertaModel;
         $this->anakMagangModel = new AnakMagangModel;
-
-        // // Cek jika belum login
-        // if (!$this->session->get('admin_logged_in')) {
-        //     return redirect()->to('/login/admin');
-        // }
-
-        // // Cek jika level bukan 'admin'
-        // if ($this->session->get('level') !== 'admin') {
-        //     $this->session->setFlashdata('error', 'Anda tidak memiliki akses ke halaman ini.');
-        //     $this->session->destroy();
-        //     return redirect()->to('/login/admin');
-        // }
     }
 
     public function index()
@@ -131,30 +116,6 @@ class Dashboard extends BaseController
             . view('templates/detail', $data)
             . view('templates/footer');
     }
-
-
-    // public function detail($id)
-    // {
-    //     helper('date');  // Load helper 'date'
-    //     $registrasiModel = new RegistrasiModel();
-    //     $detailRegisModel = new DetailRegisModel();
-    //     $mentorModel = new MentorModel();
-
-    //     $data['detail'] = $registrasiModel->getDetail($id);
-    //     $data['detail_mentor'] = $detailRegisModel->getDetailWithMentor($id);
-    //     $data['list_mentor'] = $mentorModel->getData();
-
-    //     if (!$data['detail']) {
-    //         throw new \CodeIgniter\Exceptions\PageNotFoundException('Data tidak ditemukan');
-    //     }
-
-
-    //     return view('templates/header')
-    //         . view('templates/sidebar')
-    //         . view('templates/topbar')
-    //         . view('templates/detail', $data)
-    //         . view('templates/footer');
-    // }
 
     public function updateStatus()
     {
@@ -238,86 +199,6 @@ class Dashboard extends BaseController
             return redirect()->to('/admin/dashboard');
         }
     }
-
-    // public function updateStatus()
-    // {
-    //     $id = $this->request->getPost('id');
-    //     $action = strtolower($this->request->getPost('action'));
-    //     $nipg = $this->request->getPost('nipg');
-
-    //     if ($id && in_array($action, ['accept', 'reject'])) {
-    //         $registrasiModel = new RegistrasiModel();
-    //         $mentorModel = new MentorModel();
-    //         $detailRegisModel = new DetailRegisModel();
-    //         $anakMagangModel = new AnakMagangModel();
-
-    //         $peserta = $registrasiModel->getPesertaById($id);
-    //         if (!$peserta) {
-    //             $this->session->setFlashdata('error', 'Peserta tidak ditemukan.');
-    //             return redirect()->to('/admin/dashboard');
-    //         }
-
-    //         $statusUpdate = ($action === 'accept') ? 'Accept' : 'reject';
-    //         $registrasiModel->updateStatus($id, $statusUpdate);
-    //         $registrasiModel->updateTimelineAcc($id, 'Pencarian Mentor');
-
-
-    //         $lastPrimaryKey = $detailRegisModel->selectMax('iddetail')->first();
-    //         $newPrimaryKey = isset($lastPrimaryKey['iddetail']) ? $lastPrimaryKey['iddetail'] + 1 : 1;
-
-    //         if ($statusUpdate === 'Accept') {
-    //             $dataDetailRegis = [
-    //                 'iddetail' => $newPrimaryKey,
-    //                 'id_register' => $id,
-    //                 'nipg' => $nipg,
-    //                 'approved' => 'W'
-    //             ];
-
-    //             $detailRegisModel->insertDetailRegis($dataDetailRegis);
-
-    //             $mentor = $mentorModel->getMentorByNipg($nipg);
-
-    //             if ($mentor) {
-    //                 $this->sendEmailToMentor($mentor, $peserta);
-
-    //                 $unitKerja = $peserta['minat'];
-    //                 $tglMulai = $peserta['tanggal1'];
-    //                 $tglSelesai = $peserta['tanggal2'];
-
-    //                 $lastPrimaryKey = $anakMagangModel->selectMax('id_magang')->first();
-    //                 $newPrimaryKey = isset($lastPrimaryKey['id_magang']) ? $lastPrimaryKey['id_magang'] + 1 : 1;
-    //                 $dataAnakMagang = [
-    //                     'id_magang' => $newPrimaryKey,
-    //                     'id_register' => $id,
-    //                     'unit_kerja' => $unitKerja,
-    //                     'tgl_mulai' => $tglMulai,
-    //                     'tgl_selesai' => $tglSelesai,
-    //                     'id_mentor' => $mentor['id_mentor'],
-    //                 ];
-
-    //                 $insertSuccess = $anakMagangModel->insertAnakMagang($dataAnakMagang);
-
-    //                 if (!$insertSuccess) {
-    //                     $this->session->setFlashdata('error', 'Gagal memasukkan data ke tabel anak_magang.');
-    //                     return redirect()->to('/admin/dashboard');
-    //                 }
-    //             } else {
-    //                 $this->session->setFlashdata('error', 'Informasi mentor tidak ditemukan.');
-    //                 return redirect()->to('/admin/dashboard');
-    //             }
-    //         } elseif ($statusUpdate === 'reject') {
-    //             $this->sendEmailToPeserta($peserta, $statusUpdate);
-    //         }
-
-    //         $this->session->setFlashdata('success', 'Status berhasil diperbarui.');
-    //         return redirect()->to('/admin/dashboard');
-    //     } else {
-    //         $this->session->setFlashdata('error', 'Data atau aksi tidak valid.');
-    //         return redirect()->to('/admin/dashboard');
-    //     }
-    // }
-
-
     private function sendEmailToPeserta($peserta, $status, $mentor = null)
     {
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
@@ -449,46 +330,6 @@ class Dashboard extends BaseController
             return false;
         }
     }
-
-    // private function sendEmailToMentor($mentor, $peserta)
-    // {
-    //     $email = \Config\Services::email();
-
-    //     $email->setFrom('ormasbbctestt@gmail.com', 'PGN GAS Admin Internship Program');
-    //     $email->setTo($mentor['email']);
-    //     $email->setSubject('Informasi Anak Bimbingan Baru');
-    //     $email->setMessage("
-    //     Anda memiliki anak bimbingan baru:
-    // 		- Nama: {$peserta['nama']}
-    // 		- No Telp: {$peserta['notelp']}
-    // 		- Email: {$peserta['email']}
-    // 		- Prodi: {$peserta['prodi']}
-    // 		- Fakultas: {$peserta['jurusan']}
-    // 		- Instansi: {$peserta['instansi']}
-    // 		- Satuan Kerja: {$peserta['minat']}
-    //         - Jenis Kegiatan: {$peserta['tipe']}
-
-    // 		Silakan login ke sistem untuk informasi lebih lanjut.
-    //     ");
-
-    //     return $email->send();
-    // }
-
-    // public function file($file_name)
-    // {
-    //     $file_path = WRITEPATH . 'uploads/' . $file_name;
-
-    //     if (file_exists($file_path)) {
-    //         $mime_type = mime_content_type($file_path); // Mendapatkan MIME type file
-    //         return $this->response
-    //             ->setHeader('Content-Type', $mime_type) // Menentukan Content-Type
-    //             ->setHeader('Content-Disposition', 'attachment; filename="' . basename($file_name) . '"') // Menambahkan header untuk unduhan
-    //             ->setBody(file_get_contents($file_path)); // Membaca isi file
-    //     } else {
-    //         throw new \CodeIgniter\Exceptions\PageNotFoundException('File tidak ditemukan');
-    //     }
-    // }
-
     public function file($file_name)
     {
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
@@ -506,9 +347,6 @@ class Dashboard extends BaseController
             throw new \CodeIgniter\Exceptions\PageNotFoundException('File tidak ditemukan');
         }
     }
-
-
-
     public function downloadAll($id)
     {
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
@@ -558,9 +396,6 @@ class Dashboard extends BaseController
         return $this->response->download($zip_file_path, null)->setFileName($zip_file_name);
     }
 
-
-
-
     public function data_mentor()
     {
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
@@ -601,31 +436,6 @@ class Dashboard extends BaseController
         echo view('templates/detail_data_mentor', $data);
         echo view('templates/footer');
     }
-
-    // public function detailDataPeserta($id_magang)
-    // {
-    //     helper('date');
-
-    //     $data['detail_peserta'] = $this->pesertaModel->getDetailPeserta($id_magang);
-    //     $data['id_magang'] = $id_magang;
-
-    //     if (!$data['detail_peserta']) {
-    //         throw new \CodeIgniter\Exceptions\PageNotFoundException('Data peserta tidak ditemukan');
-    //     }
-
-    //     // Ambil data timeline dari tabel registrasi
-    //     $timelineData = $this->pesertaModel->getTimelineFromRegistrasi($id_magang); // Pastikan method ini mengambil data timeline yang diperlukan
-
-    //     dd($timelineData);
-    //     // Menambahkan data timeline ke dalam array data
-    //     $data['detail_peserta']['timeline'] = $timelineData;
-
-    //     echo view('templates/header');
-    //     echo view('templates/sidebar');
-    //     echo view('templates/topbar');
-    //     echo view('templates/detail_data_peserta', $data);
-    //     echo view('templates/footer');
-    // }
 
     public function detailDataPeserta($id_magang)
     {
@@ -703,7 +513,6 @@ class Dashboard extends BaseController
         echo view('templates/detail_data_m_peserta', $data);
         echo view('templates/footer');
     }
-
 
     public function data_peserta()
     {
@@ -816,7 +625,7 @@ class Dashboard extends BaseController
         $data['peserta'] = $this->pesertaModel->getDetailAbsenPeserta($id_magang, $start_date, $end_date);
         $data['id_magang'] = $id_magang;
 
-        $dompdf = new \Dompdf\Dompdf();
+        $dompdf = new Dompdf();
         $html = view('mentor/cetak_detail_rekap_absensi_bimbingan', $data);
 
         $dompdf->loadHtml($html);
@@ -933,7 +742,7 @@ class Dashboard extends BaseController
             $item->status = $item->total_nilai > 75 ? 'Lulus' : 'Tidak Lulus';
         }
 
-        $dompdf = new \Dompdf\Dompdf();
+        $dompdf = new Dompdf();
         $data['title'] = "Detail Rekap Nilai Akhir";
         $html = view('mentor/cetak_detail_riwayat_nilai_bimbingan', $data);
 
@@ -1054,7 +863,6 @@ class Dashboard extends BaseController
         // Pastikan foto peserta sudah di-setup
         foreach ($data['detail_peserta'] as &$peserta) {
             if (!empty($peserta->foto)) {
-                $peserta->foto = $peserta->foto; // Path foto
             } else {
                 $peserta->foto = 'default.png'; // Foto default jika tidak ada
             }
@@ -1276,5 +1084,82 @@ class Dashboard extends BaseController
 
         // Output file PDF ke browser
         $dompdf->stream("sertifikat_" . $peserta['nama'] . ".pdf", ["Attachment" => false]);
+    }
+
+    public function sertifikat($id)
+    {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'admin') {
+            return view('no_access');
+        }
+        $id_magang = $id;
+        $anakMagang = $this->anakMagangModel->find($id);
+        $user_register = $this->registrasiModel->getRegistrasiById($id);
+        if ($id_magang != NULL) {
+            // Periksa apakah tgl_selesai sudah terlewati
+            if (empty($anakMagang['tgl_selesai']) || strtotime($anakMagang['tgl_selesai']) > time() || $user_register['no_sertif'] == null) {
+                // Jika program belum selesai, tampilkan pesan
+                $data['is_completed'] = false;
+                $data['message'] = 'Program belum selesai';
+            } else {
+                // Jika sudah selesai, tampilkan tombol cetak sertifikat
+                $data['is_completed'] = true;
+                $data['message'] = 'Program anda telah selesai';
+            }
+        } else {
+            $data['laporan'] = null;
+        }
+
+        $data['id_magang'] = $id_magang; // Tambahkan ini agar tersedia di view
+        $data['anakMagangModel'] = $this->anakMagangModel;
+        $data['anakMagang'] = $anakMagang;
+        $data['user_register'] = $user_register;
+
+        return view('templates/header') .
+            view('templates/sidebar') .
+            view('templates/topbar') .
+            view('templates/sertifikat', $data) . // Pastikan $data dikirim ke view
+            view('templates/footer');
+    }
+
+    public function cetak($id)
+    {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'admin') {
+            return view('no_access');
+        }
+        $registrasiModel = new RegistrasiModel();
+        $user_nomor = $this->session->get('nomor');
+        // Ambil data nilai dan data registrasi
+        $registrasi_data = $this->registrasiModel->getRegistrasiById($id); // Ambil data dari tabel registrasi berdasarkan nomo
+
+        $data['registrasi'] = $registrasi_data;
+
+        if (!$data['registrasi']) {
+            return redirect()->to('/')->with('error', 'Data tidak ditemukan.');
+        }
+
+        return view('templates/cetak_sertifikat', $data);
+    }
+
+    // Submit nomor sertifikat dan update ke database
+    public function submitNoSertifikat()
+    {
+        $no_sertif = $this->request->getPost('no_sertif');
+        $id_register = $this->request->getPost('id_register');
+        // Validasi input
+        if (empty($no_sertif)) {
+            return redirect()->back()->with('error', 'Nomor sertifikat tidak boleh kosong!');
+        }
+
+        $registrasiModel = new RegistrasiModel();
+        $registrasiModel->update($id_register, ['no_sertif' => $no_sertif]);
+
+        // Redirect dan beri pesan bahwa sertifikat berhasil disimpan
+        return redirect()->to('admin/dashboard/data_peserta')->with('message', 'Nomor Sertifikat berhasil disimpan. Silakan unduh sertifikat.');
     }
 }

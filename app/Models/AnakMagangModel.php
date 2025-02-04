@@ -65,16 +65,12 @@ class AnakMagangModel extends Model
     public function getPesertaMagangDesc()
     {
         return $this->db->table('registrasi')
-            ->select('registrasi.nomor, registrasi.nama, registrasi.instansi, registrasi.tanggal1, registrasi.tanggal2, anak_magang.status, anak_magang.id_magang')
+            ->select('registrasi.nomor, registrasi.nama, registrasi.instansi, registrasi.tanggal1, registrasi.tanggal2, anak_magang.status, anak_magang.id_magang, registrasi.id_register') // Menambahkan id_register pada select
             ->join('anak_magang', 'registrasi.id_register = anak_magang.id_register') // Menghubungkan tabel registrasi dan anak_magang
             ->orderBy('anak_magang.id_magang', 'DESC') // Mengurutkan berdasarkan kolom id_magang secara descending
             ->get()
             ->getResultArray();
     }
-
-
-
-
 
     public function getPesertaMagang()
     {

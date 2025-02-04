@@ -22,7 +22,7 @@
                 <div class="col-lg-12">
                     <div class="card position-relative">
                         <?php if ($is_completed): ?>
-                            <a href="<?php echo base_url('dashboard/generate_sertifikat/' . $id_magang) ?>" class="btn btn-warning btn-sm">
+                            <a href="<?php echo base_url('dashboard/cetak-sertifikat/' . $anakMagang['id_register']) ?>" class="btn btn-warning btn-sm">
                                 <i class="fas fa-file-pdf"></i> Unduh Sertifikat (PDF)
                             </a>
                         <?php else: ?>
