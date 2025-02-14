@@ -6,7 +6,7 @@
             <br>
             <!-- Tombol Ekspor Excel -->
             <a href="<?= site_url('admin/dashboard/exportToExcel'); ?>">
-                <button class="btn btn-primary btn-sm">
+                <button class="btn btn-success btn-sm">
                     <i class="fas fa-file-excel"></i> Export to Excel
                 </button>
             </a>

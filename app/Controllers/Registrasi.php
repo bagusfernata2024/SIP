@@ -28,6 +28,23 @@ class Registrasi extends BaseController
 
     public function index()
     {
+
+        // Cek apakah session 'level' tersedia
+        $user_level = session()->get('level'); // Ambil level pengguna dari session
+
+        // Jika level ada, arahkan berdasarkan level pengguna
+        if ($user_level) {
+            if ($user_level === 'admin') {
+                // Jika level user adalah admin, arahkan ke admin dashboard
+                return redirect()->to('admin/dashboard');
+            } elseif ($user_level === 'user') {
+                // Jika level user adalah user, arahkan ke dashboard user
+                return redirect()->to('dashboard');
+            } elseif ($user_level === 'mentor') {
+                // Jika level user adalah mentor, arahkan ke mentor dashboard
+                return redirect()->to('mentor/dashboard');
+            }
+        }
         $data['daftar_minat'] = $this->daftarMinatModel->findAll();
         return view('web_templates/header') .
             view('templates/registrasi_peserta', $data) .
@@ -139,12 +156,14 @@ class Registrasi extends BaseController
         $uploads = [];
         $nama = $this->request->getPost('nama');
         $instansi = $this->request->getPost('instansi');
+        $tipe = $this->request->getPost('tipe');
+
         $tanggal = date('Ymd');
 
         foreach ($files as $file) {
             $uploadedFile = $this->request->getFile($file);
             if ($uploadedFile->isValid() && !$uploadedFile->hasMoved()) {
-                $newName = $this->createRenameFile($file, $nama, $nik, $instansi, $tanggal);
+                $newName = $this->createRenameFile($file, $nama, $tipe, $nik, $instansi, $tanggal);
                 $uploadedFile->move(FCPATH . 'uploads', $newName);
                 $uploads[$file] = $newName;
                 log_message('debug', "File $file uploaded successfully.");
@@ -225,6 +244,30 @@ class Registrasi extends BaseController
             return redirect()->to('/registrasi');
         }
     }
+
+    public function cekEmail()
+    {
+        // Mendapatkan data yang dikirim via AJAX
+        $data = $this->request->getJSON();
+        $tipe = $data->tipe;
+        $email = $data->email;
+
+        // Cek apakah sudah ada peserta dengan email dan tipe yang sama
+        $existingRegistration = $this->pesertaModel
+            ->where('email', $email)
+            ->where('tipe', $tipe)
+            ->first();
+
+        if ($existingRegistration) {
+            // Jika sudah ada, kirimkan status fail
+            return $this->response->setJSON(['status' => 'fail']);
+        } else {
+            // Jika belum ada, kirimkan status success
+            return $this->response->setJSON(['status' => 'success']);
+        }
+    }
+
+
 
     // public function prosesRegistrasiPeserta()
     // {
@@ -362,9 +405,9 @@ class Registrasi extends BaseController
     //     return $emailService->send();
     // }
 
-    private function createRenameFile($type, $name, $nim, $instansi, $date)
+    private function createRenameFile($type, $name, $tipe, $nim, $instansi, $date)
     {
-        return strtolower($type . '_' . str_replace(' ', '_', $name) . '_' . $nim . '_' . $instansi . '_' . $date . '.' . pathinfo($_FILES[$type]['name'], PATHINFO_EXTENSION));
+        return strtolower($type . '_' . str_replace(' ', '_', $name) . '_' . $tipe . '_' . $nim . '_' . $instansi . '_' . $date . '.' . pathinfo($_FILES[$type]['name'], PATHINFO_EXTENSION));
     }
 
     private function generatePassword()

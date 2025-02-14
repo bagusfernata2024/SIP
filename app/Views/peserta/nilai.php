@@ -99,9 +99,11 @@
                             </tbody>
                         </table>
                         <div class="mt-3">
+                            <?php if($nilai_akhir['ketepatan_waktu'] != null): ?>
                             <a href="<?php echo base_url('dashboard/cetak_nilai') ?>" target="_blank" class="btn btn-success btn-sm">
                                 <i class="fas fa-print"></i> Cetak
                             </a>
+                            <?php endif; ?>
                         </div>
                     <?php else: ?>
                         <div class="alert alert-warning" role="alert">

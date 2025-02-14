@@ -84,11 +84,11 @@ class AnakMagangModel extends Model
 
 
 
-    public function getIdMagang($user_nomor)
+    public function getIdMagang($id_register)
     {
         $id_register = $this->db->table('registrasi')
             ->select('id_register')
-            ->where('nomor', $user_nomor)
+            ->where('id_register', $id_register)
             ->get()
             ->getRow();
 
@@ -193,13 +193,13 @@ class AnakMagangModel extends Model
             ->getRow();
     }
 
-    public function getLaporanAkhirByMentor($user_nomor)
+    public function getLaporanAkhirByMentor($id_register)
     {
         return $this->db->table('anak_magang')
             ->select('anak_magang.*')
             ->join('detailregis', 'detailregis.id_register = anak_magang.id_register')
             ->join('mentor', 'mentor.nipg = detailregis.nipg')
-            ->where('mentor.nipg', $user_nomor)
+            ->where('mentor.nipg', $id_register)
             ->get()
             ->getResult();
     }

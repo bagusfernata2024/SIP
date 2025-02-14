@@ -149,12 +149,15 @@ class AbsensiModel extends Model
             ->countAllResults();
     }
 
-    public function updateStatusAbsensi($id_magang, $tgl, $status)
+    public function updateStatusAbsensi($id_magang, $tgl, $status, $statuss)
     {
         $builder = $this->db->table('absen');
         $builder->where('id_magang', $id_magang);
         $builder->where('tgl', $tgl);
         $builder->update(['approved' => $status]);
+        $builder->where('id_magang', $id_magang);
+        $builder->where('tgl', $tgl);
+        $builder->update(['statuss' => $statuss]);
     }
     public function updateDeskripsi($id_absen, $data)
     {

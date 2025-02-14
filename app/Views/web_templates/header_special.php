@@ -53,7 +53,7 @@
           <li><a href="<?php echo base_url(); ?>#hero" >Beranda</a></li>
           <li><a href="<?php echo base_url(); ?>#about">Tentang kami</a></li>
           <li><a href="<?php echo base_url(); ?>#features">Persyaratan</a></li>
-          <li><a href="<?php echo base_url('/login'); ?>#login">Login</a></li>
+          <li><a href="<?php echo base_url('/login'); ?>">Login</a></li>
         </ul>
         <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
       </nav>

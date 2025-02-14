@@ -295,7 +295,7 @@
                             <td>Proposal Magang</td>
                             <td><?php echo $detail['proposal_magang']; ?></td>
                             <td>
-                                <a href="<?php echo base_url('admin/dashboard/file/' . urlencode($detail['proposal_magang'])); ?>"
+                                <a href="<?php echo base_url('admin/dashboard/file_lampiran/' . urlencode($detail['proposal_magang'])); ?>"
                                     class="btn btn-primary btn-sm" download>Download</a>
                             </td>
                         </tr>
@@ -304,7 +304,7 @@
                             <td>Curriculum Vitae (CV)</td>
                             <td><?php echo $detail['cv']; ?></td>
                             <td>
-                                <a href="<?php echo base_url('admin/dashboard/file/' . urlencode($detail['cv'])); ?>"
+                                <a href="<?php echo base_url('admin/dashboard/file_lampiran/' . urlencode($detail['cv'])); ?>"
                                     class="btn btn-primary btn-sm" download>Download</a>
                             </td>
                         </tr>
@@ -313,7 +313,7 @@
                             <td>Fotocopy KTP</td>
                             <td><?php echo $detail['fc_ktp']; ?></td>
                             <td>
-                                <a href="<?php echo base_url('admin/dashboard/file/' . urlencode($detail['fc_ktp'])); ?>"
+                                <a href="<?php echo base_url('admin/dashboard/file_lampiran/' . urlencode($detail['fc_ktp'])); ?>"
                                     class="btn btn-primary btn-sm" download>Download</a>
                             </td>
                         </tr>

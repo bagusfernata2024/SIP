@@ -26,7 +26,7 @@
             justify-content: center;
             align-items: center;
             font-family: Calibri, sans-serif;
-            background: url('<?= base_url('templates/sertifikat_template.jpg') ?>') no-repeat center center fixed;
+            background: url('<?= base_url('templates/sertifikat_template.png') ?>') no-repeat center center fixed;
             background-size: contain;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
@@ -72,7 +72,7 @@
                 height: 100%;
                 margin: 0;
                 padding: 0;
-                background: url('<?= base_url('templates/sertifikat_template.jpg') ?>') no-repeat center center !important;
+                background: url('<?= base_url('templates/sertifikat_template.png') ?>') no-repeat center center !important;
                 background-size: contain !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
@@ -85,12 +85,12 @@
 
     <div class="print-container" id="printArea">
         <!-- Gambar cadangan jika background gagal -->
-        <img src="<?= base_url('templates/sertifikat_template.jpg') ?>" class="background-img">
+        <img src="<?= base_url('templates/sertifikat_template.png') ?>" class="background-img">
 
         <div class="sertifikat">
             <h1 style="color: black;"></h1>
             <br><br><br><br><br><br>
-            <p style="color: black; font-size: 15px; font-family:Calibri; margin-top: 16px;"><?= $registrasi['no_sertif'] ?></p>
+            <p style="color: black; font-size: 15px; font-family:Calibri; margin-top: 16px;">00<?= $registrasi['no_sertif'] ?>.S/DL.03/HCM/2024</p>
             <br><br><br>
             <p style="color: #1F497D; font-size:28px; margin-top:6px; font-family:Calibri;"><b><?= $registrasi['nama'] ?></b></p>
             <br><br>
@@ -131,14 +131,14 @@
                 dengan hasil
             </p>
             <p style="color: black; font-size: 28px; font-family:Calibri; margin-top: 5px;"><b>Memuaskan</b></p>
-            <p style="margin-top: 25px; font-size: 18px; font-family:Calibri;">
+            <p style="margin-top: 30px; font-size: 18px; font-family:Calibri;">
                 <?php
-                // Tampilkan tanggal saat ini dengan format "04 Januari 2025"
-                $tanggal_saat_ini = date('d', time());
-                $bulan_saat_ini = date('m', time());
-                $tahun_saat_ini = date('Y', time());
-                $formatted_tanggal_saat_ini = $tanggal_saat_ini . ' ' . $bulan[$bulan_saat_ini] . ' ' . $tahun_saat_ini;
-                echo $formatted_tanggal_saat_ini;
+                // Format tanggal selesai dengan bulan dalam bahasa Indonesia
+                $tanggal_selesai = date('d', strtotime($registrasi['tanggal2']));
+                $bulan_selesai = date('m', strtotime($registrasi['tanggal2']));
+                $tahun_selesai = date('Y', strtotime($registrasi['tanggal2']));
+                $formatted_tanggal_selesai = $tanggal_selesai . ' ' . $bulan[$bulan_selesai] . ' ' . $tahun_selesai;
+                echo $formatted_tanggal_selesai;
                 ?>
             </p>
         </div>

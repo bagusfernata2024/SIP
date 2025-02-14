@@ -21,8 +21,21 @@ class Login extends BaseController
     public function index()
     {
 
-        if ($this->session->get('admin_logged_in')) {
-            redirect('dashboard');
+        // Cek apakah session 'level' tersedia
+        $user_level = session()->get('level'); // Ambil level pengguna dari session
+
+        // Jika level ada, arahkan berdasarkan level pengguna
+        if ($user_level) {
+            if ($user_level === 'admin') {
+                // Jika level user adalah admin, arahkan ke admin dashboard
+                return redirect()->to('admin/dashboard');
+            } elseif ($user_level === 'user') {
+                // Jika level user adalah user, arahkan ke dashboard user
+                return redirect()->to('dashboard');
+            } elseif ($user_level === 'mentor') {
+                // Jika level user adalah mentor, arahkan ke mentor dashboard
+                return redirect()->to('mentor/dashboard');
+            }
         }
 
         return view('web_templates/header') .
@@ -125,8 +138,21 @@ class Login extends BaseController
 
     public function admin()
     {
-        if ($this->session->get('admin_logged_in')) {
-            return redirect()->to('/admin/dashboard');
+        // Cek apakah session 'level' tersedia
+        $user_level = session()->get('level'); // Ambil level pengguna dari session
+
+        // Jika level ada, arahkan berdasarkan level pengguna
+        if ($user_level) {
+            if ($user_level === 'admin') {
+                // Jika level user adalah admin, arahkan ke admin dashboard
+                return redirect()->to('admin/dashboard');
+            } elseif ($user_level === 'user') {
+                // Jika level user adalah user, arahkan ke dashboard user
+                return redirect()->to('dashboard');
+            } elseif ($user_level === 'mentor') {
+                // Jika level user adalah mentor, arahkan ke mentor dashboard
+                return redirect()->to('mentor/dashboard');
+            }
         }
 
         return view('web_templates/header_special') .

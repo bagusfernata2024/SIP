@@ -109,7 +109,6 @@ class Dashboard extends BaseController
         if (!$data['detail']) {
             throw new \CodeIgniter\Exceptions\PageNotFoundException('Data tidak ditemukan');
         }
-
         return view('templates/header')
             . view('templates/sidebar')
             . view('templates/topbar')
@@ -159,6 +158,7 @@ class Dashboard extends BaseController
                 $detailRegisModel->insertDetailRegis($dataDetailRegis);
 
                 $mentor = $mentorModel->getMentorByNipg($nipg);
+                // dd($peserta);
 
                 if ($mentor) {
                     $this->sendEmailToMentor($mentor, $peserta);
@@ -199,59 +199,6 @@ class Dashboard extends BaseController
             return redirect()->to('/admin/dashboard');
         }
     }
-    private function sendEmailToPeserta($peserta, $status, $mentor = null)
-    {
-        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
-        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
-
-        if ($user_level !== 'admin') {
-            return view('no_access');
-        }
-        $email = \Config\Services::email();
-
-        $email->setFrom('ormasbbctestt@gmail.com', 'PGN GAS Admin Internship Program');
-        $email->setTo($peserta['email']);
-
-        if ($status === 'Accept' && $mentor) {
-            $email->setSubject('Selamat! Pendaftaran Anda Telah Diterima');
-            $email->setMessage("
-				Kepada Yth. {$peserta['nama']},
-				
-				Dengan hormat,
-				Kami dengan senang hati menginformasikan bahwa pendaftaran Anda dalam program ini telah diterima.
-				
-				Berikut adalah informasi terkait mentor Anda:
-				- Nama: {$mentor['nama']}
-				- NIPG: {$mentor['nipg']}
-				- Email: {$mentor['email']}
-				- Satuan Kerja: {$mentor['division']}
-				
-				Silakan login ke sistem kami untuk informasi lebih lanjut dan memulai program ini. Jika Anda memiliki pertanyaan, jangan ragu untuk menghubungi kami.
-				
-				Terima kasih atas partisipasi Anda.
-	
-				Hormat kami,
-				Admin Program
-            ");
-        } elseif ($status === 'reject') {
-            $email->setSubject('Hasil Pendaftaran Program');
-            $email->setMessage("
-            Kepada Yth. {$peserta['nama']},
-				
-				Dengan hormat,
-				Kami mengucapkan terima kasih atas minat dan partisipasi Anda dalam program ini. 
-				Namun, dengan berat hati kami sampaikan bahwa pendaftaran Anda belum dapat diterima.
-				
-				Kami mendorong Anda untuk tetap semangat dan terus meningkatkan kemampuan Anda. 
-				Jika ada pertanyaan lebih lanjut, silakan hubungi tim kami.
-	
-				Hormat kami,
-				Admin Program
-            ");
-        }
-
-        return $email->send();
-    }
 
     private function sendEmailToMentor($mentor, $peserta)
     {
@@ -261,10 +208,24 @@ class Dashboard extends BaseController
         if ($user_level !== 'admin') {
             return view('no_access');
         }
+
+        // Pastikan nilai-nilai ini valid
+        $mentorEmail = $mentor['email'] ?? '';
+        if (empty($mentorEmail)) {
+            log_message('error', 'Email mentor kosong');
+            return false;
+        }
+
+        // Cek apakah peserta memiliki data yang valid
+        if (empty($peserta['nama']) || empty($peserta['email'])) {
+            log_message('error', 'Data peserta tidak lengkap');
+            return false;
+        }
+
         $email = \Config\Services::email();
 
         // Mengatur alamat pengirim, penerima, dan subjek
-        $email->setFrom('ormasbbctestt@gmail.com', 'PGN GAS Admin Internship Program');
+        $email->setFrom('mdndfzn@gmail.com', 'PGN GAS Admin Internship Program');
         $email->setTo($mentor['email']);
         $email->setSubject('Permohonan Persetujuan Anak Bimbingan Baru');
 
@@ -329,6 +290,60 @@ class Dashboard extends BaseController
             log_message('error', $email->printDebugger(['headers']));
             return false;
         }
+    }
+
+    private function sendEmailToPeserta($peserta, $status, $mentor = null)
+    {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'admin') {
+            return view('no_access');
+        }
+        $email = \Config\Services::email();
+
+        $email->setFrom('mdndfzn@gmail.com', 'PGN GAS Admin Internship Program');
+        $email->setTo($peserta['email']);
+
+        if ($status === 'Accept' && $mentor) {
+            $email->setSubject('Selamat! Pendaftaran Anda Telah Diterima');
+            $email->setMessage("
+				Kepada Yth. {$peserta['nama']},
+				
+				Dengan hormat,
+				Kami dengan senang hati menginformasikan bahwa pendaftaran Anda dalam program ini telah diterima.
+				
+				Berikut adalah informasi terkait mentor Anda:
+				- Nama: {$mentor['nama']}
+				- NIPG: {$mentor['nipg']}
+				- Email: {$mentor['email']}
+				- Satuan Kerja: {$mentor['division']}
+				
+				Silakan login ke sistem kami untuk informasi lebih lanjut dan memulai program ini. Jika Anda memiliki pertanyaan, jangan ragu untuk menghubungi kami.
+				
+				Terima kasih atas partisipasi Anda.
+	
+				Hormat kami,
+				Admin Program
+            ");
+        } elseif ($status === 'reject') {
+            $email->setSubject('Hasil Pendaftaran Program');
+            $email->setMessage("
+            Kepada Yth. {$peserta['nama']},
+				
+				Dengan hormat,
+				Kami mengucapkan terima kasih atas minat dan partisipasi Anda dalam program ini. 
+				Namun, dengan berat hati kami sampaikan bahwa pendaftaran Anda belum dapat diterima.
+				
+				Kami mendorong Anda untuk tetap semangat dan terus meningkatkan kemampuan Anda. 
+				Jika ada pertanyaan lebih lanjut, silakan hubungi tim kami.
+	
+				Hormat kami,
+				Admin Program
+            ");
+        }
+
+        return $email->send();
     }
     public function file($file_name)
     {
@@ -824,8 +839,6 @@ class Dashboard extends BaseController
         }
     }
 
-
-
     public function download_buku_rekening($file_name)
     {
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
@@ -893,24 +906,68 @@ class Dashboard extends BaseController
             return redirect()->to('admin/dashboard/perpanjang_peserta/' . $id_magang);
         }
 
-        // Update tanggal perpanjangan pada tabel registrasi dan anak_magang
-        $data = ['tgl_perpanjangan' => $tgl_perpanjangan];
-        $success_anak_magang = $this->pesertaModel->updateTglPerpanjanganAnakMagang($id_magang, $data);
+        // Langkah 1: Cari id_register berdasarkan id_magang dari tabel anak_magang
+        $id_register = $this->pesertaModel->getIdRegisterByIdMagang($id_magang);
 
-        // Jika berhasil memperbarui tanggal perpanjangan pada kedua tabel
-        if ($success_anak_magang) {
-            session()->setFlashdata('message', 'Tanggal perpanjangan berhasil diperbarui.');
+        // Jika id_register ditemukan, lanjutkan proses update
+        if ($id_register) {
+            // Langkah 2: Update tanggal perpanjangan pada tabel anak_magang
+            $data_anak_magang = ['tgl_perpanjangan' => $tgl_perpanjangan];
+            $success_anak_magang = $this->pesertaModel->updateTglPerpanjanganAnakMagang($id_magang, $data_anak_magang);
 
-            // Tambahkan data absensi untuk periode yang baru
-            $this->tambahAbsensiBaru($id_magang, $tgl_perpanjangan);
+            // Jika berhasil memperbarui tanggal perpanjangan pada ketiga tabel
+            if ($success_anak_magang) {
+                session()->setFlashdata('message', 'Tanggal perpanjangan berhasil diperbarui.');
+
+                // Tambahkan data absensi untuk periode yang baru
+                $this->tambahAbsensiBaru($id_magang, $tgl_perpanjangan, $id_register);
+            } else {
+                session()->setFlashdata('message', 'Gagal memperbarui tanggal perpanjangan.');
+            }
         } else {
-            session()->setFlashdata('message', 'Gagal memperbarui tanggal perpanjangan.');
+            session()->setFlashdata('message', 'ID Magang tidak ditemukan.');
         }
 
         return redirect()->to('admin/dashboard/perpanjang_peserta/' . $id_magang);
     }
 
-    private function tambahAbsensiBaru($id_magang, $tgl_perpanjangan)
+    // public function perpanjang_magang()
+    // {
+    //     // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+    //     $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+    //     if ($user_level !== 'admin') {
+    //         return view('no_access');
+    //     }
+
+    //     // Ambil data yang diperlukan
+    //     $id_magang = $this->request->getPost('id_magang');
+    //     $tgl_perpanjangan = $this->request->getPost('tgl_perpanjangan');
+
+    //     // Validasi input
+    //     if (empty($id_magang) || empty($tgl_perpanjangan)) {
+    //         session()->setFlashdata('message', 'ID Magang atau Tanggal Perpanjangan tidak valid.');
+    //         return redirect()->to('admin/dashboard/perpanjang_peserta/' . $id_magang);
+    //     }
+
+    //     // Update tanggal perpanjangan pada tabel registrasi dan anak_magang
+    //     $data = ['tgl_perpanjangan' => $tgl_perpanjangan];
+    //     $success_anak_magang = $this->pesertaModel->updateTglPerpanjanganAnakMagang($id_magang, $data);
+
+    //     // Jika berhasil memperbarui tanggal perpanjangan pada kedua tabel
+    //     if ($success_anak_magang) {
+    //         session()->setFlashdata('message', 'Tanggal perpanjangan berhasil diperbarui.');
+
+    //         // Tambahkan data absensi untuk periode yang baru
+    //         $this->tambahAbsensiBaru($id_magang, $tgl_perpanjangan);
+    //     } else {
+    //         session()->setFlashdata('message', 'Gagal memperbarui tanggal perpanjangan.');
+    //     }
+
+    //     return redirect()->to('admin/dashboard/perpanjang_peserta/' . $id_magang);
+    // }
+
+    private function tambahAbsensiBaru($id_magang, $tgl_perpanjangan, $id_register)
     {
         // Ambil data tanggal selesai lama
         $detail = $this->pesertaModel->getDetailPesertaByIdMagang($id_magang);
@@ -918,36 +975,47 @@ class Dashboard extends BaseController
 
         // Jika tanggal selesai lama lebih kecil dari tanggal perpanjangan, tambahkan data absensi baru
         if ($tgl_selesai_lama < $tgl_perpanjangan) {
-            // Loop untuk menambahkan data absensi baru dari tanggal selesai lama (tgl_selesai_lama) hingga tanggal perpanjangan
-            $start_date = new DateTime($tgl_selesai_lama);
-            $end_date = new DateTime($tgl_perpanjangan);
-            $end_date->modify('+1 day'); // Menambahkan 1 hari agar tanggal perpanjangan tercakup
-            $interval = new DateInterval('P1D'); // Menambahkan 1 hari per iterasi
-            $daterange = new DatePeriod($start_date, $interval, $end_date);
 
-            foreach ($daterange as $date) {
-                // Cek apakah absensi untuk tanggal ini sudah ada
-                $absen_exists = $this->pesertaModel->checkAbsensiExists($id_magang, $date->format('Y-m-d'));
+            // Langkah 3: Update tanggal2 pada tabel registrasi menggunakan id_register yang ditemukan
+            $data_registrasi = ['tanggal2' => $tgl_perpanjangan];
+            $success_registrasi = $this->pesertaModel->updateTglPerpanjanganRegistrasi($id_register, $data_registrasi);
 
-                // Jika absensi belum ada untuk tanggal ini, tambahkan
-                if (!$absen_exists) {
-                    // Siapkan data untuk absensi baru
-                    $data_absen = [
-                        'id_magang' => $id_magang,
-                        'tgl' => $date->format('Y-m-d'),
-                        'statuss' => null, // Status default hadir
-                        'approved' => null, // Menunggu persetujuan
-                        'jam_masuk' => null, // Kosongkan jam masuk
-                        'jam_pulang' => null, // Kosongkan jam pulang
-                        'latitude_masuk' => null,
-                        'longitude_masuk' => null,
-                        'latitude_keluar' => null,
-                        'longitude_keluar' => null,
-                        'deskripsi' => null
-                    ];
+            // Langkah 4: Update tanggal_selesai pada tabel anak_magang
+            $data_tanggal_selesai = ['tgl_selesai' => $tgl_perpanjangan];
+            $success_tanggal_selesai = $this->pesertaModel->updateTglSelesaiAnakMagang($id_magang, $data_tanggal_selesai);
 
-                    // Masukkan data absensi baru ke database
-                    $this->pesertaModel->tambahAbsensi($data_absen);
+            if ($success_registrasi && $success_tanggal_selesai) {
+                // Loop untuk menambahkan data absensi baru dari tanggal selesai lama (tgl_selesai_lama) hingga tanggal perpanjangan
+                $start_date = new DateTime($tgl_selesai_lama);
+                $end_date = new DateTime($tgl_perpanjangan);
+                $end_date->modify('+1 day'); // Menambahkan 1 hari agar tanggal perpanjangan tercakup
+                $interval = new DateInterval('P1D'); // Menambahkan 1 hari per iterasi
+                $daterange = new DatePeriod($start_date, $interval, $end_date);
+
+                foreach ($daterange as $date) {
+                    // Cek apakah absensi untuk tanggal ini sudah ada
+                    $absen_exists = $this->pesertaModel->checkAbsensiExists($id_magang, $date->format('Y-m-d'));
+
+                    // Jika absensi belum ada untuk tanggal ini, tambahkan
+                    if (!$absen_exists) {
+                        // Siapkan data untuk absensi baru
+                        $data_absen = [
+                            'id_magang' => $id_magang,
+                            'tgl' => $date->format('Y-m-d'),
+                            'statuss' => null, // Status default hadir
+                            'approved' => null, // Menunggu persetujuan
+                            'jam_masuk' => null, // Kosongkan jam masuk
+                            'jam_pulang' => null, // Kosongkan jam pulang
+                            'latitude_masuk' => null,
+                            'longitude_masuk' => null,
+                            'latitude_keluar' => null,
+                            'longitude_keluar' => null,
+                            'deskripsi' => null
+                        ];
+
+                        // Masukkan data absensi baru ke database
+                        $this->pesertaModel->tambahAbsensi($data_absen);
+                    }
                 }
             }
         }

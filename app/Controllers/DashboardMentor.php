@@ -32,6 +32,8 @@ class DashboardMentor extends BaseController
 
     public function __construct()
     {
+
+
         $this->absensiModel = new AbsensiModel();
         $this->anakMagangModel = new AnakMagangModel();
         $this->laporanModel = new LaporanModel();
@@ -262,7 +264,6 @@ class DashboardMentor extends BaseController
                 if (!isset($input->id_magang, $input->id_register)) {
                     return $this->response->setJSON(['success' => false, 'message' => 'Data tidak valid']);
                 }
-
                 $idMagang = $input->id_magang;
                 $idRegister = $input->id_register;
 
@@ -320,7 +321,6 @@ class DashboardMentor extends BaseController
                     $absenData[] = [
                         'id_magang' => $idMagang,
                         'tgl' => $tanggalSekarang->format('Y-m-d'),
-                        'approved' => 'N'
                     ];
                     $tanggalSekarang->modify('+1 day');
                 }
@@ -351,7 +351,6 @@ class DashboardMentor extends BaseController
                 return $this->response->setJSON(['success' => false, 'message' => 'Terjadi kesalahan pada server']);
             }
         }
-
         return $this->response->setJSON(['success' => false, 'message' => 'Invalid request']);
     }
 
@@ -858,10 +857,15 @@ class DashboardMentor extends BaseController
             $id_magang = $data->id_magang ?? null;
             $status = $data->status ?? null;
             $tgl = $data->tgl ?? null;
+            if($status == 'Y'){
+                $statuss = "Hadir";
+            }else{
+                $statuss = "Tidak Hadir";
+            }
 
             if ($id_magang && in_array($status, ['Y', 'N'])) {
                 // Update status
-                $this->absensiModel->updateStatusAbsensi($id_magang, $tgl, $status);
+                $this->absensiModel->updateStatusAbsensi($id_magang, $tgl, $status, $statuss);
 
                 return $this->response->setJSON(['success' => true]);
             } else {
@@ -1068,7 +1072,6 @@ class DashboardMentor extends BaseController
         helper('date');
         $user_nomor = session()->get('nomor');
         $data['nilai'] = $this->nilaiModel->getNilaiByMentor($user_nomor);
-
         return view('mentor/header') .
             view('mentor/sidebar') .
             view('mentor/topbar') .
@@ -1078,15 +1081,15 @@ class DashboardMentor extends BaseController
 
     public function simpan_nilai()
     {
-        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
-        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+        $user_level = $this->session->get('level');
 
         if ($user_level !== 'mentor') {
             return view('no_access');
         }
-        $id_magang = $this->request->getPost('id_magang');
 
-        // Data yang diterima dari form
+        $id_magang = $this->request->getPost('id_magang');
+        $id_register = $this->request->getPost('id_register');
+
         $data = [
             'ketepatan_waktu' => $this->request->getPost('ketepatan_waktu'),
             'sikap_kerja' => $this->request->getPost('sikap_kerja'),
@@ -1105,30 +1108,43 @@ class DashboardMentor extends BaseController
             'tgl_input' => date('Y-m-d'),
         ];
 
-        log_message('debug', "ID Magang yang diterima: $id_magang");
+        // Log data nilai
         log_message('debug', 'Data yang diterima untuk simpan_nilai: ' . json_encode($data));
 
-        // Panggil model untuk update nilai
         $model = new NilaiModel();
 
         if ($model->updateNilai($data, $id_magang)) {
-            log_message('debug', "Nilai berhasil diperbarui untuk id_magang: $id_magang");
+            // Ambil nilai no_sertif terakhir
+            $registrasiModel = new RegistrasiModel();
+            $last_no_sertif = $registrasiModel->getLastNoSertif();
 
-            // Update status pada tabel anak_magang menjadi 'Inactive'
-            $anakMagangModel = new AnakMagangModel();
+            // Pastikan no_sertif adalah angka
+            log_message('debug', "No_sertif terakhir: " . $last_no_sertif);
 
-            if ($anakMagangModel->updateStatusInactive($id_magang)) {
-                log_message('debug', "Status anak_magang berhasil diperbarui menjadi Inactive untuk id_magang: $id_magang");
+            // Jika no_sertif terakhir ditemukan, tambahkan 1
+            $new_no_sertif = $last_no_sertif + 1;
+
+            // Log perubahan no_sertif
+            log_message('debug', "No_sertif baru: " . $new_no_sertif);
+
+            // Update no_sertif pada tabel registrasi
+            $updateData = [
+                'no_sertif' => $new_no_sertif
+            ];
+
+            if ($registrasiModel->updateNoSertif($id_register, $updateData)) {
+                log_message('debug', "No Sertif berhasil diperbarui menjadi $new_no_sertif untuk id_magang: $id_register");
             } else {
-                log_message('error', "Gagal memperbarui status anak_magang untuk id_magang: $id_magang");
+                log_message('error', "Gagal memperbarui no_sertif untuk id_magang: $id_register");
             }
 
-            return $this->response->setJSON(['success' => true, 'message' => 'Nilai berhasil diperbarui dan status anak_magang diubah']);
+            return $this->response->setJSON(['success' => true, 'message' => 'Nilai berhasil diperbarui, dan no_sertif diperbarui']);
         } else {
-            log_message('error', "Gagal memperbarui nilai untuk id_magang: $id_magang");
+            log_message('error', "Gagal memperbarui nilai untuk id_magang: $id_register");
             return $this->response->setJSON(['success' => false, 'message' => 'Gagal memperbarui nilai']);
         }
     }
+
 
     public function riwayatNilaiBimbingan()
     {

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controllers;
 
 use App\Models\MentorModel;
@@ -20,6 +21,24 @@ class HalamanUtama extends BaseController
 
     public function index()
     {
+
+        // Cek apakah session 'level' tersedia
+        $user_level = session()->get('level'); // Ambil level pengguna dari session
+
+        // Jika level ada, arahkan berdasarkan level pengguna
+        if ($user_level) {
+            if ($user_level === 'admin') {
+                // Jika level user adalah admin, arahkan ke admin dashboard
+                return redirect()->to('admin/dashboard');
+            } elseif ($user_level === 'user') {
+                // Jika level user adalah user, arahkan ke dashboard user
+                return redirect()->to('dashboard');
+            } elseif ($user_level === 'mentor') {
+                // Jika level user adalah mentor, arahkan ke mentor dashboard
+                return redirect()->to('mentor/dashboard');
+            }
+        }
+
         $data = [
             'mentor' => $this->mentorModel->getData(),
             'total_mentor' => $this->mentorModel->countMentors(),
@@ -28,7 +47,7 @@ class HalamanUtama extends BaseController
         ];
 
         return view('web_templates/header') .
-               view('halaman_utama', $data) .
-               view('web_templates/footer');
+            view('halaman_utama', $data) .
+            view('web_templates/footer');
     }
 }

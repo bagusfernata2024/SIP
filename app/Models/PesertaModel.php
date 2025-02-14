@@ -180,10 +180,10 @@ class PesertaModel extends Model
             ->getRowArray(); // Asumsikan kolom timeline berisi data yang dapat diproses
     }
 
-    public function updateTglPerpanjanganRegistrasi($id_magang, $data)
-    {
-        return $this->db->table('registrasi')->update($data, ['id_register' => $id_magang]);
-    }
+    // public function updateTglPerpanjanganRegistrasi($id_magang, $data)
+    // {
+    //     return $this->db->table('registrasi')->update($data, ['id_register' => $id_magang]);
+    // }
 
     public function updateTglPerpanjanganAnakMagang($id_magang, $data)
     {
@@ -206,5 +206,36 @@ class PesertaModel extends Model
             ->where('id_magang', $id_magang)
             ->where('tgl', $tanggal)
             ->countAllResults() > 0; // Mengembalikan true jika sudah ada, false jika belum ada
+    }
+
+    public function updateTglPerpanjanganRegistrasi($id_magang, $data)
+    {
+        return $this->db->table('registrasi')
+            ->where('id_register', $id_magang)
+            ->update($data);
+    }
+
+    public function updateTglSelesaiAnakMagang($id_magang, $data)
+    {
+        return $this->db->table('anak_magang')
+            ->where('id_magang', $id_magang)
+            ->update($data);
+    }
+
+    public function getIdRegisterByIdMagang($id_magang)
+    {
+        // Ambil id_register berdasarkan id_magang
+        $query = $this->db->table('anak_magang')
+            ->select('id_register')
+            ->where('id_magang', $id_magang)
+            ->get();
+
+        if ($query->getNumRows() > 0) {
+            // Jika data ditemukan, kembalikan id_register
+            return $query->getRow()->id_register;
+        } else {
+            // Jika tidak ditemukan, kembalikan null
+            return null;
+        }
     }
 }

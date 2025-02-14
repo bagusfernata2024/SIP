@@ -49,7 +49,7 @@
                                         <td><?= $item->instansi ?></td>
                                         <td> <?= formatTanggalIndo($item->tanggal1) ?> - <?= formatTanggalIndo($item->tanggal2) ?></td>
                                         <td>
-                                            <button class="btn btn-success btn-sm" onclick="openModal(<?= $item->id_magang ?>)">
+                                            <button class="btn btn-success btn-sm" onclick="openModal(<?= $item->id_magang ?>, <?= $item->id_register ?>)">
                                                 <i class="fas fa-edit" style="color: white;"></i>
                                             </button>
                                         </td>
@@ -79,6 +79,7 @@
             <form id="nilaiForm">
                 <div class="modal-body">
                     <input type="hidden" id="idMagang" name="id_magang">
+                    <input type="hidden" id="idRegister" name="id_register">
 
                     <div class="mb-3">
                         <div class="alert alert-danger" role="alert">
@@ -202,8 +203,9 @@
 
 <!-- JavaScript -->
 <script>
-    function openModal(idMagang) {
+    function openModal(idMagang, idRegister) {
         document.getElementById('idMagang').value = idMagang; // Isi id_magang ke input form
+        document.getElementById('idRegister').value = idRegister; // Isi id_magang ke input form
         const modal = new bootstrap.Modal(document.getElementById('inputNilaiModal'));
         modal.show();
     }
@@ -221,9 +223,9 @@
             .then(data => {
                 if (data.success) {
                     alert('Data berhasil disimpan!');
-                    location.reload(); // Reload halaman
+                    location.reload(); // Reload halaman untuk melihat perubahan
                 } else {
-                    alert('Gagal menyimpan data.');
+                    alert('Gagal menyimpan data: ' + data.message);
                 }
             })
             .catch(error => console.error('Error:', error));

@@ -47,14 +47,40 @@
                                     <td><?= $item->nama; ?></td>
                                     <td><?= $item->instansi; ?></td>
                                     <td><?= formatTanggalIndo($item->tgl_mulai); ?> - <?= formatTanggalIndo($item->tgl_selesai); ?></td>
-                                    <td><?= $item->status ?? 'Waiting'; ?></td>
+                                    <td style="color:white">
+                                        <span class="badge 
+                                    <?php
+                                    if ($item->status === 'Aktif') {
+                                        // Jika status Accept, cek apakah tanggal mulai magang belum terjadi
+                                        $current_date = date('Y-m-d'); // Tanggal saat ini
+                                        if ($item->tgl_mulai > $current_date) {
+                                            echo 'bg-warning text-light'; // Warna untuk status Belum Aktif
+                                            $status_text = 'Belum Aktif';
+                                        } else {
+                                            echo 'bg-success text-light'; // Warna untuk status Aktif
+                                            $status_text = 'Aktif';
+                                        }
+                                    } elseif ($item->status === 'reject') {
+                                        echo 'bg-danger text-light';
+                                        $status_text = 'Ditolak';
+                                    } elseif ($item->status === 'Selesai Magang') {
+                                        echo 'bg-info text-light';
+                                        $status_text = 'Selesai Magang';
+                                    } else {
+                                        echo 'bg-warning text-light';
+                                        $status_text = 'Menunggu Konfirmasi';
+                                    }
+                                    ?>">
+                                            <?php echo $status_text; ?>
+                                        </span>
+                                    </td>
                                     <td>
                                         <?php if ($item->status !== 'Aktif' and $item->status !== 'Selesai Magang'): ?>
                                             <button class="btn btn-sm btn-success" title="Terima" onclick="approvePeserta(<?= $item->id_magang; ?>, '<?= $item->id_register; ?>')">
                                                 <i class="fas fa-check"></i>
                                             </button>
                                         <?php else: ?>
-                                            <span class="text-success" title="Sudah Aktif">
+                                            <span class="text-success" title="Sudah Diterima">
                                                 <i class="fas fa-check-circle"></i>
                                             </span>
                                         <?php endif; ?>

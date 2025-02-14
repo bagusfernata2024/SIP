@@ -50,7 +50,7 @@ log_message('debug', 'Flashdata email di view: ' . $email);
                                     placeholder="Harus menggunakan @gmail.com"
                                     pattern="^[a-zA-Z0-9._%+-]+@gmail\.com$"
                                     required>
-                                <div class="invalid-feedback">Email harus menggunakan domain @gmail.com.</div>
+                                <div class="invalid-feedback" id="emailFeedback"></div>
                             </div>
 
                             <!-- Nomor Telepon -->
@@ -313,18 +313,6 @@ log_message('debug', 'Flashdata email di view: ' . $email);
                     </div>
                 </div>
             </div>
-
-            <?php if (session()->getFlashdata('error_message')): ?>
-                <script>
-                    document.addEventListener('DOMContentLoaded', function() {
-                        const errorMessage = '<?= session()->getFlashdata('error_message') ?>';
-                        const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
-                        document.getElementById('errorModalBody').innerText = errorMessage; // Masukkan pesan error ke modal
-                        errorModal.show();
-                    });
-                </script>
-            <?php endif; ?>
-
             <!-- Modal Gagal (Error Message) -->
             <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered">
@@ -349,6 +337,66 @@ log_message('debug', 'Flashdata email di view: ' . $email);
         </div>
 
     </section><!-- /Hero Section -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const emailInput = document.getElementById('email');
+            const emailFeedback = document.getElementById('emailFeedback');
+            const tipeSelect = document.getElementById('tujuan');
+
+            // Reset feedback saat pengguna mengubah input
+            emailInput.addEventListener('input', function() {
+                emailInput.classList.remove('is-invalid');
+                emailFeedback.style.display = 'none'; // Sembunyikan feedback error
+            });
+
+            // Cek setelah user selesai mengetik email (gunakan blur atau delay)
+            emailInput.addEventListener('blur', function() {
+                const email = emailInput.value;
+                const tipe = tipeSelect.value;
+
+                // 1. Cek format email
+                if (email && !/^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(email)) {
+                    emailInput.classList.add('is-invalid');
+                    emailFeedback.style.display = 'block';
+                    emailFeedback.textContent = 'Email harus menggunakan domain @gmail.com.';
+                    return; // Hentikan eksekusi jika email salah
+                }
+
+                // 2. Jika email formatnya benar, cek apakah sudah terdaftar dengan tipe yang sama
+                if (tipe) {
+                    checkEmailRegistrasi(tipe, email);
+                }
+            });
+
+            // Fungsi untuk mengecek email sudah terdaftar atau belum
+            function checkEmailRegistrasi(tipe, email) {
+                fetch('<?= site_url('registrasi/cek_email') ?>', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            tipe: tipe,
+                            email: email
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'fail') {
+                            emailInput.classList.add('is-invalid');
+                            emailFeedback.style.display = 'block';
+                            emailFeedback.textContent = 'Anda sudah pernah mendaftar dengan tipe program ini.';
+                        } else {
+                            emailInput.classList.remove('is-invalid');
+                            emailFeedback.style.display = 'none'; // Hapus error
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error checking email:', error);
+                    });
+            }
+        });
+    </script>
 
 
 </main>

@@ -100,7 +100,7 @@ class RegistrasiModel extends Model
             return false; // Gagal
         }
     }
-    
+
     public function updateTimelineAccMentor($idRegister, $status)
     {
         $builder = $this->db->table('registrasi');
@@ -176,10 +176,24 @@ class RegistrasiModel extends Model
     public function getRegistrasiByNomor($nomor)
     {
         return $this->where('nomor', $nomor)->first();  // Mengambil data pertama yang sesuai dengan nomor
-    }    
+    }
 
     public function getRegistrasiById($id)
     {
         return $this->where('id_register', $id)->first();
+    }
+
+    // Ambil no_sertif terakhir
+    public function getLastNoSertif()
+    {
+        // Mengambil nilai no_sertif terakhir, pastikan kita mengakses hasil pertama dari array
+        $result = $this->selectMax('no_sertif')->first();
+        return $result ? $result['no_sertif'] : 0; // Mengembalikan no_sertif terakhir atau 0 jika tidak ada
+    }
+
+    // Update no_sertif pada tabel registrasi
+    public function updateNoSertif($id_register, $data)
+    {
+        return $this->where('id_register', $id_register)->set($data)->update();
     }
 }

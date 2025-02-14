@@ -20,17 +20,17 @@
         <div class="mb-3">
             <!-- Tombol Check-In -->
             <button
-                class="btn btn-success <?= ($absensi_today && !empty($absensi_today['jam_masuk'])) ? 'disabled' : '' ?>"
+                class="btn btn-success"
                 id="btnCheckIn"
-                <?= ($absensi_today && !empty($absensi_today['jam_masuk'])) ? 'disabled' : '' ?>>
+                <?= ($absensi_today && !empty($absensi_today['jam_masuk'])) || $isTodayAbsent ? 'disabled' : '' ?>>
                 Check-In
             </button>
 
             <!-- Tombol Check-Out -->
             <button
-                class="btn btn-danger <?= ($absensi_today && !empty($absensi_today['jam_masuk']) && empty($absensi_today['jam_pulang'])) ? '' : 'disabled' ?>"
+                class="btn btn-danger"
                 id="btnCheckOut"
-                <?= ($absensi_today && !empty($absensi_today['jam_masuk']) && empty($absensi_today['jam_pulang'])) ? '' : 'disabled' ?>>
+                <?= ($absensi_today && !empty($absensi_today['jam_masuk']) && empty($absensi_today['jam_pulang'])) || $isTodayAbsent ? 'disabled' : '' ?>>
                 Check-Out
             </button>
 
@@ -38,7 +38,6 @@
                 <i class="fas fa-file-pdf"></i> Cetak Absen
             </a>
         </div>
-
 
         <!-- Modal untuk Konfirmasi Check-In -->
         <div class="modal fade" id="checkInModal" tabindex="-1" aria-labelledby="modalLabelCheckIn" aria-hidden="true">
@@ -308,16 +307,42 @@
     });
 
     document.addEventListener("DOMContentLoaded", function() {
-        // Fungsi untuk mengecek waktu dan mengatur tombol
+        // Ambil data tanggal mulai dan selesai absensi dari PHP
+        const tglMulai = '<?= $tgl_mulai; ?>'; // Tanggal mulai absensi dari controller
+        const tglSelesai = '<?= $tgl_selesai; ?>'; // Tanggal selesai absensi dari controller
+        const today = new Date().toISOString().split('T')[0]; // Format tanggal hari ini: YYYY-MM-DD
+
+        // Fungsi untuk mengecek apakah hari ini berada dalam rentang absensi
+        function isWithinAbsencePeriod() {
+            // Cek apakah hari ini dalam rentang tanggal mulai dan selesai absensi
+            console.log(today);
+            console.log(tglMulai);
+            console.log(tglSelesai);
+            console.log(today >= tglMulai && today <= tglSelesai);
+            return today >= tglMulai && today <= tglSelesai;
+        }
+
+        // Fungsi untuk mengupdate status tombol Check-In dan Check-Out
         function updateButtonState() {
+            const btnCheckIn = document.getElementById("btnCheckIn");
+            const btnCheckOut = document.getElementById("btnCheckOut");
+
+            // Jika hari ini tidak dalam rentang absensi, nonaktifkan tombol dan keluar
+            if (!isWithinAbsencePeriod()) {
+                btnCheckIn.disabled = true;
+                btnCheckOut.disabled = true;
+                btnCheckIn.classList.add("disabled");
+                btnCheckOut.classList.add("disabled");
+                console.log("Tombol Check-In dan Check-Out dinonaktifkan karena hari ini tidak dalam periode absensi.");
+                return; // Hentikan eksekusi lebih lanjut jika hari ini tidak dalam rentang absensi
+            }
+
+            // Logika untuk Clock-In (hanya aktif sebelum jam 20:00)
             const currentTime = new Date();
             const currentHour = currentTime.getHours();
             const currentMinute = currentTime.getMinutes();
 
-            const btnCheckIn = document.getElementById("btnCheckIn");
-            const btnCheckOut = document.getElementById("btnCheckOut");
-
-            // Logika untuk Clock-In (hanya aktif sebelum jam 12:00 siang)
+            // Logika untuk Check-In (hanya aktif sebelum jam 20:00)
             if (currentHour < 20) {
                 btnCheckIn.disabled = false;
                 btnCheckIn.classList.remove("disabled");
@@ -326,8 +351,8 @@
                 btnCheckIn.classList.add("disabled");
             }
 
-            // Logika untuk Clock-Out (aktif hanya antara 12:00 siang - 11:59 malam)
-            if (currentHour >= 12 && currentHour < 17) {
+            // Logika untuk Check-Out (aktif hanya antara 12:00 - 17:00)
+            if (currentHour >= 11 && currentHour < 21) {
                 btnCheckOut.disabled = false;
                 btnCheckOut.classList.remove("disabled");
             } else {
@@ -340,11 +365,11 @@
             console.log(`Clock-In: ${!btnCheckIn.disabled}, Clock-Out: ${!btnCheckOut.disabled}`);
         }
 
-        // Perbarui tombol saat halaman pertama kali dimuat
+        // Panggil fungsi updateButtonState untuk memeriksa status tombol saat halaman pertama kali dimuat
         updateButtonState();
 
         // Atur interval untuk mengecek setiap menit (60000 ms)
-        setInterval(updateButtonState, 1);
+        setInterval(updateButtonState, 1); // Perbarui setiap menit
     });
 </script>
 

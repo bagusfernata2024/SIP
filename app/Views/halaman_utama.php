@@ -26,7 +26,7 @@
             </p>
 
             <div class="hero-buttons">
-              <a href="<?php echo base_url('/registrasi/registrasi_peserta'); ?>" class="btn btn-primary me-0 me-sm-2 mx-1">Daftar Sekarang</a>
+              <a href="<?php echo base_url('/registrasi'); ?>" class="btn btn-primary me-0 me-sm-2 mx-1">Daftar Sekarang</a>
               <a href="https://www.youtube.com/watch?v=Y7f98aduVJ8" class="btn btn-link mt-2 mt-sm-0 glightbox">
                 <i class="bi bi-play-circle me-1"></i>
                 Play Video
@@ -253,7 +253,7 @@
             Dapatkan bimbingan profesional, peluang membangun jaringan, dan kesiapan menghadapi dunia kerja.
             Jangan lewatkan kesempatan ini untuk memulai perjalanan kariermu yang cemerlang!
           </p>
-          <a href="<?php echo base_url('/registrasi/registrasi_peserta'); ?>" class="btn btn-cta">Daftar Sekarang</a>
+          <a href="<?php echo base_url('/registrasi'); ?>" class="btn btn-cta">Daftar Sekarang</a>
         </div>
       </div>
 

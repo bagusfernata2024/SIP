@@ -37,6 +37,7 @@ $routes->get('/mentor/logout', 'Login::logoutMentor');
 $routes->get('/registrasi', 'Registrasi::index');
 $routes->post('/registrasi/proses_registrasi_peserta', 'Registrasi::prosesRegistrasiPeserta');
 $routes->post('/registrasi/validateEmail', 'Registrasi::validateEmail');
+$routes->post('/registrasi/cek_email', 'Registrasi::cekEmail');
 
 
 //Registrasi Mentor
@@ -99,7 +100,6 @@ $routes->get('dashboard/cetak-sertifikat/(:num)', 'Dashboard::cetak/$1');
 $routes->get('/mentor/dashboard', 'DashboardMentor::index');
 $routes->get('/mentor/dashboard/daftar_peserta', 'DashboardMentor::daftarPeserta');
 $routes->post('mentor/dashboard/approve_peserta', 'DashboardMentor::approve_peserta');
-// $routes->get('mentor/dashboard/approve_peserta', 'Dashboard::approve_peserta');
 $routes->get('/mentor/dashboard/absensi_bimbingan', 'DashboardMentor::absensiBimbingan');
 $routes->post('/mentor/dashboard/update_status_absensi', 'DashboardMentor::updateStatusAbsensi');
 $routes->get('/mentor/dashboard/rekap_absensi_bimbingan', 'DashboardMentor::rekapAbsensiBimbingan');

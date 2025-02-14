@@ -110,7 +110,7 @@ class NilaiModel extends Model
     {
         $id_register = $this->db->table('registrasi')
             ->select('id_register')
-            ->where('nomor', $user_nomor)
+            ->where('id_register', $user_nomor)
             ->get()
             ->getRow();
 
