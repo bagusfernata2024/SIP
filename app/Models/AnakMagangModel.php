@@ -15,6 +15,13 @@ class AnakMagangModel extends Model
         return $this->findAll();
     }
 
+    public function countByStatus($status)
+    {
+        return $this->db->table($this->table)
+            ->where('status', $status)
+            ->countAllResults();
+    }
+
     public function getTanggalMagang($idMagang)
     {
         return $this->select('tgl_mulai AS tanggal1, tgl_selesai AS tanggal')
@@ -60,6 +67,11 @@ class AnakMagangModel extends Model
             ->where('anak_magang.id_magang', $id_magang)
             ->get()
             ->getRowArray(); // Mengembalikan satu baris sebagai array
+    }
+
+    public function getPesertaByIdMagangOne($id_magang)
+    {
+        return $this->where('id_magang', $id_magang)->first();
     }
 
     public function getPesertaMagangDesc()

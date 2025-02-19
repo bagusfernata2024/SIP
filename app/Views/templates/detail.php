@@ -1,3 +1,15 @@
+<?php if (session()->getFlashdata('success')): ?>
+    <div class="alert alert-success">
+        <?= session()->getFlashdata('success'); ?>
+    </div>
+<?php endif; ?>
+
+<?php if (session()->getFlashdata('error')): ?>
+    <div class="alert alert-danger">
+        <?= session()->getFlashdata('error'); ?>
+    </div>
+<?php endif; ?>
+
 <div class="container-fluid">
     <div class="mt-4 d-flex justify-content-start">
         <a href="<?php echo base_url('admin/dashboard'); ?>" class="btn btn-secondary btn-sm">
@@ -23,12 +35,230 @@
                         </tr>
                     </tbody>
                 </table>
-                <?php if ($detail['timeline'] !== 'Pencarian Mentor') { ?>
+
+                <h5 class="font-weight-bold mt-4">Data Diri:</h5>
+                <table class="table table-bordered">
+                    <tbody>
+                        <tr>
+                            <th>Nama</th>
+                            <td><?php echo $detail['nama']; ?></td>
+                        </tr>
+                        <tr>
+                            <th>Jurusan</th>
+                            <td><?php echo $detail['jurusan']; ?></td>
+                        </tr>
+                        <tr>
+                            <th>Program Studi</th>
+                            <td><?php echo $detail['prodi']; ?></td>
+                        </tr>
+                        <tr>
+                            <th>Instansi</th>
+                            <td><?php echo $detail['instansi']; ?></td>
+                        </tr>
+                        <tr>
+                            <th>No Telepon</th>
+                            <td>
+                                <?php echo $detail['notelp']; ?>
+                                <a href="https://wa.me/<?php echo '62' . ltrim($detail['notelp'], '0'); ?>" target="_blank" class="btn btn-success btn-sm">
+                                    Hubungi via WhatsApp
+                                </a>
+
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Email</th>
+                            <td><?php echo $detail['email']; ?></td>
+                        </tr>
+                        <tr>
+                            <th>Alamat</th>
+                            <td><?php echo $detail['alamat']; ?></td>
+                        </tr>
+                        <tr>
+                            <th>Jenis Kelamin</th>
+                            <td>
+                                <?php
+                                if ($detail['jk'] === 'L') {
+                                    echo 'Laki-laki';
+                                } elseif ($detail['jk'] === 'P') {
+                                    echo 'Perempuan';
+                                } else {
+                                    echo 'Tidak Diketahui';
+                                }
+                                ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Tanggal Lahir</th>
+                            <td><?php echo formatTanggalIndo($detail['tgl_lahir']) ?></td>
+                        </tr>
+                        <tr>
+                            <th>NIK</th>
+                            <td><?php echo $detail['nik']; ?></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h5 class="font-weight-bold mt-4">Informasi Magang:</h5>
+                <table class="table table-bordered">
+                    <tbody>
+                        <tr>
+                            <th>Strata</th>
+                            <td><?php echo $detail['strata']; ?></td>
+                        </tr>
+                        <tr>
+                            <th>Periode Magang</th>
+                            <td><?php echo $detail['lama_pkl']; ?> Bulan</td>
+                        </tr>
+                        <tr>
+                            <th>Tanggal Registrasi</th>
+                            <td><?php echo formatTanggalIndo($detail['tgl_regis']) ?></td>
+                        </tr>
+                        <tr>
+                            <th>Tanggal Mulai</th>
+                            <td>
+                                <?php echo formatTanggalIndo($detail['tanggal1']); ?>
+                                <?php if ($detail['timeline'] == 'Review Berkas Awal') { ?>
+
+                                    <button type="button" class="btn btn-warning btn-sm ms-2" data-bs-toggle="modal" data-bs-target="#editTanggalModal">
+                                        Edit
+                                    </button>
+                                <?php } ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Tanggal Selesai</th>
+                            <td>
+                                <?php echo formatTanggalIndo($detail['tanggal2']); ?>
+                                <?php if ($detail['timeline'] == 'Review Berkas Awal') { ?>
+
+                                    <button type="button" class="btn btn-warning btn-sm ms-2" data-bs-toggle="modal" data-bs-target="#editTanggalModal">
+                                        Edit
+                                    </button>
+                                <?php } ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Status</th>
+                            <td style="color:white">
+                                <span class="badge 
+                                    <?php
+                                    if ($detail['status'] === 'Accept') echo 'bg-success text-light';
+                                    elseif ($detail['status'] === 'reject') echo 'bg-danger text-light';
+                                    else echo 'bg-warning text-light';
+                                    ?>">
+                                    <?php echo $detail['status'] ? ucfirst($detail['status']) : 'Belum Diterima'; ?>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Minat Satuan Kerja</th>
+                            <td><?php echo $detail['minat']; ?></td>
+                        </tr>
+                        <tr>
+                            <th>Tipe Magang</th>
+                            <td><?php echo $detail['tipe']; ?></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+
+            <!-- File Section -->
+            <h5 class="font-weight-bold mt-4">File Lampiran:</h5>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Lampiran</th>
+                            <th>Nama File</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>Surat Permohonan</td>
+                            <td><?php echo $detail['surat_permohonan']; ?></td>
+                            <td>
+                                <a href="<?php echo base_url('admin/dashboard/file_lampiran/' . urlencode($detail['surat_permohonan'])); ?>"
+                                    class="btn btn-primary btn-sm" download>Download</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Proposal Magang</td>
+                            <td><?php echo $detail['proposal_magang']; ?></td>
+                            <td>
+                                <a href="<?php echo base_url('admin/dashboard/file_lampiran/' . urlencode($detail['proposal_magang'])); ?>"
+                                    class="btn btn-primary btn-sm" download>Download</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>Curriculum Vitae (CV)</td>
+                            <td><?php echo $detail['cv']; ?></td>
+                            <td>
+                                <a href="<?php echo base_url('admin/dashboard/file_lampiran/' . urlencode($detail['cv'])); ?>"
+                                    class="btn btn-primary btn-sm" download>Download</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>Fotocopy KTP</td>
+                            <td><?php echo $detail['fc_ktp']; ?></td>
+                            <td>
+                                <a href="<?php echo base_url('admin/dashboard/file_lampiran/' . urlencode($detail['fc_ktp'])); ?>"
+                                    class="btn btn-primary btn-sm" download>Download</a>
+                            </td>
+                        </tr>
+
+                        <!-- Tombol Download Semua -->
+                        <div class="mt-3">
+                            <a href="<?php echo base_url('admin/dashboard/download_all/' . $detail['id_register']); ?>" class="btn btn-success btn-sm">Download Semua Lampiran</a>
+                        </div>
+                        <br>
+                    </tbody>
+                </table>
+            </div>
+            <!-- Tombol Terima dan Tolak -->
+            <div class="mt-4">
+                <form method="post" action="<?php echo base_url('admin/dashboard/update_status'); ?>">
+                    <div class="d-flex justify-content-end">
+                        <input type="hidden" name="id" value="<?php echo $detail['id_register']; ?>">
+
+                        <?php if ($detail['status'] === 'Accept') { ?>
+                            <!-- Jika sudah diterima, hanya tampilkan tombol nonaktif hijau -->
+                            <button type="button" class="btn btn-success btn-sm disabled" disabled>
+                                Pendaftar Diterima
+                            </button>
+                        <?php } elseif ($detail['status'] === 'reject') { ?>
+                            <!-- Jika sudah ditolak, tampilkan tombol merah nonaktif -->
+                            <button type="button" class="btn btn-danger btn-sm disabled btn-white" disabled>
+                                Pendaftar Ditolak
+                            </button>
+                        <?php } else { ?>
+                            <?php if ($detail['timeline'] == 'Review Berkas Awal') { ?>
+                                <!-- Jika belum ada keputusan, tampilkan tombol aktif untuk aksi -->
+                                <button type="button" class="btn btn-success btn-sm ml-2" data-bs-toggle="modal" data-bs-target="#confirmModal" onclick="setAction('Accept')">
+                                    Terima Berkas Awal
+                                </button>
+                                <button type="button" class="btn btn-danger btn-sm ml-2" data-bs-toggle="modal" data-bs-target="#confirmModal" onclick="setAction('reject')">
+                                    Tolak
+                                </button>
+                            <?php } ?>
+                        <?php } ?>
+                    </div>
+                </form>
+            </div>
+
+            <div class="pilih-mentor">
+                <?php if ($detail['timeline'] !== 'Review Berkas Awal') { ?>
                     <h5 class="font-weight-bold mt-4">Informasi Mentor:</h5>
                     <table class="table table-bordered">
                         <div class="mt-4">
                             <!-- Logika untuk menentukan warna tombol berdasarkan status -->
-                            <?php if ($detail['status'] === 'Accept') { ?>
+                            <?php if ($detail['status'] == 'Accept' && $detail_mentor['nipg'] !== null) { ?>
                                 <!-- Jika diterima, Maka data mentor akan ditampilkan -->
                                 <button type="button" class="btn btn-success btn-sm disabled mb-4" disabled>
                                     Pendaftar diterima
@@ -142,221 +372,111 @@
                     <div class="alert alert-warning" role="alert">
                         <strong>Pendaftar Belum Diterima</strong> Silakan pilih mentor jika ingin menerima pendaftar magang.
                     </div>
-                    <form method="post" action="<?php echo base_url('admin/dashboard/update_status'); ?>">
+                    <?php if (!$anak_magang) { ?>
                         <div class="form-group mb-4">
-                            <label for="mentor" class="form-label font-weight-bold">Pilih Mentor</label>
-                            <select class="form-control form-select" id="mentor" name="nipg" required>
-                                <option value="" disabled selected>-- Pilih Mentor --</option>
-                                <?php foreach ($list_mentor as $mentor) { ?>
-                                    <option value="<?php echo $mentor['nipg']; ?>">
-                                        <?php echo $mentor['nipg'] . " | " . $mentor['nama'] . " | " . $mentor['division']; ?>
-                                    </option>
-                                <?php } ?>
-                            </select>
+                            <form action="<?php echo base_url('admin/dashboard/pilih_mentor'); ?>" method="POST" class="d-inline">
+                                <label for="mentor" class="form-label font-weight-bold">Pilih Mentor</label>
+                                <select class="form-control form-select" id="mentor" name="nipg" required>
+                                    <option value="" disabled selected>-- Pilih Mentor --</option>
+                                    <?php foreach ($list_mentor as $mentor) { ?>
+                                        <option value="<?php echo $mentor['nipg']; ?>">
+                                            <?php echo $mentor['nipg'] . " | " . $mentor['nama'] . " | " . $mentor['division']; ?>
+                                        </option>
+                                    <?php } ?>
+                                </select>
                         </div>
+                        <!-- Tombol Pilih Mentor -->
+                        <input type="hidden" name="id_register" value="<?php echo $detail['id_register']; ?>">
+                        <button type="submit" class="btn btn-primary btn-sm">Pilih Mentor</button>
+                        </form>
                     <?php } ?>
                 <?php } ?>
-
-                <h5 class="font-weight-bold mt-4">Data Diri:</h5>
-                <table class="table table-bordered">
-                    <tbody>
-                        <tr>
-                            <th>Nama</th>
-                            <td><?php echo $detail['nama']; ?></td>
-                        </tr>
-                        <tr>
-                            <th>Jurusan</th>
-                            <td><?php echo $detail['jurusan']; ?></td>
-                        </tr>
-                        <tr>
-                            <th>Program Studi</th>
-                            <td><?php echo $detail['prodi']; ?></td>
-                        </tr>
-                        <tr>
-                            <th>Instansi</th>
-                            <td><?php echo $detail['instansi']; ?></td>
-                        </tr>
-                        <tr>
-                            <th>No Telepon</th>
-                            <td>
-                                <?php echo $detail['notelp']; ?>
-                                <a href="https://wa.me/<?php echo '62' . ltrim($detail['notelp'], '0'); ?>" target="_blank" class="btn btn-success btn-sm">
-                                    Hubungi via WhatsApp
-                                </a>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Email</th>
-                            <td><?php echo $detail['email']; ?></td>
-                        </tr>
-                        <tr>
-                            <th>Alamat</th>
-                            <td><?php echo $detail['alamat']; ?></td>
-                        </tr>
-                        <tr>
-                            <th>Jenis Kelamin</th>
-                            <td>
-                                <?php
-                                if ($detail['jk'] === 'L') {
-                                    echo 'Laki-laki';
-                                } elseif ($detail['jk'] === 'P') {
-                                    echo 'Perempuan';
-                                } else {
-                                    echo 'Tidak Diketahui';
-                                }
-                                ?>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Tanggal Lahir</th>
-                            <td><?php echo formatTanggalIndo($detail['tgl_lahir']) ?></td>
-                        </tr>
-                        <tr>
-                            <th>NIK</th>
-                            <td><?php echo $detail['nik']; ?></td>
-                        </tr>
-                    </tbody>
-                </table>
-
-                <h5 class="font-weight-bold mt-4">Informasi Magang:</h5>
-                <table class="table table-bordered">
-                    <tbody>
-                        <tr>
-                            <th>Strata</th>
-                            <td><?php echo $detail['strata']; ?></td>
-                        </tr>
-                        <tr>
-                            <th>Periode Magang</th>
-                            <td><?php echo $detail['lama_pkl']; ?> Bulan</td>
-                        </tr>
-                        <tr>
-                            <th>Tanggal Registrasi</th>
-                            <td><?php echo formatTanggalIndo($detail['tgl_regis']) ?></td>
-                        </tr>
-                        <tr>
-                            <th>Tanggal Mulai</th>
-                            <td><?php echo formatTanggalIndo($detail['tanggal1']) ?></td>
-                        </tr>
-                        <tr>
-                            <th>Tanggal Selesai</th>
-                            <td><?php echo formatTanggalIndo($detail['tanggal2']) ?></td>
-                        </tr>
-                        <tr>
-                            <th>Status</th>
-                            <td style="color:white">
-                                <span class="badge 
-                                    <?php
-                                    if ($detail['status'] === 'Accept') echo 'bg-success text-light';
-                                    elseif ($detail['status'] === 'reject') echo 'bg-danger text-light';
-                                    else echo 'bg-warning text-light';
-                                    ?>">
-                                    <?php echo $detail['status'] ? ucfirst($detail['status']) : 'Belum Diterima'; ?>
-                                </span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Minat Satuan Kerja</th>
-                            <td><?php echo $detail['minat']; ?></td>
-                        </tr>
-                        <tr>
-                            <th>Tipe Magang</th>
-                            <td><?php echo $detail['tipe']; ?></td>
-                        </tr>
-                    </tbody>
-                </table>
+            <?php } ?>
             </div>
 
-
-            <!-- File Section -->
-            <h5 class="font-weight-bold mt-4">File Lampiran:</h5>
+            <!-- Tabel Surat Perjanjian -->
+            <h5 class="font-weight-bold mt-4">Surat Perjanjian:</h5>
             <div class="table-responsive">
                 <table class="table table-bordered">
                     <thead>
                         <tr>
                             <th>#</th>
-                            <th>Lampiran</th>
                             <th>Nama File</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>1</td>
-                            <td>Surat Permohonan</td>
-                            <td><?php echo $detail['surat_permohonan']; ?></td>
-                            <td>
-                                <a href="<?php echo base_url('admin/dashboard/file_lampiran/' . urlencode($detail['surat_permohonan'])); ?>"
-                                    class="btn btn-primary btn-sm" download>Download</a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>2</td>
-                            <td>Proposal Magang</td>
-                            <td><?php echo $detail['proposal_magang']; ?></td>
-                            <td>
-                                <a href="<?php echo base_url('admin/dashboard/file_lampiran/' . urlencode($detail['proposal_magang'])); ?>"
-                                    class="btn btn-primary btn-sm" download>Download</a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>3</td>
-                            <td>Curriculum Vitae (CV)</td>
-                            <td><?php echo $detail['cv']; ?></td>
-                            <td>
-                                <a href="<?php echo base_url('admin/dashboard/file_lampiran/' . urlencode($detail['cv'])); ?>"
-                                    class="btn btn-primary btn-sm" download>Download</a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>4</td>
-                            <td>Fotocopy KTP</td>
-                            <td><?php echo $detail['fc_ktp']; ?></td>
-                            <td>
-                                <a href="<?php echo base_url('admin/dashboard/file_lampiran/' . urlencode($detail['fc_ktp'])); ?>"
-                                    class="btn btn-primary btn-sm" download>Download</a>
-                            </td>
-                        </tr>
-
-                        <!-- Tombol Download Semua -->
-                        <div class="mt-3">
-                            <a href="<?php echo base_url('admin/dashboard/download_all/' . $detail['id_register']); ?>" class="btn btn-success btn-sm">Download Semua Lampiran</a>
-                        </div>
-                        <br>
+                        <?php if (!empty($detail['surat_perjanjian'])) { ?>
+                            <tr>
+                                <td>1</td>
+                                <td><?php echo $detail['surat_perjanjian']; ?></td>
+                                <td>
+                                    <a href="<?php echo base_url('uploads/' . $detail['surat_perjanjian']); ?>"
+                                        class="btn btn-primary btn-sm" download>
+                                        Download
+                                    </a>
+                                </td>
+                            </tr>
+                        <?php } else { ?>
+                            <tr>
+                                <td colspan="3" class="text-center text-danger">
+                                    <strong>Surat perjanjian belum diunggah.</strong>
+                                </td>
+                            </tr>
+                        <?php } ?>
                     </tbody>
                 </table>
             </div>
-            <!-- Tombol Terima dan Tolak -->
             <div class="mt-4">
-                <div class="d-flex justify-content-end">
-                    <input type="hidden" name="id" value="<?php echo $detail['id_register']; ?>">
+                <form method="post" action="<?php echo base_url('admin/dashboard/terima_surat_perjanjian'); ?>">
+                    <div class="d-flex justify-content-end">
+                        <input type="hidden" name="id_register" value="<?php echo $detail['id_register']; ?>">
+                        <?php if ($anak_magang) { ?>
+                            <?php if ($anak_magang['status'] == 'Aktif') { ?>
+                                <!-- Jika sudah diterima, hanya tampilkan tombol nonaktif hijau -->
+                                <button type="button" class="btn btn-success btn-sm disabled" disabled>
+                                    Pendaftar Diterima
+                                </button>
+                            <?php } elseif ($anak_magang['status'] == 'reject') { ?>
+                                <!-- Jika sudah ditolak, tampilkan tombol merah nonaktif -->
+                                <button type="button" class="btn btn-danger btn-sm disabled btn-white" disabled>
+                                    Pendaftar Ditolak
+                                </button>
+                            <?php } else { ?>
+                                <!-- Jika belum ada keputusan, tampilkan tombol aktif untuk aksi -->
+                                <button type="submit" class="btn btn-success btn-sm ml-2" data-bs-toggle="modal" data-bs-target="#confirmModal" onclick="setAction('Accept')">
+                                    Terima Surat Perjanjian
+                                </button>
+                                <button type="button" class="btn btn-danger btn-sm ml-2" data-bs-toggle="modal" data-bs-target="#confirmModal" onclick="setAction('reject')">
+                                    Tolak
+                                </button>
+                            <?php } ?>
+                        <?php } else { ?>
+                            <?php if ($detail['status'] === 'Accept') { ?>
+                                <!-- Jika sudah diterima, hanya tampilkan tombol nonaktif hijau -->
+                                <button type="button" class="btn btn-success btn-sm disabled" disabled>
+                                    Pendaftar Diterima
+                                </button>
+                            <?php } elseif ($detail['status'] === 'reject') { ?>
+                                <!-- Jika sudah ditolak, tampilkan tombol merah nonaktif -->
+                                <button type="button" class="btn btn-danger btn-sm disabled btn-white" disabled>
+                                    Pendaftar Ditolak
+                                </button>
+                            <?php } else { ?>
 
-                    <?php if ($detail['status'] === 'Accept') { ?>
-                        <!-- Jika sudah diterima, hanya tampilkan tombol nonaktif hijau -->
-                        <button type="button" class="btn btn-success btn-sm disabled" disabled>
-                            Pendaftar Diterima
-                        </button>
-                    <?php } elseif ($detail['status'] === 'reject') { ?>
-                        <!-- Jika sudah ditolak, tampilkan tombol merah nonaktif -->
-                        <button type="button" class="btn btn-danger btn-sm disabled" disabled>
-                            Pendaftar Ditolak
-                        </button>
-                    <?php } else { ?>
-                        <?php if ($detail['timeline'] !== 'Pencarian Mentor') { ?>
-                            <!-- Jika belum ada keputusan, tampilkan tombol aktif untuk aksi -->
-                            <button type="button" class="btn btn-success btn-sm ml-2" data-bs-toggle="modal" data-bs-target="#confirmModal" onclick="setAction('Accept')">
-                                Kirim
-                            </button>
-                            <button type="button" class="btn btn-danger btn-sm ml-2" data-bs-toggle="modal" data-bs-target="#confirmModal" onclick="setAction('reject')">
-                                Tolak
-                            </button>
+                            <?php } ?>
+
                         <?php } ?>
-                    <?php } ?>
-                </div>
+                    </div>
                 </form>
             </div>
+
+
+
         </div>
     </div>
+</div>
+</div>
 </div>
 </div>
 
@@ -381,6 +501,38 @@
     </div>
 </div>
 
+<!-- Modal Edit Tanggal -->
+<div class="modal fade" id="editTanggalModal" tabindex="-1" aria-labelledby="editTanggalModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editTanggalModalLabel">Edit Tanggal Magang</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="<?php echo base_url('admin/dashboard/update_tanggal'); ?>">
+                <div class="modal-body">
+                    <input type="hidden" name="id" value="<?php echo $detail['id_register']; ?>">
+
+                    <div class="mb-3">
+                        <label for="tanggalMulai" class="form-label">Tanggal Mulai</label>
+                        <input type="date" class="form-control" id="tanggalMulai" name="tanggalMulai" value="<?php echo $detail['tanggal1']; ?>" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="tanggalSelesai" class="form-label">Tanggal Selesai</label>
+                        <input type="date" class="form-control" id="tanggalSelesai" name="tanggalSelesai" value="<?php echo $detail['tanggal2']; ?>" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
 <script>
     let actionType = '';
 
@@ -391,9 +543,8 @@
 
     document.getElementById('confirmAction').addEventListener('click', function() {
         // Ambil nilai nipg dari select
-        const nipgValue = document.getElementById('mentor').value;
 
-        if (actionType && nipgValue) {
+        if (actionType) {
             const form = document.createElement('form');
             form.method = 'POST';
             form.action = '<?php echo base_url("admin/dashboard/update_status"); ?>';
@@ -407,16 +558,9 @@
             actionField.type = 'hidden';
             actionField.name = 'action';
             actionField.value = actionType;
-
-            const nipgField = document.createElement('input');
-            nipgField.type = 'hidden';
-            nipgField.name = 'nipg';
-            nipgField.value = nipgValue;
-
             // Tambahkan semua field ke form
             form.appendChild(idField);
             form.appendChild(actionField);
-            form.appendChild(nipgField);
 
             // Tambahkan form ke body dan submit
             document.body.appendChild(form);

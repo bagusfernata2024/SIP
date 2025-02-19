@@ -37,6 +37,11 @@ class MentorModel extends Model
         return $this->where('nipg', $nipg)->first();
     }
 
+    public function getMentorByIdMentorOne($id_mentor)
+    {
+        return $this->where('id_mentor', $id_mentor)->first();
+    }
+
     public function getMentorByIdMentor($id_mentor)
     {
         return $this->db->table($this->table)

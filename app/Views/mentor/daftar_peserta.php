@@ -74,8 +74,9 @@
                                             <?php echo $status_text; ?>
                                         </span>
                                     </td>
+
                                     <td>
-                                        <?php if ($item->status !== 'Aktif' and $item->status !== 'Selesai Magang'): ?>
+                                        <?php if ($item->status !== 'Aktif' && $item->status !== 'Selesai Magang' && $item->status == null): ?>
                                             <button class="btn btn-sm btn-success" title="Terima" onclick="approvePeserta(<?= $item->id_magang; ?>, '<?= $item->id_register; ?>')">
                                                 <i class="fas fa-check"></i>
                                             </button>

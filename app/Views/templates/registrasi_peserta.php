@@ -382,19 +382,25 @@ log_message('debug', 'Flashdata email di view: ' . $email);
                     })
                     .then(response => response.json())
                     .then(data => {
-                        if (data.status === 'fail') {
+                        if (data.status === 'fail' && data.status_code !== 'reject') {
+                            // Menampilkan pesan error jika status bukan reject
                             emailInput.classList.add('is-invalid');
                             emailFeedback.style.display = 'block';
                             emailFeedback.textContent = 'Anda sudah pernah mendaftar dengan tipe program ini.';
+                        } else if (data.status === 'fail' && data.status_code === 'reject') {
+                            // Jika statusnya 'reject', izinkan pengguna untuk mendaftar kembali
+                            emailInput.classList.remove('is-invalid');
+                            emailFeedback.style.display = 'none';
                         } else {
                             emailInput.classList.remove('is-invalid');
-                            emailFeedback.style.display = 'none'; // Hapus error
+                            emailFeedback.style.display = 'none'; // Hapus error jika tidak ada masalah
                         }
                     })
                     .catch(error => {
                         console.error('Error checking email:', error);
                     });
             }
+
         });
     </script>
 

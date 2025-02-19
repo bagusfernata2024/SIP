@@ -19,7 +19,7 @@
 								Total Pendaftar
 							</div>
 							<div class="h5 mb-0 font-weight-bold text-gray-800">
-								<?= $total ?>
+								<?= $total_pendaftar ?>
 							</div>
 						</div>
 						<div class="col-auto">
@@ -45,6 +45,26 @@
 						</div>
 						<div class="col-auto">
 							<i class="fas fa-user-check"></i>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-xl-3 col-md-6 mb-4">
+			<div class="card border-left-info shadow h-100 py-2">
+				<div class="card-body">
+					<div class="row no-gutters align-items-center">
+						<div class="col mr-2">
+							<div
+								class="text-xs font-weight-bold text-info text-uppercase mb-1">
+								Peserta Aktif
+							</div>
+							<div class="h5 mb-0 font-weight-bold text-gray-800">
+								<?= $total_active ?>
+							</div>
+						</div>
+						<div class="col-auto">
+							<i class="fas fa-users"></i>
 						</div>
 					</div>
 				</div>
@@ -99,6 +119,27 @@
 				</div>
 			</div>
 		</div>
+		<div class="col-xl-3 col-md-6 mb-4">
+			<div class="card border-left-info shadow h-100 py-2">
+				<div class="card-body">
+					<div class="row no-gutters align-items-center">
+						<div class="col mr-2">
+							<div
+								class="text-xs font-weight-bold text-info text-uppercase mb-1">
+								Selesai Kegiatan
+							</div>
+							<div class="h5 mb-0 font-weight-bold text-gray-800">
+								<?= $total_done ?>
+							</div>
+						</div>
+						<div class="col-auto">
+							<i class="fas fa-users"></i>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
 	</div>
 	<div class="card shadow mb-4">
 		<div class="card-header py-3">

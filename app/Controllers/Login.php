@@ -71,12 +71,19 @@ class Login extends BaseController
                     ->get()
                     ->getRowArray();
 
+                $registrasi_tipe = $this->db->table('registrasi')
+                    ->select('tipe')
+                    ->where('id_register', $user['id_register'])
+                    ->get()
+                    ->getRowArray();
+
                 $sessionData['user_logged_in'] = true;
                 $sessionData['instansi'] = $user['instansi'];
                 $sessionData['email'] = $user['email'];
                 $sessionData['alamat'] = $user['alamat'];
                 $sessionData['notelp'] = $user['notelp'];
                 $sessionData['id_register'] = $user['id_register'];
+                $sessionData['tipe'] = $registrasi_tipe['tipe'];
                 $sessionData['foto'] = $registrasi['foto'] ?? 'default.png';
 
                 $this->session->set($sessionData);
@@ -114,6 +121,13 @@ class Login extends BaseController
                 ->get()
                 ->getRowArray();
 
+            $registrasi_tipe = $this->db->table('registrasi')
+                ->select('tipe')
+                ->where('id_register', $admin['id_register'])
+                ->get()
+                ->getRowArray();
+
+            dd($registrasi_tipe);
             // Set data sesi dengan data foto dari tabel registrasi
             $this->session->set([
                 'peserta_logged_in' => true,
@@ -127,6 +141,7 @@ class Login extends BaseController
                 'alamat' => $admin['alamat'],
                 'notelp' => $admin['notelp'],
                 'id_register' => $admin['id_register'],
+                'tipe' => $registrasi_tipe['tipe'],
                 'foto' => $registrasi['foto'] ?? 'default.png', // Gunakan foto dari tabel registrasi atau default
             ]);
             return redirect()->to('/dashboard');

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use CodeIgniter\Model;
@@ -28,5 +29,16 @@ class DetailRegisModel extends Model
     public function insertDetailRegis($data)
     {
         return $this->insert($data);
+    }
+
+    public function getDataByRegisterId($id_register)
+    {
+        return $this->where('id_register', $id_register)->first();
+    }
+
+    // Di dalam DetailRegisModel
+    public function countMentorChildren($nipg)
+    {
+        return $this->where('nipg', $nipg)->countAllResults();  // Menghitung berapa banyak anak bimbingan per NIPG
     }
 }

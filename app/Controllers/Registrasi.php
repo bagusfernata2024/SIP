@@ -143,7 +143,9 @@ class Registrasi extends BaseController
         $existingRegistration = $this->pesertaModel
             ->where('email', $email)
             ->where('tipe', $tipe)
+            ->where('status !=', 'reject')  // Filter tambahan untuk memastikan status bukan 'reject'
             ->first();
+
 
         if ($existingRegistration) {
             session()->setFlashdata('status', 'fail');
@@ -184,7 +186,7 @@ class Registrasi extends BaseController
 
         $lastPrimaryKey = $this->pesertaModel->selectMax('id_register')->first();
         $newPrimaryKey = isset($lastPrimaryKey['id_register']) ? $lastPrimaryKey['id_register'] + 1 : 1;
-        $timeline = 'Review Berkas';
+        $timeline = 'Review Berkas Awal';
         $data = [
             'id' => $newPrimaryKey, // Memastikan id berurutan
             'tipe' => $tipe,
@@ -256,6 +258,7 @@ class Registrasi extends BaseController
         $existingRegistration = $this->pesertaModel
             ->where('email', $email)
             ->where('tipe', $tipe)
+            ->where('status !=', 'reject')
             ->first();
 
         if ($existingRegistration) {

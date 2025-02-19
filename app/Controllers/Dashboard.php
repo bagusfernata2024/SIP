@@ -8,6 +8,8 @@ use App\Models\LaporanModel;
 use App\Models\NilaiModel;
 use App\Models\PesertaModel;
 use App\Models\RegistrasiModel;
+use App\Models\DetailRegisModel;
+
 use CodeIgniter\Controller;
 use App\Libraries\PdfGenerator;
 use Dompdf\Dompdf;
@@ -26,6 +28,8 @@ class Dashboard extends BaseController
     protected $laporanModel;
     protected $pdfgenerator;
     protected $registrasiModel;
+    protected $detailRegisModel;
+
 
 
     public function __construct()
@@ -38,6 +42,8 @@ class Dashboard extends BaseController
         $this->laporanModel = new LaporanModel();
         $this->pdfgenerator = new PdfGenerator();
         $this->registrasiModel = new RegistrasiModel();
+        $this->detailRegisModel = new DetailRegisModel();
+
 
         // if (!$this->session->get('peserta_logged_in')) {
         //     return redirect()->to('login');
@@ -53,7 +59,9 @@ class Dashboard extends BaseController
     public function index()
     {
         $id_register = $this->session->get('id_register');
-
+        $register = $this->registrasiModel->getRegistrasiById($id_register);
+        $id_magang = $this->anakMagangModel->getIdMagangByRegister($id_register);
+        $anak_magang = $this->anakMagangModel->getPesertaByIdMagang($id_magang);
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
         $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
 
@@ -64,19 +72,76 @@ class Dashboard extends BaseController
         $total_absen_yang_belum_confirm = $this->absensiModel->getAbsenByPesertaCountNotYetConfirm($id_register);
 
         $data['total_absen_yang_belum_confirm'] = $total_absen_yang_belum_confirm;
+        $data['anak_magang'] = $anak_magang;
+        $data['registrasi'] = $register;
 
         return view('peserta/header') .
-            view('peserta/sidebar') .
+            view('peserta/sidebar', $data) .
             view('peserta/topbar') .
             view('peserta/dashboard', $data) .
             view('peserta/footer');
     }
 
+    public function uploadSurat()
+    {
+        $id_register = $this->session->get('id_register');
+        $register = $this->registrasiModel->getRegistrasiById($id_register);
+        $id_magang = $this->anakMagangModel->getIdMagangByRegister($id_register);
+        $anak_magang = $this->anakMagangModel->getPesertaByIdMagang($id_magang);
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'user') {
+            return view('no_access');
+        }
+        $nama = $this->session->get('nama');
+        $tipe = $this->session->get('tipe');
+        $nomor = $this->session->get('nomor');
+        $instansi = $this->session->get('instansi');
+        $tanggal = date('Ymd');
+        $data['anak_magang'] = $anak_magang;
+        $data['registrasi'] = $register;
+
+
+        if ($file = $this->request->getFile('surat_perjanjian')) {
+            if ($file->isValid() && !$file->hasMoved()) {
+                $newName = $this->createRenameFile('surat_perjanjian', $nama, $tipe, $nomor, $instansi, $tanggal);
+                $file->move(FCPATH . 'uploads', $newName);
+
+                // Simpan ke database
+                $this->registrasiModel->update($id_register, ['surat_perjanjian' => $newName]);
+
+                return redirect()->to(base_url('dashboard'))->with('success', 'Surat perjanjian berhasil diunggah.');
+            }
+        }
+        return redirect()->to(base_url('dashboard'))->with('error', 'Gagal mengunggah file.');
+    }
+
+    private function createRenameFile($type, $name, $tipe, $nim, $instansi, $date)
+    {
+        $id_register = $this->session->get('id_register');
+        $register = $this->registrasiModel->getRegistrasiById($id_register);
+        $id_magang = $this->anakMagangModel->getIdMagangByRegister($id_register);
+        $anak_magang = $this->anakMagangModel->getPesertaByIdMagang($id_magang);
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'user') {
+            return view('no_access');
+        }
+        $data['anak_magang'] = $anak_magang;
+        $data['registrasi'] = $register;
+        return strtolower($type . '_' . str_replace(' ', '_', $name) . '_' . $tipe . '_' . $nim . '_' . $instansi . '_' . $date . '.' . pathinfo($_FILES[$type]['name'], PATHINFO_EXTENSION));
+    }
+
     public function absensi()
     {
-        // Cek level pengguna dari session
+        $id_register = $this->session->get('id_register');
+        $register = $this->registrasiModel->getRegistrasiById($id_register);
+        $id_magang = $this->anakMagangModel->getIdMagangByRegister($id_register);
+        $anak_magang = $this->anakMagangModel->getPesertaByIdMagang($id_magang);
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
         $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
-        $user_register = $this->session->get('id_register'); // Pastikan 'level' di-set saat login
 
         if ($user_level !== 'user') {
             return view('no_access');
@@ -139,9 +204,11 @@ class Dashboard extends BaseController
             'tgl_mulai' => $tgl_mulai, // Kirim tanggal mulai
             'tgl_selesai' => $tgl_selesai, // Kirim tanggal selesai
         ];
+        $data['anak_magang'] = $anak_magang;
+        $data['registrasi'] = $register;
         // Tampilkan view dengan data
         return view('peserta/header') .
-            view('peserta/sidebar') .
+            view('peserta/sidebar', $data) .
             view('peserta/topbar') .
             view('peserta/absensi', $data) .
             view('peserta/footer');
@@ -158,7 +225,7 @@ class Dashboard extends BaseController
     //     // Debug untuk memastikan data anak magang ditemukan
     //     if (!$anakMagang) {
     //         return view('peserta/header') .
-    //             view('peserta/sidebar') .
+    //             view('peserta/sidebar', $data) .
     //             view('peserta/topbar') .
     //             view('peserta/absensi', [
     //                 'absensi_today' => null,
@@ -222,7 +289,7 @@ class Dashboard extends BaseController
     //     // die();
 
     //     return view('peserta/header') .
-    //         view('peserta/sidebar') .
+    //         view('peserta/sidebar', $data) .
     //         view('peserta/topbar') .
     //         view('peserta/absensi', $data) .
     //         view('peserta/footer');
@@ -231,6 +298,10 @@ class Dashboard extends BaseController
     // Helper untuk generate range tanggal
     private function generateTanggalRange($startDate, $endDate)
     {
+        $id_register = $this->session->get('id_register');
+        $register = $this->registrasiModel->getRegistrasiById($id_register);
+        $id_magang = $this->anakMagangModel->getIdMagangByRegister($id_register);
+        $anak_magang = $this->anakMagangModel->getPesertaByIdMagang($id_magang);
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
         $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
 
@@ -247,6 +318,8 @@ class Dashboard extends BaseController
         foreach ($dateRange as $date) {
             $dates[] = $date->format('Y-m-d');
         }
+        $data['anak_magang'] = $anak_magang;
+        $data['registrasi'] = $register;
 
         return $dates;
     }
@@ -272,7 +345,7 @@ class Dashboard extends BaseController
     //     $data['id_magang'] = $id_magang;
 
     //     return view('peserta/header') .
-    //         view('peserta/sidebar') .
+    //         view('peserta/sidebar', $data) .
     //         view('peserta/topbar') .
     //         view('peserta/absensi', $data) .
     //         view('peserta/footer');
@@ -311,6 +384,10 @@ class Dashboard extends BaseController
 
     public function updateDeskripsi()
     {
+        $id_register = $this->session->get('id_register');
+        $register = $this->registrasiModel->getRegistrasiById($id_register);
+        $id_magang = $this->anakMagangModel->getIdMagangByRegister($id_register);
+        $anak_magang = $this->anakMagangModel->getPesertaByIdMagang($id_magang);
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
         $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
 
@@ -319,7 +396,8 @@ class Dashboard extends BaseController
         }
         $id_absen = $this->request->getPost('id_absen');
         $deskripsi = $this->request->getPost('deskripsi');
-
+        $data['anak_magang'] = $anak_magang;
+        $data['registrasi'] = $register;
         // Validasi data
         if (empty($id_absen) || empty($deskripsi)) {
             return $this->response->setJSON(['error' => 'ID Absen atau deskripsi tidak boleh kosong.']);
@@ -351,7 +429,7 @@ class Dashboard extends BaseController
     //     $data['id_magang'] = $id_magang;
 
     //     return view('peserta/header') .
-    //         view('peserta/sidebar') .
+    //         view('peserta/sidebar', $data) .
     //         view('peserta/topbar') .
     //         view('peserta/absensi', $data) .
     //         view('peserta/footer');
@@ -359,6 +437,12 @@ class Dashboard extends BaseController
 
     public function checkIn()
     {
+        $id_register = $this->session->get('id_register');
+        $register = $this->registrasiModel->getRegistrasiById($id_register);
+        $id_magang = $this->anakMagangModel->getIdMagangByRegister($id_register);
+        $anak_magang = $this->anakMagangModel->getPesertaByIdMagang($id_magang);
+        $data['anak_magang'] = $anak_magang;
+        $data['registrasi'] = $register;
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
         $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
 
@@ -412,6 +496,12 @@ class Dashboard extends BaseController
 
     public function checkOut()
     {
+        $id_register = $this->session->get('id_register');
+        $register = $this->registrasiModel->getRegistrasiById($id_register);
+        $id_magang = $this->anakMagangModel->getIdMagangByRegister($id_register);
+        $anak_magang = $this->anakMagangModel->getPesertaByIdMagang($id_magang);
+        $data['anak_magang'] = $anak_magang;
+        $data['registrasi'] = $register;
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
         $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
 
@@ -495,6 +585,12 @@ class Dashboard extends BaseController
 
     public function laporan()
     {
+        $id_register = $this->session->get('id_register');
+        $register = $this->registrasiModel->getRegistrasiById($id_register);
+        $id_magang = $this->anakMagangModel->getIdMagangByRegister($id_register);
+        $anak_magang = $this->anakMagangModel->getPesertaByIdMagang($id_magang);
+        $data['anak_magang'] = $anak_magang;
+        $data['registrasi'] = $register;
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
         $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
 
@@ -515,7 +611,7 @@ class Dashboard extends BaseController
         $data['anakMagangModel'] = $this->anakMagangModel;
 
         return view('peserta/header') .
-            view('peserta/sidebar') .
+            view('peserta/sidebar', $data) .
             view('peserta/topbar') .
             view('peserta/laporan', $data) . // Pastikan $data dikirim ke view
             view('peserta/footer');
@@ -524,6 +620,12 @@ class Dashboard extends BaseController
 
     public function proses_upload_laporan_akhir()
     {
+        $id_register = $this->session->get('id_register');
+        $register = $this->registrasiModel->getRegistrasiById($id_register);
+        $id_magang = $this->anakMagangModel->getIdMagangByRegister($id_register);
+        $anak_magang = $this->anakMagangModel->getPesertaByIdMagang($id_magang);
+        $data['anak_magang'] = $anak_magang;
+        $data['registrasi'] = $register;
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
         $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
 
@@ -574,6 +676,12 @@ class Dashboard extends BaseController
 
     public function file($file_name)
     {
+        $id_register = $this->session->get('id_register');
+        $register = $this->registrasiModel->getRegistrasiById($id_register);
+        $id_magang = $this->anakMagangModel->getIdMagangByRegister($id_register);
+        $anak_magang = $this->anakMagangModel->getPesertaByIdMagang($id_magang);
+        $data['anak_magang'] = $anak_magang;
+        $data['registrasi'] = $register;
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
         $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
 
@@ -593,6 +701,12 @@ class Dashboard extends BaseController
 
     public function nilai()
     {
+        $id_register = $this->session->get('id_register');
+        $register = $this->registrasiModel->getRegistrasiById($id_register);
+        $id_magang = $this->anakMagangModel->getIdMagangByRegister($id_register);
+        $anak_magang = $this->anakMagangModel->getPesertaByIdMagang($id_magang);
+        $data['anak_magang'] = $anak_magang;
+        $data['registrasi'] = $register;
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
         $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
 
@@ -612,7 +726,7 @@ class Dashboard extends BaseController
 
         $data['id_magang'] = $id_magang;
         return view('peserta/header') .
-            view('peserta/sidebar') .
+            view('peserta/sidebar', $data) .
             view('peserta/topbar') .
             view('peserta/nilai', $data) .
             view('peserta/footer');
@@ -620,6 +734,12 @@ class Dashboard extends BaseController
 
     public function sertifikat()
     {
+        $id_register = $this->session->get('id_register');
+        $register = $this->registrasiModel->getRegistrasiById($id_register);
+        $id_magang = $this->anakMagangModel->getIdMagangByRegister($id_register);
+        $anak_magang = $this->anakMagangModel->getPesertaByIdMagang($id_magang);
+        $data['anak_magang'] = $anak_magang;
+        $data['registrasi'] = $register;
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
         $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
 
@@ -649,7 +769,7 @@ class Dashboard extends BaseController
         $data['anakMagangModel'] = $this->anakMagangModel;
         $data['anakMagang'] = $anakMagang;
         return view('peserta/header') .
-            view('peserta/sidebar') .
+            view('peserta/sidebar', $data) .
             view('peserta/topbar') .
             view('peserta/sertifikat', $data) . // Pastikan $data dikirim ke view
             view('peserta/footer');
@@ -657,6 +777,12 @@ class Dashboard extends BaseController
 
     public function cetak_nilai()
     {
+        $id_register = $this->session->get('id_register');
+        $register = $this->registrasiModel->getRegistrasiById($id_register);
+        $id_magang = $this->anakMagangModel->getIdMagangByRegister($id_register);
+        $anak_magang = $this->anakMagangModel->getPesertaByIdMagang($id_magang);
+        $data['anak_magang'] = $anak_magang;
+        $data['registrasi'] = $register;
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
         $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
 
@@ -689,6 +815,12 @@ class Dashboard extends BaseController
 
     public function profile()
     {
+        $id_register = $this->session->get('id_register');
+        $register = $this->registrasiModel->getRegistrasiById($id_register);
+        $id_magang = $this->anakMagangModel->getIdMagangByRegister($id_register);
+        $anak_magang = $this->anakMagangModel->getPesertaByIdMagang($id_magang);
+        $data['anak_magang'] = $anak_magang;
+        $data['registrasi'] = $register;
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
         $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
 
@@ -703,7 +835,7 @@ class Dashboard extends BaseController
         $data['data'] = $this->anakMagangModel->getDataAnakMagang($id_magang);
 
         return view('peserta/header') .
-            view('peserta/sidebar') .
+            view('peserta/sidebar', $data) .
             view('peserta/topbar') .
             view('peserta/profile', $data) .
             view('peserta/footer');
@@ -711,6 +843,12 @@ class Dashboard extends BaseController
 
     public function editProfile()
     {
+        $id_register = $this->session->get('id_register');
+        $register = $this->registrasiModel->getRegistrasiById($id_register);
+        $id_magang = $this->anakMagangModel->getIdMagangByRegister($id_register);
+        $anak_magang = $this->anakMagangModel->getPesertaByIdMagang($id_magang);
+        $data['anak_magang'] = $anak_magang;
+        $data['registrasi'] = $register;
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
         $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
 
@@ -723,7 +861,7 @@ class Dashboard extends BaseController
         $data['data'] = $this->anakMagangModel->getDataAnakMagang($id_magang);
 
         return view('peserta/header') .
-            view('peserta/sidebar') .
+            view('peserta/sidebar', $data) .
             view('peserta/topbar') .
             view('peserta/edit_profile', $data) .
             view('peserta/footer');
@@ -731,6 +869,12 @@ class Dashboard extends BaseController
 
     public function updateProfile()
     {
+        $id_register = $this->session->get('id_register');
+        $register = $this->registrasiModel->getRegistrasiById($id_register);
+        $id_magang = $this->anakMagangModel->getIdMagangByRegister($id_register);
+        $anak_magang = $this->anakMagangModel->getPesertaByIdMagang($id_magang);
+        $data['anak_magang'] = $anak_magang;
+        $data['registrasi'] = $register;
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
         $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
 
@@ -780,6 +924,12 @@ class Dashboard extends BaseController
 
     public function editInfoBank()
     {
+        $id_register = $this->session->get('id_register');
+        $register = $this->registrasiModel->getRegistrasiById($id_register);
+        $id_magang = $this->anakMagangModel->getIdMagangByRegister($id_register);
+        $anak_magang = $this->anakMagangModel->getPesertaByIdMagang($id_magang);
+        $data['anak_magang'] = $anak_magang;
+        $data['registrasi'] = $register;
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
         $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
 
@@ -793,7 +943,7 @@ class Dashboard extends BaseController
         $data['data'] = $this->anakMagangModel->getDataAnakMagang($id_magang);
 
         return view('peserta/header') .
-            view('peserta/sidebar') .
+            view('peserta/sidebar', $data) .
             view('peserta/topbar') .
             view('peserta/edit_info_bank', $data) .
             view('peserta/footer');
@@ -801,6 +951,12 @@ class Dashboard extends BaseController
 
     public function updateBankInfo()
     {
+        $id_register = $this->session->get('id_register');
+        $register = $this->registrasiModel->getRegistrasiById($id_register);
+        $id_magang = $this->anakMagangModel->getIdMagangByRegister($id_register);
+        $anak_magang = $this->anakMagangModel->getPesertaByIdMagang($id_magang);
+        $data['anak_magang'] = $anak_magang;
+        $data['registrasi'] = $register;
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
         $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
 
@@ -859,6 +1015,12 @@ class Dashboard extends BaseController
 
     public function downloadBukuRekening($file_name)
     {
+        $id_register = $this->session->get('id_register');
+        $register = $this->registrasiModel->getRegistrasiById($id_register);
+        $id_magang = $this->anakMagangModel->getIdMagangByRegister($id_register);
+        $anak_magang = $this->anakMagangModel->getPesertaByIdMagang($id_magang);
+        $data['anak_magang'] = $anak_magang;
+        $data['registrasi'] = $register;
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
         $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
 
@@ -893,6 +1055,12 @@ class Dashboard extends BaseController
 
     public function cetak_absensi()
     {
+        $id_register = $this->session->get('id_register');
+        $register = $this->registrasiModel->getRegistrasiById($id_register);
+        $id_magang = $this->anakMagangModel->getIdMagangByRegister($id_register);
+        $anak_magang = $this->anakMagangModel->getPesertaByIdMagang($id_magang);
+        $data['anak_magang'] = $anak_magang;
+        $data['registrasi'] = $register;
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
         $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
 
@@ -931,6 +1099,12 @@ class Dashboard extends BaseController
 
     public function cetak($id)
     {
+        $id_register = $this->session->get('id_register');
+        $register = $this->registrasiModel->getRegistrasiById($id_register);
+        $id_magang = $this->anakMagangModel->getIdMagangByRegister($id_register);
+        $anak_magang = $this->anakMagangModel->getPesertaByIdMagang($id_magang);
+        $data['anak_magang'] = $anak_magang;
+        $data['registrasi'] = $register;
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
         $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
 
