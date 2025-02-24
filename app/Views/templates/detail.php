@@ -163,6 +163,8 @@
             </div>
 
 
+
+
             <!-- File Section -->
             <h5 class="font-weight-bold mt-4">File Lampiran:</h5>
             <div class="table-responsive">
@@ -221,6 +223,24 @@
                     </tbody>
                 </table>
             </div>
+            <!-- File Surat Perjanjian -->
+            <h5 class="font-weight-bold mt-4">Upload Surat Perjanjian:</h5>
+
+            <?php if (!empty($detail['surat_perjanjian'])): ?>
+                <!-- Jika surat perjanjian sudah ada di database -->
+                <p>Surat Perjanjian telah diupload: <a href="<?php echo base_url('uploads/' . $detail['surat_perjanjian']); ?>" target="_blank"><?php echo $detail['surat_perjanjian']; ?></a></p>
+            <?php else: ?>
+                <!-- Jika surat perjanjian belum diupload -->
+                <form method="POST" action="<?php echo base_url('admin/dashboard/upload_surat_perjanjian'); ?>" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="suratPerjanjian" class="form-label">Pilih Surat Perjanjian</label>
+                        <input type="file" class="form-control" id="suratPerjanjian" name="surat_perjanjian" required>
+                    </div>
+                    <input type="hidden" name="id_register" value="<?php echo $detail['id_register']; ?>">
+                    <button type="submit" class="btn btn-primary">Upload Surat Perjanjian</button>
+                </form>
+            <?php endif; ?>
+
             <!-- Tombol Terima dan Tolak -->
             <div class="mt-4">
                 <form method="post" action="<?php echo base_url('admin/dashboard/update_status'); ?>">
@@ -252,13 +272,15 @@
                 </form>
             </div>
 
+
+
             <div class="pilih-mentor">
                 <?php if ($detail['timeline'] !== 'Review Berkas Awal') { ?>
                     <h5 class="font-weight-bold mt-4">Informasi Mentor:</h5>
                     <table class="table table-bordered">
                         <div class="mt-4">
                             <!-- Logika untuk menentukan warna tombol berdasarkan status -->
-                            <?php if ($detail['status'] == 'Accept' && $detail_mentor['nipg'] !== null) { ?>
+                            <?php if ($detail_mentor['approved'] == 'Y' && $detail_mentor['nipg'] !== null) { ?>
                                 <!-- Jika diterima, Maka data mentor akan ditampilkan -->
                                 <button type="button" class="btn btn-success btn-sm disabled mb-4" disabled>
                                     Pendaftar diterima
@@ -406,12 +428,12 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <?php if (!empty($detail['surat_perjanjian'])) { ?>
+                        <?php if (!empty($detail['surat_perjanjian_ttd'])) { ?>
                             <tr>
                                 <td>1</td>
-                                <td><?php echo $detail['surat_perjanjian']; ?></td>
+                                <td><?php echo $detail['surat_perjanjian_ttd']; ?></td>
                                 <td>
-                                    <a href="<?php echo base_url('uploads/' . $detail['surat_perjanjian']); ?>"
+                                    <a href="<?php echo base_url('uploads/surat_perjanjian_ttd/' . $detail['surat_perjanjian']); ?>"
                                         class="btn btn-primary btn-sm" download>
                                         Download
                                     </a>

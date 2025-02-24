@@ -41,6 +41,7 @@
                                             <tr>
                                                 <th>No</th>
                                                 <th>Lampiran</th>
+                                                <th>Nama</th>
                                                 <th>Nama File</th>
                                                 <th>Periksa</th>
                                                 <th>Status</th>
@@ -50,6 +51,7 @@
                                             <tr>
                                                 <th>No</th>
                                                 <th>Lampiran</th>
+                                                <th>Nama</th>
                                                 <th>Nama File</th>
                                                 <th>Periksa</th>
                                                 <th>Status</th>
@@ -65,6 +67,7 @@
                                                         <tr>
                                                             <td><?= $no++; ?></td>
                                                             <td>Laporan Akhir</td>
+                                                            <td><?= $item->nama; ?></td>
                                                             <td><?= $item->laporan_akhir; ?></td>
                                                             <td>
                                                                 <a href="<?php echo base_url('mentor/dashboard/file/' . $item->laporan_akhir); ?>" class="btn btn-primary btn-sm">Download</a>

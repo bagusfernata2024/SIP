@@ -159,7 +159,7 @@ class DashboardMentor extends BaseController
                 $registrasiModel->updateTimelineAccMentor($idRegister, 'Review Surat Perjanjian');
 
                 // Update timeline status di tabel registrasi
-                $registrasiModel->updateStatusAccMentor($idRegister, 'Accept');
+                // $registrasiModel->updateStatusAccMentor($idRegister, 'Accept');
 
                 // Update status di tabel anak_magang
                 $anakMagangModel->update($idMagang, ['status' => 'Waiting']);
@@ -655,9 +655,9 @@ class DashboardMentor extends BaseController
             $id_magang = $data->id_magang ?? null;
             $status = $data->status ?? null;
             $tgl = $data->tgl ?? null;
-            if($status == 'Y'){
+            if ($status == 'Y') {
                 $statuss = "Hadir";
-            }else{
+            } else {
                 $statuss = "Tidak Hadir";
             }
 
@@ -783,6 +783,7 @@ class DashboardMentor extends BaseController
         }
         $user_nomor = session()->get('nomor');
         $data['laporan'] = $this->anakMagangModel->getLaporanAkhirByMentor($user_nomor);
+        // dd($data);
         return view('mentor/header') .
             view('mentor/sidebar') .
             view('mentor/topbar') .
@@ -989,13 +990,45 @@ class DashboardMentor extends BaseController
         $model = new NilaiModel();
 
         // Mengambil nilai berdasarkan mentor
-        $data['nilai_akhir'] = $model->getNilaiByMentor($user_nomor);
+        $data['nilai_akhir'] = $model->getNilaiByIdMagangFull($id_magang);
+        $data['nilai_akhir_pure'] = $model->getNilaiByIdMagangPure($id_magang);
+        // dd($data['nilai_akhir']);
         $data['id_magang'] = $id_magang;
+        // dd($data['nilai_akhir_pure']);
+        $total = 0;
+        $total += $data['nilai_akhir_pure']['ketepatan_waktu'];
+        $total += $data['nilai_akhir_pure']['sikap_kerja'];
+        $total += $data['nilai_akhir_pure']['tanggung_jawab'];
+        $total += $data['nilai_akhir_pure']['kehadiran'];
+        $total += $data['nilai_akhir_pure']['kemampuan_kerja'];
+        $total += $data['nilai_akhir_pure']['keterampilan_kerja'];
+        $total += $data['nilai_akhir_pure']['kualitas_hasil'];
+        $total += $data['nilai_akhir_pure']['kemampuan_komunikasi'];
+        $total += $data['nilai_akhir_pure']['kerjasama'];
+        $total += $data['nilai_akhir_pure']['kerajinan'];
+        $total += $data['nilai_akhir_pure']['percaya_diri'];
+        $total += $data['nilai_akhir_pure']['mematuhi_aturan'];
+        $total += $data['nilai_akhir_pure']['penampilan'];
 
-        foreach ($data['nilai_akhir'] as $item) {
-            $item->total_nilai = $this->hitungTotalNilai($item);
-            $item->status = $item->total_nilai > 75 ? 'Lulus' : 'Tidak Lulus';
+        switch ($data['nilai_akhir_pure']['perilaku']) {
+            case 'Sangat Baik':
+                $total += 100;
+                break;
+            case 'Baik':
+                $total += 75;
+                break;
+            case 'Cukup Baik':
+                $total += 50;
+                break;
+            case 'Tidak Baik':
+                $total += 0;
+                break;
         }
+
+        $total = $total / 14;
+
+        $data['status'] = $total > 75 ? 'Lulus' : 'Tidak Lulus';
+
 
         // Menampilkan view
         return view('mentor/header') .
@@ -1059,24 +1092,163 @@ class DashboardMentor extends BaseController
 
         $user_nomor = session()->get('nomor');
         $id_magang = $this->request->getUri()->getSegment(4);
-
         // Memuat model
-        $model = new NilaiModel();
-        $data['nilai_akhir'] = $model->getNilaiByMentor($user_nomor);
+        // Mengambil nilai berdasarkan mentor
+        $data['nilai_akhir'] = $this->nilaiModel->getNilaiByIdMagangFull($id_magang);
+        $data['nilai_akhir_pure'] = $this->nilaiModel->getNilaiByIdMagangPure($id_magang);
+        // dd($data['nilai_akhir']);
         $data['id_magang'] = $id_magang;
+        // dd($data['nilai_akhir_pure']);
+        $total = 0;
+        $total += $data['nilai_akhir_pure']['ketepatan_waktu'];
+        $total += $data['nilai_akhir_pure']['sikap_kerja'];
+        $total += $data['nilai_akhir_pure']['tanggung_jawab'];
+        $total += $data['nilai_akhir_pure']['kehadiran'];
+        $total += $data['nilai_akhir_pure']['kemampuan_kerja'];
+        $total += $data['nilai_akhir_pure']['keterampilan_kerja'];
+        $total += $data['nilai_akhir_pure']['kualitas_hasil'];
+        $total += $data['nilai_akhir_pure']['kemampuan_komunikasi'];
+        $total += $data['nilai_akhir_pure']['kerjasama'];
+        $total += $data['nilai_akhir_pure']['kerajinan'];
+        $total += $data['nilai_akhir_pure']['percaya_diri'];
+        $total += $data['nilai_akhir_pure']['mematuhi_aturan'];
+        $total += $data['nilai_akhir_pure']['penampilan'];
 
-        foreach ($data['nilai_akhir'] as $item) {
-            $item->total_nilai = $this->hitungTotalNilai($item);
-            $item->status = $item->total_nilai > 75 ? 'Lulus' : 'Tidak Lulus';
+        switch ($data['nilai_akhir_pure']['perilaku']) {
+            case 'Sangat Baik':
+                $total += 100;
+                break;
+            case 'Baik':
+                $total += 75;
+                break;
+            case 'Cukup Baik':
+                $total += 50;
+                break;
+            case 'Tidak Baik':
+                $total += 0;
+                break;
         }
+
+        $total = $total / 14;
+
+        $data['status'] = $total > 75 ? 'Lulus' : 'Tidak Lulus';
 
         // Menggunakan PdfGenerator (periksa pustaka PDF Anda di CI4)
         $pdf = new PdfGenerator();
-        $data['title'] = "Detail Rekap Absensi";
+        $data['title'] = "Detail Nilai";
         $file_pdf = $data['title'];
         $paper = 'A4';
         $orientation = "landscape";
         $html = view('mentor/cetak_detail_riwayat_nilai_bimbingan', $data);  // Menggunakan view() di CI4
         $pdf->generate($html, $file_pdf, $paper, $orientation);
     }
+
+    //Before ceking
+    // public function detailRiwayatNilaiBimbingan($id_magang)
+    // {
+    //     // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+    //     $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+    //     if ($user_level !== 'mentor') {
+    //         return view('no_access');
+    //     }
+    //     helper('date');
+
+    //     $user_nomor = session()->get('nomor');
+
+    //     // Memuat model
+    //     $model = new NilaiModel();
+
+    //     // Mengambil nilai berdasarkan mentor
+    //     $data['nilai_akhir'] = $model->getNilaiByMentor($user_nomor);
+    //     $data['id_magang'] = $id_magang;
+
+    //     dd($data['nilai_akhir']);
+
+    //     foreach ($data['nilai_akhir'] as $item) {
+    //         $item->total_nilai = $this->hitungTotalNilai($item);
+    //         $item->status = $item->total_nilai > 75 ? 'Lulus' : 'Tidak Lulus';
+    //     }
+
+    //     // Menampilkan view
+    //     return view('mentor/header') .
+    //         view('mentor/sidebar') .
+    //         view('mentor/topbar') .
+    //         view('mentor/detail_riwayat_nilai_bimbingan', $data) .
+    //         view('mentor/footer');
+    // }
+
+    // private function hitungTotalNilai($item)
+    // {
+    //     // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+    //     $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+    //     if ($user_level !== 'mentor') {
+    //         return view('no_access');
+    //     }
+    //     $total = 0;
+
+    //     $total += $item->ketepatan_waktu;
+    //     $total += $item->sikap_kerja;
+    //     $total += $item->tanggung_jawab;
+    //     $total += $item->kehadiran;
+    //     $total += $item->kemampuan_kerja;
+    //     $total += $item->keterampilan_kerja;
+    //     $total += $item->kualitas_hasil;
+    //     $total += $item->kemampuan_komunikasi;
+    //     $total += $item->kerjasama;
+    //     $total += $item->kerajinan;
+    //     $total += $item->percaya_diri;
+    //     $total += $item->mematuhi_aturan;
+    //     $total += $item->penampilan;
+
+    //     switch ($item->perilaku) {
+    //         case 'Sangat Baik':
+    //             $total += 100;
+    //             break;
+    //         case 'Baik':
+    //             $total += 75;
+    //             break;
+    //         case 'Cukup Baik':
+    //             $total += 50;
+    //             break;
+    //         case 'Tidak Baik':
+    //             $total += 0;
+    //             break;
+    //     }
+
+    //     return $total / 14;
+    // }
+
+    // public function cetakDetailRiwayatNilaiBimbingan()
+    // {
+    //     // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+    //     $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+    //     if ($user_level !== 'mentor') {
+    //         return view('no_access');
+    //     }
+    //     helper('date');
+
+    //     $user_nomor = session()->get('nomor');
+    //     $id_magang = $this->request->getUri()->getSegment(4);
+    //     // Memuat model
+    //     $model = new NilaiModel();
+    //     $data['nilai_akhir'] = $model->getNilaiByMentor($user_nomor);
+    //     $data['id_magang'] = $id_magang;
+
+    //     foreach ($data['nilai_akhir'] as $item) {
+    //         $item->total_nilai = $this->hitungTotalNilai($item);
+    //         $item->status = $item->total_nilai > 75 ? 'Lulus' : 'Tidak Lulus';
+    //     }
+
+    //     // Menggunakan PdfGenerator (periksa pustaka PDF Anda di CI4)
+    //     $pdf = new PdfGenerator();
+    //     $data['title'] = "Detail Rekap Absensi";
+    //     $file_pdf = $data['title'];
+    //     $paper = 'A4';
+    //     $orientation = "landscape";
+    //     $html = view('mentor/cetak_detail_riwayat_nilai_bimbingan', $data);  // Menggunakan view() di CI4
+    //     $pdf->generate($html, $file_pdf, $paper, $orientation);
+    // }
 }

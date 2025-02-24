@@ -14,7 +14,13 @@
 
 	<!-- Divider -->
 	<hr class="sidebar-divider my-0" />
-	<?php if ($registrasi['surat_perjanjian'] !== null && $anak_magang['status'] == 'Aktif') {  ?>
+	<?php if ($anak_magang == null) { ?>
+		<li class="nav-item <?= service('uri')->getSegment(1) == 'dashboard' && service('uri')->getSegment(2) == '' ? 'active' : ''; ?>">
+			<a class="nav-link" href="<?php echo site_url('dashboard'); ?>">
+				<i class="fa fa-tachometer-alt"></i>
+				<span>Upload Surat Perjanjian</span></a>
+		</li>
+	<?php } elseif ($registrasi['surat_perjanjian_ttd'] !== null && $anak_magang['status'] == 'Aktif') {  ?>
 
 		<!-- Nav Item - Dashboard -->
 		<li class="nav-item <?= service('uri')->getSegment(1) == 'dashboard' && service('uri')->getSegment(2) == '' ? 'active' : ''; ?>">

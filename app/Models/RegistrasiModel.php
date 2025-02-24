@@ -8,7 +8,7 @@ class RegistrasiModel extends Model
 {
     protected $table = 'registrasi';
     protected $primaryKey = 'id_register';
-    protected $allowedFields = ['tipe', 'nomor', 'nama', 'email', 'notelp', 'alamat', 'jk', 'tgl_lahir', 'strata', 'jurusan', 'prodi', 'instansi', 'lama_pkl', 'surat_permohonan', 'proposal_magang', 'cv', 'marksheet', 'tanggal1', 'tanggal2', 'status', 'tgl_regis', 'minat', 'nik', 'fc_ktp', 'tipe_magang', 'email_ap', 'foto', 'timeline', 'no_sertif' ,'surat_perjanjian'];
+    protected $allowedFields = ['tipe', 'nomor', 'nama', 'email', 'notelp', 'alamat', 'jk', 'tgl_lahir', 'strata', 'jurusan', 'prodi', 'instansi', 'lama_pkl', 'surat_permohonan', 'proposal_magang', 'cv', 'marksheet', 'tanggal1', 'tanggal2', 'status', 'tgl_regis', 'minat', 'nik', 'fc_ktp', 'tipe_magang', 'email_ap', 'foto', 'timeline', 'no_sertif' ,'surat_perjanjian', 'surat_perjanjian_ttd'];
 
 
     public function getTimeline($id)

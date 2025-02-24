@@ -79,13 +79,10 @@ class Dashboard extends BaseController
         }
         // dd($this->encryption = \Config\Services::encryption());
         // $data['registrasi'] = $this->registrasiModel->findAll(); // Misalnya ambil semua peserta
-        
+
         // foreach ($data['registrasi'] as $register) {
         //     $register['encrypted_id'] = urlencode(base64_encode($this->encryption->encrypt($register['id_register'])));
         // }
-
-        // Menghitung total pendaftar berdasarkan semua data registrasi
-        $data['total_pendaftar'] = $registrasiModel->countAll(); // Mengambil total pendaftar dari tabel registrasi
 
         // Menghitung total pendaftar diterima (berdasarkan tabel anak_magang, status diterima dianggap sebagai sudah ada data di tabel anak_magang)
         $data['total_accept'] = $anakMagangModel->countAll();  // Menghitung peserta aktif dari anak_magang dengan status 'Aktif'
@@ -94,13 +91,16 @@ class Dashboard extends BaseController
         $data['total_active'] = $anakMagangModel->countByStatus('Aktif'); // Peserta dengan status aktif
 
         // Menghitung total peserta menunggu (status 'null' di tabel anak_magang)
-        $data['total_waiting'] = $anakMagangModel->countByStatus(null);  // Peserta dengan status 'null' di tabel anak_magang
+        $data['total_waiting'] = $registrasiModel->countPesertaByStatus('Waiting');  // Peserta dengan status 'null' di tabel anak_magang
 
         // Menghitung total peserta ditolak (status 'reject' di tabel registrasi)
         $data['total_reject'] = $registrasiModel->countPesertaByStatus('reject');  // Peserta ditolak di registrasi
 
         // Menghitung total peserta selesai kegiatan (status 'Selesai Magang' di tabel anak_magang)
         $data['total_done'] = $anakMagangModel->countByStatus('Selesai Magang'); // Peserta dengan status 'Selesai Magang'
+
+        // Menghitung total pendaftar berdasarkan semua data registrasi
+        $data['total_pendaftar'] = $data['total_accept'] + $data['total_reject']; // Mengambil total pendaftar dari tabel registrasi
 
         // Total keseluruhan peserta (hanya untuk keperluan informasi)
         $data['total'] = $data['total_accept'] + $data['total_reject'] + $data['total_waiting'] + $data['total_done'];
@@ -115,58 +115,95 @@ class Dashboard extends BaseController
     public function generateSuratMagang()
     {
         // Membuat objek PhpWord
-        $phpWord = new PhpWord();
+        $phpWord = new \PhpOffice\PhpWord\PhpWord();
+        $section = $phpWord->addSection([
+            'pageSizeW' => 11906, // Lebar halaman A4
+            'pageSizeH' => 16838, // Tinggi halaman A4
+            'marginTop' => 720,   // Margin atas
+            'marginLeft' => 1440, // Margin kiri
+            'marginRight' => 1440, // Margin kanan
+            'marginBottom' => 1440, // Margin bawah
+        ]);
 
-        // Menambahkan section
-        $section = $phpWord->addSection();
+        // Format umum teks
+        $boldStyle = ['bold' => true];
+        $normalStyle = ['size' => 11];
+        $spasi1Style = ['spaceAfter' => 0, 'spaceBefore' => 0, 'size' => 11]; // Spasi 1
+        $justifyStyle = ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::BOTH]; // Justify alignment
 
-        // Menambahkan header surat
-        $section->addText("Nomor: 009400.S/DL.03/HCBPS/2025", ['bold' => true]);
-        $section->addText("Sifat: Segera", ['bold' => true]);
-        $section->addText("Lampiran: 2 Berkas", ['bold' => true]);
-        $section->addText("Perihal: Surat Persetujuan Magang a.n. Prity Nur Aisah", ['bold' => true]);
-        $section->addText("Jakarta, 13 Februari 2025\n");
+        // Menambahkan Logo di Kanan Atas dengan posisi di belakang teks
+        $section->addImage('C:\laragon\www\sip4\public\templates\logo.png', [
+            'width' => 100,    // Ukuran logo disesuaikan
+            'height' => 100,
+            'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::RIGHT,
+            'behindText' => true, // Logo berada di belakang teks
+        ]);
 
-        // Paragraf pertama
-        $section->addText("Yang Terhormat", ['bold' => true]);
-        $section->addText("Bidang Akademik, Kemahasiswaan dan Alumni");
-        $section->addText("Fakultas Ekonomi dan Manajemen Institut Pertanian Bogor");
-        $section->addText("Jalan Agatis, Kampus IPB Dramaga, Bogor 16680\n");
+        // Nomor, Sifat, Lampiran, Perihal dengan spasi 1
+        $section->addText("Nomor : 009400.S/DL.03/HCBPS/2025", $normalStyle);
+        $section->addText("Sifat : Segera", $normalStyle);
+        $section->addText("Lampiran : 2 Berkas", $normalStyle);
+        $section->addText("Perihal : Surat Persetujuan Magang a.n. Prity Nur Aisah", $normalStyle);
+        $section->addTextBreak(1);
 
-        // Paragraf kedua
-        $section->addText("Sehubungan dengan Surat Bidang Akademik, Kemahasiswaan dan Alumni Fakultas Ekonomi dan Manajemen Institut Pertanian Bogor Nomor: 1118/IT3.F7/PK.01.06/M/B/2025 tanggal 01 Februari 2025 tentang Izin Magang, dengan ini disampaikan hal-hal sebagai berikut:", ['bold' => true]);
-        $section->addText("1. Memberikan persetujuan untuk melakukan Praktik Kerja Lapangan (PKL) kepada mahasiswa sebagai berikut:", ['bold' => true]);
+        // Tempat dan Tanggal Surat, ditulis di kiri
+        $section->addText("Jakarta, 13 Februari 2025", $normalStyle);
+        $section->addTextBreak(1);
 
-        // Tabel data mahasiswa
-        $table = $section->addTable();
+        // "Yang Terhormat" hingga alamat kampus dengan spasi 1
+        $section->addText("Yang Terhormat", $boldStyle);
+        $section->addText("Bidang Akademik, Kemahasiswaan dan Alumni", $boldStyle);
+        $section->addText("Fakultas Ekonomi dan Manajemen Institut Pertanian Bogor", $boldStyle);
+        $section->addText("Jalan Agatis, Kampus IPB Dramaga, Bogor 16680", $normalStyle);
+        $section->addTextBreak(1);
+
+        // Isi Surat dengan justify alignment
+        $section->addText("Sehubungan dengan Surat Bidang Akademik, Kemahasiswaan dan Alumni Fakultas Ekonomi dan Manajemen Institut Pertanian Bogor Nomor : 1118/IT3.F7/PK.01.06/M/B/2025 tanggal 01 Februari 2025 tentang Izin Magang, dengan ini disampaikan hal-hal sebagai berikut:", $normalStyle);
+        $section->addTextBreak(1);
+
+        // Poin 1
+        $section->addText("1. Memberikan persetujuan untuk melakukan Praktik Kerja Lapangan (PKL) kepada mahasiswa sebagai berikut:", $normalStyle);
+
+        // Tabel Data Mahasiswa dengan teks rata tengah
+        $table = $section->addTable(['borderSize' => 6, 'borderColor' => '000000', 'width' => 100 * 50]);
         $table->addRow();
-        $table->addCell(2000)->addText("Nama");
-        $table->addCell(4000)->addText("Prity Nur Aisah");
+        $table->addCell(3000, ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER])->addText('Nama', $boldStyle);
+        $table->addCell(3000, ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER])->addText('Jurusan', $boldStyle);
+        $table->addCell(4000, ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER])->addText('Penempatan', $boldStyle);
+        $table->addCell(3000, ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER])->addText('Mentor', $boldStyle);
+
+        // Isi Tabel
         $table->addRow();
-        $table->addCell(2000)->addText("Jurusan");
-        $table->addCell(4000)->addText("Manajemen");
-        $table->addRow();
-        $table->addCell(2000)->addText("Penempatan");
-        $table->addCell(4000)->addText("Risk Strategy and Integrated Governance");
-        $table->addRow();
-        $table->addCell(2000)->addText("Mentor");
-        $table->addCell(4000)->addText("Markus Aditya");
+        $table->addCell(3000, ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER])->addText('Prity Nur Aisah');
+        $table->addCell(3000, ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER])->addText('Manajemen');
+        $table->addCell(4000, ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER])->addText('Risk Strategy and Integrated Governance');
+        $table->addCell(3000, ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER])->addText('Markus Aditya');
 
-        // Paragraf ketiga
-        $section->addText("2. Periode PKL pada tanggal 17 Februari 2025 - 16 Mei 2025, yang dilakukan secara fisik di PT Perusahaan Gas Negara Tbk sesuai dengan lokasi penempatan pada point 1 (Satu).", ['bold' => true]);
-        $section->addText("3. Selama melaksanakan PKL, kepada mahasiswa termasuk hanya diberikan uang saku (sesuai ketentuan yang berlaku di PT Perusahaan Gas Negara Tbk), dan tidak diberikan fasilitas apapun termasuk akses informasi yang menyangkut rahasia perusahaan.", ['bold' => true]);
-        $section->addText("4. Untuk pelaksanaannya, mahasiswa yang bersangkutan dapat menghubungi Sdri. Firda Prihatin (email: PGN.HCM.Support@pertamina.com; atau HP: +6289622484436).", ['bold' => true]);
+        // Poin 2
+        $section->addTextBreak(1);
+        $section->addText("2. Periode PKL pada tanggal 17 Februari 2025 - 16 Mei 2025, yang dilakukan secara fisik di PT Perusahaan Gas Negara Tbk sesuai dengan lokasi penempatan pada point 1 (Satu).", $normalStyle);
 
-        // Paragraf penutup
-        $section->addText("Atas perhatianya, kami ucapkan terima kasih.", ['bold' => true]);
-        $section->addText("Division Head, Human Capital");
-        $section->addText("Business Partner and Services");
-        $section->addText("Anisyah Roestantien");
+        // Poin 3
+        $section->addText("3. Selama melaksanakan PKL, kepada mahasiswa termasuk hanya diberikan uang saku (sesuai ketentuan yang berlaku di PT Perusahaan Gas Negara Tbk), dan tidak diberikan fasilitas apapun termasuk akses informasi yang menyangkut rahasia perusahaan.", $normalStyle);
 
-        // QR Code
-        $section->addText("QR Code: ");
+        // Poin 4
+        $section->addText("4. Untuk pelaksanaannya, mahasiswa yang bersangkutan dapat menghubungi Sdri. Firda Prihatin (email: PGN.HCM.Support@pertamina.com; atau HP.: +6289622484436).", $normalStyle);
+        $section->addTextBreak(1);
 
-        // Menyimpan dokumen Word
+        // Penutup
+        $section->addText("Atas perhatianya, kami ucapkan terima kasih.", $normalStyle);
+        $section->addTextBreak(2);
+
+        // Tanda Tangan
+        $section->addText("Division Head, Human Capital", $normalStyle);
+        $section->addText("Business Partner and Services", $normalStyle);
+        $section->addTextBreak(3);
+
+        // Nama Pejabat
+        $section->addText("Anisyah Roestantien", $boldStyle);
+        $section->addText("Pertamina Gas Negara", $normalStyle);
+
+        // Menyimpan dokumen ke file
         $fileName = 'Surat_Persetujuan_Magang_Prity_Nur_Aisah.docx';
         $filePath = FCPATH . $fileName;
         $phpWord->save($filePath, 'Word2007');
@@ -174,7 +211,8 @@ class Dashboard extends BaseController
         // Mengunduh file
         return $this->response->download($filePath, null)->setFileName($fileName);
     }
-    
+
+
 
     public function detail($id)
     {
@@ -188,6 +226,10 @@ class Dashboard extends BaseController
         $registrasiModel = new RegistrasiModel();
         $detailRegisModel = new DetailRegisModel();
         $mentorModel = new MentorModel();
+
+        // $instansi = $this->request->getPost('instansi');
+
+        // dd($this->request->getPost());
 
         // Ambil detail data registrasi
         $data['detail'] = $registrasiModel->getDetail($id);
@@ -235,6 +277,56 @@ class Dashboard extends BaseController
             . view('templates/footer');
     }
 
+    private function createRenameFile($type, $name, $tipe, $nim, $instansi, $date)
+    {
+        return strtolower($type . '_' . str_replace(' ', '_', $name) . '_' . $tipe . '_' . $nim . '_' . $instansi . '_' . $date . '.' . pathinfo($_FILES[$type]['name'], PATHINFO_EXTENSION));
+    }
+    public function upload_surat_perjanjian()
+    {
+        // Cek apakah ada file yang diupload
+        if ($this->request->getFile('surat_perjanjian')->isValid()) {
+            $file = $this->request->getFile('surat_perjanjian');
+
+            // Tentukan direktori penyimpanan file
+            $path = FCPATH . 'uploads/surat_perjanjian_sent';  // Anda dapat menyesuaikan path sesuai dengan struktur direktori Anda
+
+            // Pastikan direktori ada, jika tidak, buat
+            if (!is_dir($path)) {
+                mkdir($path, 0777, true);
+            }
+
+            $id_register = $this->request->getPost('id_register');
+
+            $registrasi = $this->registrasiModel->getRegistrasiById($id_register);
+
+            $nama = $registrasi['nama'];
+            $instansi = $registrasi['instansi'];
+            $tipe = $registrasi['tipe'];
+            $nik = $registrasi['nomor'];
+            $tanggal = date('Ymd');
+
+            // dd($this->request->getPost());
+            // Pindahkan file ke direktori yang sudah ditentukan
+            $newName = $this->createRenameFile('surat_perjanjian', $nama, $tipe, $nik, $instansi, $tanggal);
+            $fileName = $file->getRandomName();
+            $file->move($path, $newName);
+
+            // Simpan nama file ke database (misalnya di tabel 'detail' atau tabel lain yang relevan)
+            $id_register = $this->request->getPost('id_register');
+            $this->registrasiModel->update($id_register, ['surat_perjanjian' => $newName]);
+
+            // Menampilkan flash message sukses
+            session()->setFlashdata('success', 'Surat perjanjian berhasil diupload.');
+        } else {
+            // Jika tidak ada file yang diupload atau file tidak valid
+            session()->setFlashdata('error', 'Terjadi kesalahan saat mengupload file.');
+        }
+
+        // Redirect kembali ke halaman sebelumnya (atau halaman detail)
+        return redirect()->back();
+    }
+
+
     public function updateStatus()
     {
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
@@ -277,7 +369,9 @@ class Dashboard extends BaseController
 
                 $mentor = $mentorModel->getMentorByNipg($nipg);
 
-                $this->sendEmailToPesertaSuratPerjanjian($mentor, $peserta, $statusUpdate);
+                $fileName = $peserta['surat_perjanjian'];
+
+                $this->sendEmailToPesertaSuratPerjanjian($mentor, $peserta, $statusUpdate, $fileName);
 
                 // $unitKerja = $peserta['minat'];
                 // $tglMulai = $peserta['tanggal1'];
@@ -320,7 +414,7 @@ class Dashboard extends BaseController
         }
     }
 
-    private function sendEmailToPesertaSuratPerjanjian($mentor, $peserta, $statusUpdate)
+    private function sendEmailToPesertaSuratPerjanjian($mentor, $peserta, $statusUpdate, $fileName = null)
     {
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
         $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
@@ -389,8 +483,13 @@ class Dashboard extends BaseController
             </html>
         ");
             $email->setMailType('html'); // Mengatur email dalam format HTML
-            $filePath = FCPATH . 'templates/surat_perjanjian.pdf';
-            $email->attach($filePath);
+            // Jika ada file surat perjanjian yang diupload, lampirkan file
+            // dd($fileName);
+            if ($fileName) {
+                $filePath = FCPATH . 'uploads/surat_perjanjian_sent/' . $fileName;
+                // dd($filePath);
+                $email->attach($filePath);
+            }
         } elseif ($statusUpdate === 'reject') {
             $email->setSubject('Hasil Pendaftaran Program');
             $email->setMessage("
@@ -834,7 +933,6 @@ class Dashboard extends BaseController
                 <p>Dengan Hormat</p>
                 <br>
                 <p>Kami dengan senang hati menginformasikan bahwa pendaftaran Anda dalam program ini telah diterima.</p>
-                <p>Silahkan upload surat perjanjian yang telah ditandatangani ke dalam sistem.</p>
                 <p>Berikut adalah informasi terkait mentor Anda:</p>
 
                 <br>

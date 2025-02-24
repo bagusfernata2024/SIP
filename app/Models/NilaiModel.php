@@ -132,6 +132,28 @@ class NilaiModel extends Model
         return $this->where('id_magang', $id_magang)->first();
     }
 
+    public function getNilaiByIdMagangPure($id_magang)
+    {
+        return $this->select('ketepatan_waktu, sikap_kerja, tanggung_jawab, kehadiran, kemampuan_kerja, keterampilan_kerja, kualitas_hasil, kemampuan_komunikasi, kerjasama, kerajinan, percaya_diri, mematuhi_aturan, penampilan, perilaku') // Kolom yang ingin diambil
+            ->where('id_magang', $id_magang)
+            ->first();
+    }
+
+    public function getNilaiByIdMagangFull($id_magang)
+    {
+        return $this->db->table($this->table)
+            ->select('mentor.nama AS nama_mentor, mentor.nipg AS nipg, mentor.subsidiaries, nilai.*, anak_magang.*, registrasi.*')
+            ->join('anak_magang', 'anak_magang.id_magang = nilai.id_magang')
+            ->join('detailregis', 'detailregis.id_register = anak_magang.id_register')
+            ->join('mentor', 'mentor.nipg = detailregis.nipg')
+            ->join('registrasi', 'registrasi.id_register = detailregis.id_register')
+            ->where('anak_magang.id_magang', $id_magang)  // Mencari berdasarkan id_magang
+            ->get()
+            ->getResult();
+    }
+
+
+
     public function getNilaiByPeserta($id_magang)
     {
         return $this->db->table($this->table)

@@ -32,7 +32,7 @@
 		</div>
 
 		<div class="card-body">
-			<?php if ($registrasi['surat_perjanjian'] == null): ?>
+			<?php if ($registrasi['surat_perjanjian_ttd'] == null): ?>
 				<div class="alert alert-warning">
 					<strong>Perhatian!</strong> Anda belum mengunggah surat perjanjian. Silakan unggah terlebih dahulu.
 				</div>

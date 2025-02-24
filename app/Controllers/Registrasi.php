@@ -58,7 +58,6 @@ class Registrasi extends BaseController
             view('templates/registrasi_mentor', $data) .
             view('web_templates/footer_special');
     }
-
     public function prosesRegistrasiMentor()
     {
         $validation = \Config\Services::validation();
@@ -269,8 +268,6 @@ class Registrasi extends BaseController
             return $this->response->setJSON(['status' => 'success']);
         }
     }
-
-
 
     // public function prosesRegistrasiPeserta()
     // {

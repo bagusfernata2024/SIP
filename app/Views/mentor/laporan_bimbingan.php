@@ -43,6 +43,7 @@
                                             <tr>
                                                 <th>No</th>
                                                 <th>Lampiran</th>
+                                                <th>Nama</th>
                                                 <th>Nama File</th>
                                                 <th>Periksa</th>
                                                 <th>Aksi</th>
@@ -52,6 +53,7 @@
                                             <tr>
                                                 <th>No</th>
                                                 <th>Lampiran</th>
+                                                <th>Nama</th>
                                                 <th>Nama File</th>
                                                 <th>Periksa</th>
                                                 <th>Aksi</th>
@@ -63,25 +65,32 @@
                                                 $no = 1;
                                                 foreach ($laporan as $item):
                                                 ?>
-                                                    <?php if ($item->approved_laporan_akhir == NULL): ?>
-                                                        <tr>
-                                                            <td><?= $no++; ?></td>
-                                                            <td>Laporan Akhir</td>
-                                                            <td><?= $item->laporan_akhir; ?></td>
-                                                            <td>
-                                                                <a href="<?php echo base_url('mentor/dashboard/file/' . $item->laporan_akhir); ?>" class="btn btn-primary btn-sm">Download</a>
-                                                            </td>
-                                                            <td>
-                                                                <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#confirmModal" onclick="setAction('Y', <?= $item->id_magang; ?>)">
-                                                                    <i class="fas fa-check-circle fa-sm" style="color: white;"></i> <!-- Ikon lebih kecil -->
-                                                                </button>
-                                                                <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#confirmModal" onclick="setAction('N', <?= $item->id_magang; ?>)">
-                                                                    <i class="fas fa-times-circle fa-sm" style="color: white;"></i> <!-- Ikon lebih kecil -->
-                                                                </button>
-                                                            </td>
+                                                    <?php if ($item->laporan_akhir !== null): ?>
+                                                        <?php if ($item->approved_laporan_akhir == NULL): ?>
+                                                            <tr>
+                                                                <td><?= $no++; ?></td>
+                                                                <td>Laporan Akhir</td>
+                                                                <td><?= $item->nama; ?></td>
+                                                                <td><?= $item->laporan_akhir; ?></td>
+                                                                <td>
+                                                                    <a href="<?php echo base_url('mentor/dashboard/file/' . $item->laporan_akhir); ?>" class="btn btn-primary btn-sm">Download</a>
+                                                                </td>
+                                                                <td>
+                                                                    <?php if ($item->laporan_akhir !== null): ?>
 
-                                                        </tr>
+                                                                        <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#confirmModal" onclick="setAction('Y', <?= $item->id_magang; ?>)">
+                                                                            <i class="fas fa-check-circle fa-sm" style="color: white;"></i> <!-- Ikon lebih kecil -->
+                                                                        </button>
+                                                                        <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#confirmModal" onclick="setAction('N', <?= $item->id_magang; ?>)">
+                                                                            <i class="fas fa-times-circle fa-sm" style="color: white;"></i> <!-- Ikon lebih kecil -->
+                                                                        </button>
+                                                                    <?php endif; ?>
+
+                                                                </td>
+                                                            </tr>
+                                                        <?php endif; ?>
                                                     <?php endif; ?>
+
                                                 <?php endforeach; ?>
                                             <?php else: ?>
                                                 <tr>

@@ -69,6 +69,10 @@
 
 <!-- Page level custom scripts -->
 <script src="<?php echo base_url('/'); ?>files/js/demo/datatables-demo.js"></script>
+<!-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script> -->
+<!-- <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script> -->
+
 </body>
 
 </html>

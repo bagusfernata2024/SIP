@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use CodeIgniter\Model;
@@ -62,9 +63,11 @@ class LaporanModel extends Model
             ->join('detailregis', 'detailregis.id_register = anak_magang.id_register')
             ->join('registrasi', 'registrasi.id_register = detailregis.id_register')
             ->where('detailregis.nipg', $user_nomor)
-            ->where('laporan.approved', null)
+            ->where('anak_magang.laporan_akhir IS NOT NULL') // Laporan akhir tidak null
+            ->where('anak_magang.approved_laporan_akhir !=', 'Y') // Approved laporan akhir tidak 'Y'
             ->countAllResults();
     }
+
 
     public function updateStatusLaporan($id_magang, $status)
     {

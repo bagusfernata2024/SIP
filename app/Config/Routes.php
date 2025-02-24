@@ -79,6 +79,8 @@ $routes->get('/admin/dashboard/sertifikat/(:any)', 'Admin\Dashboard::sertifikat/
 $routes->get('/admin/dashboard/cetak-sertifikat/(:any)', 'Admin\Dashboard::cetak/$1');
 $routes->post('/admin/dashboard/submitNoSertifikat', 'Admin\Dashboard::submitNoSertifikat');
 $routes->post('admin/dashboard/update_tanggal', 'Admin\Dashboard::update_tanggal');
+$routes->post('admin/dashboard/upload_surat_perjanjian', 'Admin\Dashboard::upload_surat_perjanjian');
+
 
 //Dashboard Peserta
 $routes->get('/dashboard', 'Dashboard::index');

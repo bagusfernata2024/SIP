@@ -114,7 +114,7 @@ class AbsensiModel extends Model
 
         return null;
     }
-    
+
     public function getAbsenByMentor($user_nomor)
     {
         return $this->db->table('absen')
@@ -134,9 +134,11 @@ class AbsensiModel extends Model
             ->join('detailregis', 'detailregis.id_register = anak_magang.id_register')
             ->join('registrasi', 'registrasi.id_register = detailregis.id_register')
             ->where('detailregis.nipg', $user_nomor)
-            ->where('absen.approved', null)
+            ->where('absen.approved', null) // Belum dikonfirmasi
+            ->where('absen.jam_masuk IS NOT NULL') // Kondisi untuk jam_masuk yang tidak null
             ->countAllResults();
     }
+
 
     public function getAbsenByPesertaCountNotYetConfirm($user_nomor)
     {
@@ -144,10 +146,12 @@ class AbsensiModel extends Model
             ->join('anak_magang', 'anak_magang.id_magang = absen.id_magang')
             ->join('detailregis', 'detailregis.id_register = anak_magang.id_register')
             ->join('registrasi', 'registrasi.id_register = detailregis.id_register')
-            ->where('registrasi.nomor', $user_nomor)
-            ->where('absen.approved', null)
+            ->where('registrasi.id_register', $user_nomor)
+            ->where('absen.approved', null) // Belum dikonfirmasi
+            ->where('absen.jam_masuk IS NOT NULL') // Kondisi untuk jam_masuk yang tidak null
             ->countAllResults();
     }
+
 
     public function updateStatusAbsensi($id_magang, $tgl, $status, $statuss)
     {

@@ -208,13 +208,15 @@ class AnakMagangModel extends Model
     public function getLaporanAkhirByMentor($id_register)
     {
         return $this->db->table('anak_magang')
-            ->select('anak_magang.*')
+            ->select('anak_magang.*, registrasi.*')  // Menambahkan tabel registrasi
             ->join('detailregis', 'detailregis.id_register = anak_magang.id_register')
             ->join('mentor', 'mentor.nipg = detailregis.nipg')
+            ->join('registrasi', 'registrasi.id_register = anak_magang.id_register')  // Join dengan tabel registrasi
             ->where('mentor.nipg', $id_register)
             ->get()
             ->getResult();
     }
+
 
     public function updateStatusLaporanAkhir($idMagang, $status)
     {

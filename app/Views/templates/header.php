@@ -26,6 +26,8 @@
 
 	<!-- Custom styles for this page -->
 	<link href="<?php echo base_url('/'); ?>files/vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet" />
+	<link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
+
 
 	<!-- Font Awesome -->
 	<link
@@ -87,7 +89,6 @@
 		}
 	</style>
 	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 </head>
 
 <body id="page-top">

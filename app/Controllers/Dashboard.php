@@ -106,10 +106,10 @@ class Dashboard extends BaseController
         if ($file = $this->request->getFile('surat_perjanjian')) {
             if ($file->isValid() && !$file->hasMoved()) {
                 $newName = $this->createRenameFile('surat_perjanjian', $nama, $tipe, $nomor, $instansi, $tanggal);
-                $file->move(FCPATH . 'uploads', $newName);
+                $file->move(FCPATH . 'uploads/surat_perjanjian_ttd/', $newName);
 
                 // Simpan ke database
-                $this->registrasiModel->update($id_register, ['surat_perjanjian' => $newName]);
+                $this->registrasiModel->update($id_register, ['surat_perjanjian_ttd' => $newName]);
 
                 return redirect()->to(base_url('dashboard'))->with('success', 'Surat perjanjian berhasil diunggah.');
             }

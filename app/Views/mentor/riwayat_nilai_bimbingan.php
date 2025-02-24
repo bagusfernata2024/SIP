@@ -60,6 +60,7 @@
                                                     $no = 1;
                                                     foreach ($nilai as $item):
                                                     ?>
+                                                        <?php if($item->ketepatan_waktu !== null): ?>
                                                         <tr>
                                                             <td><?= $no++; ?></td>
                                                             <td><?= $item->nomor; ?></td>
@@ -77,6 +78,7 @@
                                                                     </button></a>
                                                             </td>
                                                         </tr>
+                                                        <?php endif; ?>
                                                     <?php endforeach; ?>
                                                 <?php else: ?>
                                                     <tr>
