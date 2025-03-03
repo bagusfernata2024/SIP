@@ -54,6 +54,12 @@ $routes->get('/admin/dashboard/data_peserta', 'Admin\Dashboard::data_peserta');
 $routes->get('/admin/dashboard/detail_data_mentor/(:any)', 'Admin\Dashboard::detailDataMentor/$1');
 $routes->get('/admin/dashboard/detail_data_peserta/(:any)', 'Admin\Dashboard::detailDataPeserta/$1');
 $routes->get('/admin/dashboard/detail/(:any)', 'Admin\Dashboard::detail/$1');
+$routes->get('/admin/dashboard/cari_mentor/(:any)', 'Admin\Dashboard::cari_mentor/$1');
+$routes->post('admin/dashboard/assign_mentor/(:any)', 'Admin\Dashboard::assign_mentor/$1');
+$routes->post('admin/dashboard/assign_co_mentor/(:any)', 'Admin\Dashboard::assign_co_mentor/$1');
+$routes->get('/admin/dashboard/upload_surat/(:any)', 'Admin\Dashboard::upload_surat/$1');
+$routes->get('/admin/dashboard/kirim_surat/(:any)', 'Admin\Dashboard::kirim_surat/$1');
+$routes->get('/admin/dashboard/review_surat/(:any)', 'Admin\Dashboard::review_surat/$1');
 $routes->get('/admin/dashboard/informasi_absensi/(:any)', 'Admin\Dashboard::informasiAbsensi/$1');
 $routes->get('/admin/dashboard/cetak_informasi_absensi/(:any)', 'Admin\Dashboard::cetakInformasiAbsensi/$1');
 $routes->get('/admin/dashboard/download_all/(:any)', 'Admin\Dashboard::downloadAll/$1');
@@ -80,6 +86,8 @@ $routes->get('/admin/dashboard/cetak-sertifikat/(:any)', 'Admin\Dashboard::cetak
 $routes->post('/admin/dashboard/submitNoSertifikat', 'Admin\Dashboard::submitNoSertifikat');
 $routes->post('admin/dashboard/update_tanggal', 'Admin\Dashboard::update_tanggal');
 $routes->post('admin/dashboard/upload_surat_perjanjian', 'Admin\Dashboard::upload_surat_perjanjian');
+$routes->post('admin/dashboard/upload_surat_persetujuan', 'Admin\Dashboard::upload_surat_persetujuan');
+
 
 
 //Dashboard Peserta

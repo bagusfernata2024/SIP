@@ -23,7 +23,7 @@
                 class="btn btn-success"
                 id="btnCheckIn"
                 <?= ($absensi_today && !empty($absensi_today['jam_masuk'])) || $isTodayAbsent ? 'disabled' : '' ?>>
-                Check-In
+                Clock-In
             </button>
 
             <!-- Tombol Check-Out -->

@@ -95,6 +95,7 @@ log_message('debug', 'Flashdata email di view: ' . $email);
                                 <label for="strata" class="form-label">Strata</label>
                                 <select class="form-select" id="strata" name="strata" required>
                                     <option value="" disabled selected>Pilih strata...</option>
+                                    <option value="SMK">SMK</option>
                                     <option value="D3">Diploma (D3)</option>
                                     <option value="S1">Sarjana (S1)</option>
                                     <option value="S2">Magister (S2)</option>

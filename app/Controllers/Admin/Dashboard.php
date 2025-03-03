@@ -9,6 +9,7 @@ use App\Models\MentorModel;
 use App\Models\AnakMagangModel;
 use App\Models\NilaiModel;
 use App\Models\UserModel;
+use App\Models\KaryawanModel;
 use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\IOFactory;
 
@@ -35,6 +36,9 @@ class Dashboard extends BaseController
     protected $pesertaModel;
     protected $anakMagangModel;
     protected $userModel;
+    protected $detailRegisModel;
+    protected $karyawanModel;
+
     protected $encryption;
     private $encryption_key = 'ThisIsASecretKeyForEncryption';
     public function __construct()
@@ -46,6 +50,8 @@ class Dashboard extends BaseController
         $this->pesertaModel = new PesertaModel;
         $this->anakMagangModel = new AnakMagangModel;
         $this->userModel = new UserModel;
+        $this->detailRegisModel = new DetailRegisModel;
+        $this->karyawanModel = new KaryawanModel;
         $this->encryption = \Config\Services::encryption(); // Memanggil pustaka enkripsi
 
     }
@@ -212,9 +218,71 @@ class Dashboard extends BaseController
         return $this->response->download($filePath, null)->setFileName($fileName);
     }
 
+    public function review_surat($id)
+    {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
 
+        if ($user_level !== 'admin') {
+            return view('no_access');
+        }
+        helper('date');  // Load helper 'date'
+        $registrasiModel = new RegistrasiModel();
+        $detailRegisModel = new DetailRegisModel();
+        $mentorModel = new MentorModel();
 
-    public function detail($id)
+        // $instansi = $this->request->getPost('instansi');
+
+        // dd($this->request->getPost());
+
+        // Ambil detail data registrasi
+        $data['detail'] = $registrasiModel->getDetail($id);
+        // Ambil detail mentor
+        $data['detail_mentor'] = $detailRegisModel->getDetailWithMentor($id);
+        // Ambil daftar mentor
+        $data['list_mentor'] = [];
+
+        // dd($data['detail_mentor']['nipg'] !== null && $data['detail']['status'] == 'Accept');
+
+        // Ambil daftar mentor dan filter berdasarkan jumlah anak bimbingan
+        $all_mentors = $mentorModel->getData();  // Ambil semua mentor
+        foreach ($all_mentors as $mentor) {
+            $nipg = $mentor['nipg'];
+
+            // Hitung jumlah anak bimbingan berdasarkan nipg
+            $count_children = $detailRegisModel->countMentorChildren($nipg);
+
+            // Jika jumlah anak bimbingan kurang dari 2, tambahkan ke list_mentor
+            if ($count_children < 2) {
+                $data['list_mentor'][] = $mentor;
+            }
+        }
+
+        // Ambil data timeline dari registrasi
+        $data['timeline'] = $registrasiModel->getTimeline($id);
+
+        $id_magang = $this->anakMagangModel->getIdMagangByRegister($id);
+
+        $data['anak_magang'] = $this->anakMagangModel->getPesertaByIdMagang($id_magang);
+        // dd($data['anak_magang']);
+        // dd($data['detail_mentor']);
+        // Split timeline berdasarkan tanda koma (atau tanda lainnya sesuai format)
+        if (!empty($data['timeline'])) {
+            $data['timeline'] = explode(',', $data['timeline']);
+        }
+
+        if (!$data['detail']) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Data tidak ditemukan');
+        }
+        // dd($data);
+        return view('templates/header')
+            . view('templates/sidebar')
+            . view('templates/topbar')
+            . view('templates/review_surat', $data)
+            . view('templates/footer');
+    }
+
+    public function upload_surat($id)
     {
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
         $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
@@ -273,6 +341,237 @@ class Dashboard extends BaseController
         return view('templates/header')
             . view('templates/sidebar')
             . view('templates/topbar')
+            . view('templates/upload_surat', $data)
+            . view('templates/footer');
+    }
+
+    public function cari_mentor($id)
+    {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'admin') {
+            return view('no_access');
+        }
+        helper('date');  // Load helper 'date'
+        $registrasiModel = new RegistrasiModel();
+        $detailRegisModel = new DetailRegisModel();
+        $mentorModel = new MentorModel();
+
+        // $instansi = $this->request->getPost('instansi');
+
+        // dd($this->request->getPost());
+
+        // Ambil detail data registrasi
+        $data['detail'] = $registrasiModel->getDetail($id);
+        // Ambil detail mentor
+        $data['detail_mentor'] = $detailRegisModel->getDetailWithMentor($id);
+        // Ambil daftar mentor
+        $data['list_mentor'] = [];
+
+        // dd($data['detail_mentor']['nipg'] !== null && $data['detail']['status'] == 'Accept');
+
+        // Ambil daftar mentor dan filter berdasarkan jumlah anak bimbingan
+        $all_mentors = $mentorModel->getData();  // Ambil semua mentor
+        foreach ($all_mentors as $mentor) {
+            $nipg = $mentor['nipg'];
+
+            // Hitung jumlah anak bimbingan berdasarkan nipg
+            $count_children = $detailRegisModel->countMentorChildren($nipg);
+
+            // Jika jumlah anak bimbingan kurang dari 2, tambahkan ke list_mentor
+            if ($count_children < 2) {
+                $data['list_mentor'][] = $mentor;
+            }
+        }
+
+        // Ambil data timeline dari registrasi
+        $data['timeline'] = $registrasiModel->getTimeline($id);
+
+        $id_magang = $this->anakMagangModel->getIdMagangByRegister($id);
+
+        $data['anak_magang'] = $this->anakMagangModel->getPesertaByIdMagangOne($id_magang);
+        $coMentors = $this->karyawanModel->getData();  // Misalnya berdasarkan nipg mentor
+        $data['co_mentors'] = $coMentors;
+        $nipg = $data['anak_magang']['nipg_co_mentor'];
+        $data['co_mentor'] = $this->karyawanModel->getDataByNipg($nipg);
+        // dd($nipg);
+
+        // Split timeline berdasarkan tanda koma (atau tanda lainnya sesuai format)
+        if (!empty($data['timeline'])) {
+            $data['timeline'] = explode(',', $data['timeline']);
+        }
+
+        if (!$data['detail']) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Data tidak ditemukan');
+        }
+
+        return view('templates/header')
+            . view('templates/sidebar')
+            . view('templates/topbar')
+            . view('templates/cari_mentor', $data)
+            . view('templates/footer');
+    }
+
+    public function assign_mentor($id_register)
+    {
+        // Ambil data dari form
+        // $id_register = $this->request->getPost('id_register');
+        $nipg = $this->request->getPost('nipg');  // Mentor yang dipilih
+
+        $peserta = $this->registrasiModel->getPesertaById($id_register);
+        // Pastikan data yang dipilih ada
+        if (empty($nipg)) {
+            return redirect()->back()->with('error', 'Silakan pilih mentor');
+        }
+        $mentor = $this->mentorModel->getMentorByNipg($nipg);
+        // Model DetailRegis
+        $detailRegisModel = new DetailRegisModel();
+
+        $dataDetailRegis = [
+            'id_register' => $id_register,
+            'nipg' => $nipg,
+            'approved' => 'W'
+        ];
+
+        $detailRegisModel->insertDetailRegis($dataDetailRegis);
+
+        $mentor = $this->mentorModel->getMentorByNipg($nipg);
+
+        $fileName = $peserta['surat_perjanjian'];
+
+        $this->sendEmailToMentor($mentor, $peserta);
+
+        $unitKerja = $peserta['minat'];
+        $tglMulai = $peserta['tanggal1'];
+        $tglSelesai = $peserta['tanggal2'];
+
+        $lastPrimaryKey = $this->anakMagangModel->selectMax('id_magang')->first();
+        $newPrimaryKey = isset($lastPrimaryKey['id_magang']) ? $lastPrimaryKey['id_magang'] + 1 : 1;
+        $dataAnakMagang = [
+            'id_magang' => $newPrimaryKey,
+            'id_register' => $id_register,
+            'unit_kerja' => $unitKerja,
+            'tgl_mulai' => $tglMulai,
+            'tgl_selesai' => $tglSelesai,
+            'id_mentor' => $mentor['id_mentor'],
+        ];
+
+        $insertSuccess = $this->anakMagangModel->insertAnakMagang($dataAnakMagang);
+        // dd($detail);
+        // if (!$detail) {
+        //     return redirect()->back()->with('error', 'Data registrasi tidak ditemukan');
+        // }
+
+        // Update NIPG pada tabel detailregis
+        $data = [
+            'nipg' => $nipg,  // NIPG mentor yang dipilih
+        ];
+
+        // Perbarui data
+
+        // Redirect kembali ke halaman detail dengan pesan sukses
+        return redirect()->to('/admin/dashboard/detail/' . $id_register)->with('success', 'Mentor berhasil dipilih');
+    }
+
+    public function assign_co_mentor($id_register)
+    {
+        // Ambil data dari form
+        $nipg = $this->request->getPost('nipg');  // Mentor yang dipilih
+
+        // Ambil data peserta berdasarkan id_register
+        $peserta = $this->registrasiModel->getPesertaById($id_register);
+
+        // Pastikan data peserta ada
+        if (empty($peserta)) {
+            return redirect()->back()->with('error', 'Peserta tidak ditemukan');
+        }
+
+        // Pastikan mentor yang dipilih ada (nipg tidak kosong)
+        if (empty($nipg)) {
+            return redirect()->back()->with('error', 'Silakan pilih mentor');
+        }
+
+        // Update nipg_co_mentor di tabel anak_magang berdasarkan id_register
+        $anakMagangModel = new AnakMagangModel();  // Model untuk tabel anak_magang
+
+        $dataToUpdate = [
+            'nipg_co_mentor' => $nipg  // Menyimpan nipg co-mentor
+        ];
+
+        // Lakukan update pada tabel anak_magang untuk peserta yang sesuai id_register
+        $updateResult = $anakMagangModel->updateByRegisterId($id_register, $dataToUpdate);
+
+        if ($updateResult) {
+            // Redirect kembali ke halaman detail dengan pesan sukses
+            return redirect()->to('/admin/dashboard/detail/' . $id_register)->with('success', 'Co-mentor berhasil dipilih');
+        } else {
+            // Jika update gagal
+            return redirect()->back()->with('error', 'Gagal memperbarui co-mentor');
+        }
+    }
+
+
+    public function detail($id)
+    {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'admin') {
+            return view('no_access');
+        }
+        helper('date');  // Load helper 'date'
+        $registrasiModel = new RegistrasiModel();
+        $detailRegisModel = new DetailRegisModel();
+        $mentorModel = new MentorModel();
+
+        // $instansi = $this->request->getPost('instansi');
+
+        // dd($this->request->getPost());
+
+        // Ambil detail data registrasi
+        $data['detail'] = $registrasiModel->getDetail($id);
+        // Ambil detail mentor
+        $data['detail_mentor'] = $detailRegisModel->getDetailWithMentor($id);
+        // Ambil daftar mentor
+        $data['list_mentor'] = [];
+
+        // dd($data['detail_mentor']['nipg'] !== null && $data['detail']['status'] == 'Accept');
+
+        // Ambil daftar mentor dan filter berdasarkan jumlah anak bimbingan
+        $all_mentors = $mentorModel->getData();  // Ambil semua mentor
+        foreach ($all_mentors as $mentor) {
+            $nipg = $mentor['nipg'];
+
+            // Hitung jumlah anak bimbingan berdasarkan nipg
+            $count_children = $detailRegisModel->countMentorChildren($nipg);
+
+            // Jika jumlah anak bimbingan kurang dari 2, tambahkan ke list_mentor
+            if ($count_children < 2) {
+                $data['list_mentor'][] = $mentor;
+            }
+        }
+
+        // Ambil data timeline dari registrasi
+        $data['timeline'] = $registrasiModel->getTimeline($id);
+
+        $id_magang = $this->anakMagangModel->getIdMagangByRegister($id);
+
+        $data['anak_magang'] = $this->anakMagangModel->getPesertaByIdMagang($id_magang);
+        // dd($data['anak_magang']);
+        // dd($data['detail_mentor']);
+        // Split timeline berdasarkan tanda koma (atau tanda lainnya sesuai format)
+        if (!empty($data['timeline'])) {
+            $data['timeline'] = explode(',', $data['timeline']);
+        }
+
+        if (!$data['detail']) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Data tidak ditemukan');
+        }
+        // dd($data);
+        return view('templates/header')
+            . view('templates/sidebar')
+            . view('templates/topbar')
             . view('templates/detail', $data)
             . view('templates/footer');
     }
@@ -280,6 +579,30 @@ class Dashboard extends BaseController
     private function createRenameFile($type, $name, $tipe, $nim, $instansi, $date)
     {
         return strtolower($type . '_' . str_replace(' ', '_', $name) . '_' . $tipe . '_' . $nim . '_' . $instansi . '_' . $date . '.' . pathinfo($_FILES[$type]['name'], PATHINFO_EXTENSION));
+    }
+
+    public function kirim_surat($id_register)
+    {
+
+        $registrasi = $this->registrasiModel->getRegistrasiById($id_register);
+
+        // dd($this->request->getPost());
+        // Pindahkan file ke direktori yang sudah ditentukan
+
+        // Simpan nama file ke database (misalnya di tabel 'detail' atau tabel lain yang relevan)
+
+        $id_magang = $this->anakMagangModel->getIdMagangByRegister($id_register);
+        $anak_magang = $this->anakMagangModel->getPesertaByIdMagangOne($id_magang);
+        $peserta = $this->registrasiModel->getPesertaById($id_register);
+        // dd($anak_magang);
+        $mentor = $this->mentorModel->getMentorByIdMentor($anak_magang['id_mentor']);
+        $statusUpdate = 'Accept';
+        $fileName = $peserta['surat_perjanjian'];
+        $fileName2 = $peserta['surat_persetujuan'];
+        $this->sendEmailToPesertaSuratPerjanjian($mentor, $peserta, $statusUpdate, $fileName, $fileName2);
+
+        // Redirect kembali ke halaman sebelumnya (atau halaman detail)
+        return redirect()->back();
     }
     public function upload_surat_perjanjian()
     {
@@ -315,6 +638,13 @@ class Dashboard extends BaseController
             $id_register = $this->request->getPost('id_register');
             $this->registrasiModel->update($id_register, ['surat_perjanjian' => $newName]);
 
+            $peserta = $this->registrasiModel->getPesertaById($id_register);
+            // $mentor = $this->mentorModel->getMentorByIdMentor($peserta['id_mentor']);
+            $statusUpdate = 'Accept';
+            $fileName = $peserta['surat_perjanjian'];
+
+            // $this->sendEmailToPesertaSuratPerjanjian($mentor, $peserta, $statusUpdate, $newName);
+
             // Menampilkan flash message sukses
             session()->setFlashdata('success', 'Surat perjanjian berhasil diupload.');
         } else {
@@ -326,95 +656,139 @@ class Dashboard extends BaseController
         return redirect()->back();
     }
 
-
-    public function updateStatus()
+    public function upload_surat_persetujuan()
     {
-        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
-        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+        // Cek apakah ada file yang diupload
+        if ($this->request->getFile('surat_persetujuan')->isValid()) {
+            $file = $this->request->getFile('surat_persetujuan');
 
-        if ($user_level !== 'admin') {
-            return view('no_access');
-        }
-        $id = $this->request->getPost('id');
-        $action = strtolower($this->request->getPost('action'));
-        $nipg = $this->request->getPost('nipg');
+            // Tentukan direktori penyimpanan file
+            $path = FCPATH . 'uploads/surat_persetujuan_sent';  // Anda dapat menyesuaikan path sesuai dengan struktur direktori Anda
 
-        if ($id && in_array($action, ['accept', 'reject'])) {
-            $registrasiModel = new RegistrasiModel();
-            $mentorModel = new MentorModel();
-            $detailRegisModel = new DetailRegisModel();
-            $anakMagangModel = new AnakMagangModel();
-
-            $peserta = $registrasiModel->getPesertaById($id);
-            if (!$peserta) {
-                $this->session->setFlashdata('error', 'Peserta tidak ditemukan.');
-                return redirect()->to('/admin/dashboard');
+            // Pastikan direktori ada, jika tidak, buat
+            if (!is_dir($path)) {
+                mkdir($path, 0777, true);
             }
 
-            $statusUpdate = ($action === 'accept') ? 'Accept' : 'reject';
-            $registrasiModel->updateTimelineAcc($id, 'Pencarian Mentor');
+            $id_register = $this->request->getPost('id_register');
+            $registrasi = $this->registrasiModel->getRegistrasiById($id_register);
 
-            $lastPrimaryKey = $detailRegisModel->selectMax('iddetail')->first();
-            $newPrimaryKey = isset($lastPrimaryKey['iddetail']) ? $lastPrimaryKey['iddetail'] + 1 : 1;
+            $nama = $registrasi['nama'];
+            $instansi = $registrasi['instansi'];
+            $tipe = $registrasi['tipe'];
+            $nik = $registrasi['nomor'];
+            $tanggal = date('Ymd');
 
-            if ($statusUpdate === 'Accept') {
-                $dataDetailRegis = [
-                    'iddetail' => $newPrimaryKey,
-                    'id_register' => $id,
-                    'nipg' => $nipg,
-                    'approved' => 'W'
-                ];
+            // dd($this->request->getPost());
+            // Pindahkan file ke direktori yang sudah ditentukan
+            $newName = $this->createRenameFile('surat_persetujuan', $nama, $tipe, $nik, $instansi, $tanggal);
+            $fileName = $file->getRandomName();
+            $file->move($path, $newName);
+            // dd($newName);
+            // Simpan nama file ke database (misalnya di tabel 'detail' atau tabel lain yang relevan)
+            $id_register = $this->request->getPost('id_register');
+            $this->registrasiModel->update($id_register, ['surat_persetujuan' => $newName]);
 
-                $detailRegisModel->insertDetailRegis($dataDetailRegis);
-
-                $mentor = $mentorModel->getMentorByNipg($nipg);
-
-                $fileName = $peserta['surat_perjanjian'];
-
-                $this->sendEmailToPesertaSuratPerjanjian($mentor, $peserta, $statusUpdate, $fileName);
-
-                // $unitKerja = $peserta['minat'];
-                // $tglMulai = $peserta['tanggal1'];
-                // $tglSelesai = $peserta['tanggal2'];
-
-                // $lastPrimaryKey = $anakMagangModel->selectMax('id_magang')->first();
-                // $newPrimaryKey = isset($lastPrimaryKey['id_magang']) ? $lastPrimaryKey['id_magang'] + 1 : 1;
-                // $dataAnakMagang = [
-                //     'id_magang' => $newPrimaryKey,
-                //     'id_register' => $id,
-                //     'unit_kerja' => $unitKerja,
-                //     'tgl_mulai' => $tglMulai,
-                //     'tgl_selesai' => $tglSelesai,
-                //     'id_mentor' => $mentor['id_mentor'],
-                // ];
-
-                // $insertSuccess = $anakMagangModel->insertAnakMagang($dataAnakMagang);
-
-                // if (!$insertSuccess) {
-                //     $this->session->setFlashdata('error', 'Gagal memasukkan data ke tabel anak_magang.');
-                //     return redirect()->to('/admin/dashboard');
-                // }
-                return redirect()->to('/admin/dashboard');
-            } elseif ($statusUpdate === 'reject') {
-                $mentor = $mentorModel->getMentorByNipg($nipg);
-                $registrasiModel->updateTimelineAcc($id, null);
-                $data = [
-                    'status' => 'reject'
-                ];
-                $registrasiModel->update($peserta['id_register'], $data);
-                $this->sendEmailToPesertaSuratPerjanjian($mentor, $peserta, $statusUpdate);
-                return redirect()->to('/admin/dashboard');
-            }
-
-            $this->session->setFlashdata('success', 'Status berhasil diperbarui.');
-            return redirect()->to('/admin/dashboard');
+            // Menampilkan flash message sukses
+            session()->setFlashdata('success', 'Surat persetujuan berhasil diupload.');
         } else {
-            $this->session->setFlashdata('error', 'Data atau aksi tidak valid.');
-            return redirect()->to('/admin/dashboard');
+            // Jika tidak ada file yang diupload atau file tidak valid
+            session()->setFlashdata('error', 'Terjadi kesalahan saat mengupload file.');
         }
+
+        // Redirect kembali ke halaman sebelumnya (atau halaman detail)
+        return redirect()->back();
     }
 
-    private function sendEmailToPesertaSuratPerjanjian($mentor, $peserta, $statusUpdate, $fileName = null)
+    // public function updateStatus()
+    // {
+    //     // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+    //     $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+    //     if ($user_level !== 'admin') {
+    //         return view('no_access');
+    //     }
+    //     $id = $this->request->getPost('id');
+    //     $action = strtolower($this->request->getPost('action'));
+    //     $nipg = $this->request->getPost('nipg');
+
+    //     if ($id && in_array($action, ['accept', 'reject'])) {
+    //         $registrasiModel = new RegistrasiModel();
+    //         $mentorModel = new MentorModel();
+    //         $detailRegisModel = new DetailRegisModel();
+    //         $anakMagangModel = new AnakMagangModel();
+
+    //         $peserta = $registrasiModel->getPesertaById($id);
+    //         if (!$peserta) {
+    //             $this->session->setFlashdata('error', 'Peserta tidak ditemukan.');
+    //             return redirect()->to('/admin/dashboard');
+    //         }
+
+    //         $statusUpdate = ($action === 'accept') ? 'Accept' : 'reject';
+    //         $registrasiModel->updateTimelineAcc($id, 'Pencarian Mentor');
+
+    //         $lastPrimaryKey = $detailRegisModel->selectMax('iddetail')->first();
+    //         $newPrimaryKey = isset($lastPrimaryKey['iddetail']) ? $lastPrimaryKey['iddetail'] + 1 : 1;
+
+    //         if ($statusUpdate === 'Accept') {
+    //             $dataDetailRegis = [
+    //                 'iddetail' => $newPrimaryKey,
+    //                 'id_register' => $id,
+    //                 'nipg' => $nipg,
+    //                 'approved' => 'W'
+    //             ];
+
+    //             $detailRegisModel->insertDetailRegis($dataDetailRegis);
+
+    //             $mentor = $mentorModel->getMentorByNipg($nipg);
+    //             $peserta = $registrasiModel->getPesertaById($id);
+
+    //             $fileName = $peserta['surat_perjanjian'];
+
+    //             $this->sendEmailToPesertaSuratPerjanjian($mentor, $peserta, $statusUpdate, $fileName);
+
+    //             // $unitKerja = $peserta['minat'];
+    //             // $tglMulai = $peserta['tanggal1'];
+    //             // $tglSelesai = $peserta['tanggal2'];
+
+    //             // $lastPrimaryKey = $anakMagangModel->selectMax('id_magang')->first();
+    //             // $newPrimaryKey = isset($lastPrimaryKey['id_magang']) ? $lastPrimaryKey['id_magang'] + 1 : 1;
+    //             // $dataAnakMagang = [
+    //             //     'id_magang' => $newPrimaryKey,
+    //             //     'id_register' => $id,
+    //             //     'unit_kerja' => $unitKerja,
+    //             //     'tgl_mulai' => $tglMulai,
+    //             //     'tgl_selesai' => $tglSelesai,
+    //             //     'id_mentor' => $mentor['id_mentor'],
+    //             // ];
+
+    //             // $insertSuccess = $anakMagangModel->insertAnakMagang($dataAnakMagang);
+
+    //             // if (!$insertSuccess) {
+    //             //     $this->session->setFlashdata('error', 'Gagal memasukkan data ke tabel anak_magang.');
+    //             //     return redirect()->to('/admin/dashboard');
+    //             // }
+    //             return redirect()->to('/admin/dashboard');
+    //         } elseif ($statusUpdate === 'reject') {
+    //             $mentor = $mentorModel->getMentorByNipg($nipg);
+    //             $registrasiModel->updateTimelineAcc($id, null);
+    //             $data = [
+    //                 'status' => 'reject'
+    //             ];
+    //             $registrasiModel->update($peserta['id_register'], $data);
+    //             $this->sendEmailToPesertaSuratPerjanjian($mentor, $peserta, $statusUpdate);
+    //             return redirect()->to('/admin/dashboard');
+    //         }
+
+    //         $this->session->setFlashdata('success', 'Status berhasil diperbarui.');
+    //         return redirect()->to('/admin/dashboard');
+    //     } else {
+    //         $this->session->setFlashdata('error', 'Data atau aksi tidak valid.');
+    //         return redirect()->to('/admin/dashboard');
+    //     }
+    // }
+
+    private function sendEmailToPesertaSuratPerjanjian($mentor, $peserta, $statusUpdate, $fileName = null, $fileName2)
     {
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
         $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
@@ -485,11 +859,17 @@ class Dashboard extends BaseController
             $email->setMailType('html'); // Mengatur email dalam format HTML
             // Jika ada file surat perjanjian yang diupload, lampirkan file
             // dd($fileName);
-            if ($fileName) {
-                $filePath = FCPATH . 'uploads/surat_perjanjian_sent/' . $fileName;
-                // dd($filePath);
-                $email->attach($filePath);
-            }
+            // if ($fileName) {
+            //     $filePath = FCPATH . 'uploads/surat_perjanjian_sent/' . $fileName;
+            //     // dd($filePath);
+            //     $email->attach($filePath);
+            // }
+
+            // if ($fileName2) {
+            //     $filePath = FCPATH . 'uploads/surat_persetujuan_sent/' . $fileName2;
+            //     // dd($filePath);
+            //     $email->attach($filePath);
+            // }
         } elseif ($statusUpdate === 'reject') {
             $email->setSubject('Hasil Pendaftaran Program');
             $email->setMessage("
@@ -531,7 +911,6 @@ class Dashboard extends BaseController
     {
         // Validasi request
         $id = $this->request->getPost('id');
-        $tanggalMulai = $this->request->getPost('tanggalMulai');
         $tanggalSelesai = $this->request->getPost('tanggalSelesai');
         $registrasiModel = new RegistrasiModel();
         $detailRegisModel = new DetailRegisModel();
@@ -540,7 +919,7 @@ class Dashboard extends BaseController
         // Ambil detail data registrasi
         $registrasi = $registrasiModel->getDetail($id);
 
-        if (!$id || !$tanggalMulai || !$tanggalSelesai) {
+        if (!$id || !$tanggalSelesai) {
             return redirect()->back()->with('error', 'Data tidak lengkap.');
         }
 
@@ -549,7 +928,6 @@ class Dashboard extends BaseController
 
         // Update data di database
         $data = [
-            'tanggal1' => $tanggalMulai,
             'tanggal2' => $tanggalSelesai
         ];
 
@@ -814,17 +1192,17 @@ class Dashboard extends BaseController
         $email->setMailType('html'); // Mengatur email dalam format HTML
 
         // Menambahkan lampiran dari tabel registrasi
-        $attachments = ['surat_permohonan', 'proposal_magang', 'cv', 'fc_ktp', 'foto'];
-        foreach ($attachments as $file) {
-            if (!empty($peserta[$file])) {
-                $filePath = FCPATH . 'uploads/' . $peserta[$file];
-                if (file_exists($filePath)) {
-                    $email->attach($filePath);
-                } else {
-                    log_message('error', "File {$file} tidak ditemukan di path: {$filePath}");
-                }
-            }
-        }
+        // $attachments = ['surat_permohonan', 'proposal_magang', 'cv', 'fc_ktp', 'foto'];
+        // foreach ($attachments as $file) {
+        //     if (!empty($peserta[$file])) {
+        //         $filePath = FCPATH . 'uploads/' . $peserta[$file];
+        //         if (file_exists($filePath)) {
+        //             $email->attach($filePath);
+        //         } else {
+        //             log_message('error', "File {$file} tidak ditemukan di path: {$filePath}");
+        //         }
+        //     }
+        // }
 
         // Mengirim email
         if ($email->send()) {

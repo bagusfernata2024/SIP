@@ -8,7 +8,7 @@ class AnakMagangModel extends Model
 {
     protected $table = 'anak_magang';
     protected $primaryKey = 'id_magang';
-    protected $allowedFields = ['id_magang', 'id_register', 'unit_kerja', 'tgl_mulai', 'tgl_selesai', 'tgl_perpanjangan', 'id_mentor', 'status', 'surat_persetujuan', 'surat_pernyataan', 'nota_dinas', 'bank', 'no_rekening', 'buku_rek', 'nama_penerima_bank', 'laporan_akhir', 'approved_laporan_akhir', 'bpp', 'suket']; // Pastikan ini sesuai dengan field tabel
+    protected $allowedFields = ['id_magang', 'id_register', 'unit_kerja', 'tgl_mulai', 'tgl_selesai', 'tgl_perpanjangan', 'id_mentor', 'status', 'surat_persetujuan', 'surat_pernyataan', 'nota_dinas', 'bank', 'no_rekening', 'buku_rek', 'nama_penerima_bank', 'laporan_akhir', 'approved_laporan_akhir', 'bpp', 'suket', 'nipg_co_mentor']; // Pastikan ini sesuai dengan field tabel
 
     public function getData()
     {
@@ -215,6 +215,14 @@ class AnakMagangModel extends Model
             ->where('mentor.nipg', $id_register)
             ->get()
             ->getResult();
+    }
+
+    public function updateByRegisterId($id_register, $data)
+    {
+        // Pastikan id_register valid dan lakukan update
+        return $this->where('id_register', $id_register)
+            ->set($data)
+            ->update();
     }
 
 
