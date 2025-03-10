@@ -40,13 +40,15 @@
                             <?php
                             $no = 1;
                             foreach ($peserta as $item):
-                            ?>
+                                ?>
                                 <tr>
                                     <td><?= $no++; ?></td>
                                     <td><?= $item->nomor; ?></td>
                                     <td><?= $item->nama; ?></td>
                                     <td><?= $item->instansi; ?></td>
-                                    <td><?= formatTanggalIndo($item->tgl_mulai); ?> - <?= formatTanggalIndo($item->tgl_selesai); ?></td>
+                                    <td><?= formatTanggalIndo($item->tgl_mulai); ?> -
+                                        <?= formatTanggalIndo($item->tgl_selesai); ?>
+                                    </td>
                                     <td style="color:white">
                                         <span class="badge 
                                     <?php
@@ -68,7 +70,7 @@
                                         $status_text = 'Selesai Magang';
                                     } else {
                                         echo 'bg-warning text-light';
-                                        $status_text = 'Menunggu Konfirmasi';
+                                        $status_text = 'Proses Kelengkapan Dokumen';
                                     }
                                     ?>">
                                             <?php echo $status_text; ?>
@@ -76,10 +78,21 @@
                                     </td>
 
                                     <td>
-                                        <?php if ($item->status !== 'Aktif' && $item->status !== 'Selesai Magang' && $item->status == null): ?>
-                                            <button class="btn btn-sm btn-success" title="Terima" onclick="approvePeserta(<?= $item->id_magang; ?>, '<?= $item->id_register; ?>')">
-                                                <i class="fas fa-check"></i>
+                                        <a
+                                            href="<?php echo site_url('mentor/dashboard/detail_data_peserta/' . $item->encrypted_id); ?>">
+                                            <button class="btn btn-success btn-sm">
+                                                <i class="fas fa-search fa-sm" style="color: white; font-size: 12px;"></i>
                                             </button>
+                                        </a>
+                                        <br>
+                                        <br>
+                                        
+                                        <?php if ($item->status !== 'Aktif' && $item->status !== 'Selesai Magang' && $item->status == null): ?>
+                                            <button class="btn btn-success btn-sm" title="Terima"
+                                                onclick="approvePeserta(<?= $item->id_magang; ?>, '<?= $item->id_register; ?>')">
+                                                <i class="fas fa-check-circle fa-sm" style="color: white;"></i>
+                                            </button>
+                                            
                                         <?php else: ?>
                                             <span class="text-success" title="Sudah Diterima">
                                                 <i class="fas fa-check-circle"></i>
@@ -133,20 +146,20 @@
         modalBody.innerHTML = `Apakah Anda yakin ingin mengirimkan nilai <strong>${action === 'Y' ? 'Approved (Y)' : 'Rejected (N)'}</strong>?`;
     }
 
-    document.getElementById('confirmAction').addEventListener('click', function() {
+    document.getElementById('confirmAction').addEventListener('click', function () {
         if (selectedIdMagang && actionValue) {
             // Kirim data ke backend melalui fetch
             fetch('<?php echo base_url("mentor/dashboard/update_status_absensi"); ?>', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest' // Untuk membedakan request AJAX
-                    },
-                    body: JSON.stringify({
-                        id_magang: selectedIdMagang,
-                        status: actionValue // Kirimkan nilai Y atau N
-                    })
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest' // Untuk membedakan request AJAX
+                },
+                body: JSON.stringify({
+                    id_magang: selectedIdMagang,
+                    status: actionValue // Kirimkan nilai Y atau N
                 })
+            })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
@@ -165,16 +178,16 @@
     function approvePeserta(idMagang, idRegister) {
         if (confirm("Apakah Anda yakin ingin mengaktifkan peserta ini?")) {
             fetch('<?php echo base_url("mentor/dashboard/approve_peserta"); ?>', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body: JSON.stringify({
-                        id_magang: idMagang,
-                        id_register: idRegister
-                    })
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    id_magang: idMagang,
+                    id_register: idRegister
                 })
+            })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {

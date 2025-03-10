@@ -49,6 +49,7 @@ $routes->post('/registrasi/proses_registrasi_mentor', 'Registrasi::prosesRegistr
 
 //Dashboard Admin
 $routes->get('/admin/dashboard', 'Admin\Dashboard::index');
+$routes->get('admin/dashboard/send-reminder', 'Admin\Dashboard::sendReminder');
 $routes->get('/admin/dashboard/data_mentor', 'Admin\Dashboard::data_mentor');
 $routes->get('/admin/dashboard/data_peserta', 'Admin\Dashboard::data_peserta');
 $routes->get('/admin/dashboard/detail_data_mentor/(:any)', 'Admin\Dashboard::detailDataMentor/$1');
@@ -65,6 +66,7 @@ $routes->get('/admin/dashboard/cetak_informasi_absensi/(:any)', 'Admin\Dashboard
 $routes->get('/admin/dashboard/download_all/(:any)', 'Admin\Dashboard::downloadAll/$1');
 $routes->post('/admin/dashboard/update_status/', 'Admin\Dashboard::updateStatus');
 $routes->post('admin/dashboard/terima_surat_perjanjian', 'Admin\Dashboard::terima_surat_perjanjian');
+$routes->get('admin/dashboard/tolak_surat_perjanjian/(:any)', 'Admin\Dashboard::tolak_surat_perjanjian/$1');
 $routes->post('admin/dashboard/pilih_mentor', 'Admin\Dashboard::pilih_mentor');
 $routes->get('/admin/dashboard/file_lampiran/(:any)', 'Admin\Dashboard::file_lampiran/$1');
 $routes->get('/admin/dashboard/detail_data_m_peserta/(:any)', 'Admin\Dashboard::detail_data_m_peserta/$1');
@@ -84,9 +86,11 @@ $routes->get('/admin/dashboard/download_buku_rekening/(:any)', 'Admin\Dashboard:
 $routes->get('/admin/dashboard/sertifikat/(:any)', 'Admin\Dashboard::sertifikat/$1');
 $routes->get('/admin/dashboard/cetak-sertifikat/(:any)', 'Admin\Dashboard::cetak/$1');
 $routes->post('/admin/dashboard/submitNoSertifikat', 'Admin\Dashboard::submitNoSertifikat');
-$routes->post('admin/dashboard/update_tanggal', 'Admin\Dashboard::update_tanggal');
+$routes->post('admin/dashboard/update_tanggal_mulai', 'Admin\Dashboard::update_tanggal_mulai');
+$routes->post('admin/dashboard/update_tanggal_selesai', 'Admin\Dashboard::update_tanggal_selesai');
 $routes->post('admin/dashboard/upload_surat_perjanjian', 'Admin\Dashboard::upload_surat_perjanjian');
 $routes->post('admin/dashboard/upload_surat_persetujuan', 'Admin\Dashboard::upload_surat_persetujuan');
+$routes->post('admin/dashboard/update_satuan_kerja', 'Admin\Dashboard::update_satuan_kerja');
 
 
 
@@ -115,6 +119,12 @@ $routes->get('dashboard/cetak-sertifikat/(:any)', 'Dashboard::cetak/$1');
 //Dashboard Mentor
 $routes->get('/mentor/dashboard', 'DashboardMentor::index');
 $routes->get('/mentor/dashboard/daftar_peserta', 'DashboardMentor::daftarPeserta');
+$routes->get('/mentor/dashboard/detail_data_peserta/(:any)', 'DashboardMentor::detailDataPeserta/$1');
+$routes->get('/mentor/dashboard/file_lampiran/(:any)', 'DashboardMentor::file_lampiran/$1');
+$routes->get('/mentor/dashboard/download_all/(:any)', 'DashboardMentor::downloadAll/$1');
+$routes->get('/mentor/dashboard/cari_co_mentor/(:any)', 'DashboardMentor::cari_co_mentor/$1');
+$routes->post('mentor/dashboard/assign_co_mentor/(:any)', 'DashboardMentor::assign_co_mentor/$1');
+$routes->get('/mentor/dashboard/review_surat/(:any)', 'DashboardMentor::review_surat/$1');
 $routes->post('mentor/dashboard/approve_peserta', 'DashboardMentor::approve_peserta');
 $routes->get('/mentor/dashboard/absensi_bimbingan', 'DashboardMentor::absensiBimbingan');
 $routes->post('/mentor/dashboard/update_status_absensi', 'DashboardMentor::updateStatusAbsensi');

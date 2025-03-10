@@ -1,7 +1,7 @@
 <!-- Begin Page Content -->
 <div class="container-fluid">
     <div class="mt-4 d-flex justify-content-start mb-4">
-        <a href="<?php echo base_url('admin/dashboard/detail_data_peserta/' . $id_magang); ?>" class="btn btn-secondary btn-sm">
+        <a href="<?php echo base_url('admin/dashboard/detail_data_peserta/' . $encrypt_id); ?>" class="btn btn-secondary btn-sm">
             <i class="fa fa-arrow-left"></i> Kembali ke Detail Peserta
         </a>
     </div>

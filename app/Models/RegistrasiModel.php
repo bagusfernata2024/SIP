@@ -8,8 +8,19 @@ class RegistrasiModel extends Model
 {
     protected $table = 'registrasi';
     protected $primaryKey = 'id_register';
-    protected $allowedFields = ['tipe', 'nomor', 'nama', 'email', 'notelp', 'alamat', 'jk', 'tgl_lahir', 'strata', 'jurusan', 'prodi', 'instansi', 'lama_pkl', 'surat_permohonan', 'proposal_magang', 'cv', 'marksheet', 'tanggal1', 'tanggal2', 'status', 'tgl_regis', 'minat', 'nik', 'fc_ktp', 'tipe_magang', 'email_ap', 'foto', 'timeline', 'no_sertif' ,'surat_perjanjian', 'surat_perjanjian_ttd', 'surat_persetujuan'];
+    protected $allowedFields = ['tipe', 'nomor', 'nama', 'email', 'notelp', 'alamat', 'jk', 'tgl_lahir', 'strata', 'jurusan', 'prodi', 'instansi', 'lama_pkl', 'surat_permohonan', 'proposal_magang', 'cv', 'marksheet', 'tanggal1', 'tanggal2', 'status', 'tgl_regis', 'minat', 'nik', 'fc_ktp', 'tipe_magang', 'email_ap', 'foto', 'timeline', 'no_sertif', 'surat_perjanjian', 'surat_perjanjian_ttd', 'surat_persetujuan'];
 
+
+    public function getTop10Jurusan()
+    {
+        // Query untuk mengambil 10 jurusan terbanyak dengan status diterima
+        return $this->select('prodi, COUNT(prodi) as jumlah')
+            ->where('status', 'Accept')  // Pastikan status peserta diterima
+            ->groupBy('prodi')  // Group berdasarkan jurusan
+            ->orderBy('jumlah', 'DESC')  // Urutkan berdasarkan jumlah terbanyak
+            ->limit(10)  // Ambil 10 jurusan terbanyak
+            ->findAll();
+    }
 
     public function getTimeline($id)
     {
@@ -26,6 +37,13 @@ class RegistrasiModel extends Model
         }
 
         return []; // Jika tidak ada data, kembalikan array kosong
+    }
+
+    public function getPesertaHampirSelesai()
+    {
+        $tglReminder = date('Y-m-d', strtotime('+3 days'));
+
+        return $this->where('tanggal2', $tglReminder)->findAll();
     }
 
     public function getTanggalMagang($idMagang)
@@ -70,6 +88,13 @@ class RegistrasiModel extends Model
         $this->db->table($this->table)
             ->where('id_register', $id)
             ->update(['status' => $status]);
+    }
+
+    public function updateSurat($id, $status)
+    {
+        $this->db->table($this->table)
+            ->where('id_register', $id)
+            ->update(['upload_surat' => $status]);
     }
 
     public function updateTimelineAcc($id, $status)

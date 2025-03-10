@@ -12,10 +12,9 @@
         <div class="card-body">
             <div class="table-responsive">
                 <div class="py-3">
-                    <a href="<?php echo base_url('admin/dashboard/informasi_m_absensi/' . $id_magang) ?>" class="btn btn-info mr-2">Informasi Absensi</a>
-                    <a href="<?php echo base_url('admin/dashboard/informasi_m_laporan/' . $id_magang) ?>" class="btn btn-primary mr-2">Informasi Laporan</a>
-                    <a href="<?php echo base_url('admin/dashboard/informasi_m_nilai_akhir/' . $id_magang) ?>" class="btn btn-warning mr-2">Informasi Nilai Akhir</a>
-                    <a href="<?php echo base_url('admin/dashboard/perpanjang_peserta/' . $id_magang) ?>" class="btn btn-danger mr-2">Perpanjang</a>
+                    <a href="<?php echo base_url('admin/dashboard/informasi_m_absensi/' . $encrypted_id) ?>" class="btn btn-info mr-2">Informasi Absensi</a>
+                    <a href="<?php echo base_url('admin/dashboard/informasi_m_laporan/' . $encrypted_id) ?>" class="btn btn-primary mr-2">Informasi Laporan</a>
+                    <a href="<?php echo base_url('admin/dashboard/informasi_m_nilai_akhir/' . $encrypted_id) ?>" class="btn btn-warning mr-2">Informasi Nilai Akhir</a>
                     <button type="button" class="btn btn-success" data-toggle="modal" data-target="#statusModal">Status</button>
                 </div>
                 <!-- Modal -->
@@ -28,7 +27,7 @@
                                     <span aria-hidden="true">&times;</span>
                                 </button>
                             </div>
-                            <form action="<?php echo base_url('admin/dashboard/changeStatus/' . $id_magang); ?>" method="post">
+                            <form action="<?php echo base_url('admin/dashboard/changeStatus/' . $encrypted_id); ?>" method="post">
                                 <div class="modal-body">
                                     <div class="form-group">
                                         <label for="status">Pilih Status</label>
@@ -362,7 +361,7 @@
 
                         <!-- Tombol Download Semua -->
                         <div class="mt-3">
-                            <a href="<?php echo base_url('admin/dashboard/download_all/' . $detail_peserta[0]->id_register); ?>" class="btn btn-success btn-sm">Download Semua Lampiran</a>
+                            <a href="<?php echo base_url('admin/dashboard/download_all/' . $encrypt_id); ?>" class="btn btn-success btn-sm">Download Semua Lampiran</a>
                         </div>
                         <br>
                     </tbody>

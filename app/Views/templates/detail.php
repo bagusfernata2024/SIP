@@ -55,28 +55,48 @@
             <div class="table-responsive">
                 <div class="py-3">
                     <div class="progress">
-                        <div class="progress-bar bg-success" role="progressbar" style="width: 33%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
-                            <a href="<?php echo base_url('admin/dashboard/detail/' . $detail['id_register']); ?>" class="btn btn-success w-100">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: 33%;" aria-valuenow="100"
+                            aria-valuemin="0" aria-valuemax="100">
+                            <a href="<?php echo base_url('admin/dashboard/detail/' . $detail['encrypt_id']); ?>"
+                                class="btn btn-success w-100">
                                 Preview
                             </a>
                         </div>
-                        <div class="progress-bar bg-secondary" role="progressbar" style="width: 33%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
-                            <a href="<?php echo base_url('admin/dashboard/cari_mentor/' . $detail['id_register']); ?>" class="btn btn-secondary w-100">
+                        <div class="progress-bar bg-secondary" role="progressbar" style="width: 33%;"
+                            aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
+                            <a href="<?php echo base_url('admin/dashboard/cari_mentor/' . $detail['encrypt_id']); ?>"
+                                class="btn btn-secondary w-100">
                                 Cari Mentor
                             </a>
                         </div>
-                        <div class="progress-bar bg-secondary" role="progressbar" style="width: 33%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
-                            <a href="<?php echo base_url('admin/dashboard/upload_surat/' . $detail['id_register']); ?>" class="btn btn-secondary w-100">
+                        <div class="progress-bar bg-secondary" role="progressbar" style="width: 33%;"
+                            aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
+                            <a href="<?php echo base_url('admin/dashboard/upload_surat/' . $detail['encrypt_id']); ?>"
+                                class="btn btn-secondary w-100">
                                 Upload Surat
                             </a>
                         </div>
-                        <div class="progress-bar bg-secondary" role="progressbar" style="width: 33%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
-                            <a href="<?php echo base_url('admin/dashboard/review_surat/' . $detail['id_register']); ?>" class="btn btn-secondary w-100">
+                        <div class="progress-bar bg-secondary" role="progressbar" style="width: 33%;"
+                            aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
+                            <a href="<?php echo base_url('admin/dashboard/review_surat/' . $detail['encrypt_id']); ?>"
+                                class="btn btn-secondary w-100">
                                 Review Surat
                             </a>
                         </div>
                     </div>
                 </div>
+
+                <div class="tabel-timeline" style="margin-top: 20px;">
+                    <table class="table table-bordered">
+                        <tbody>
+                            <tr>
+                                <th>Timeline</th>
+                                <td><?php echo $detail['timeline']; ?></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
 
 
                 <h5 class="font-weight-bold mt-4">Data Diri:</h5>
@@ -102,7 +122,8 @@
                             <th>No Telepon</th>
                             <td>
                                 <?php echo $detail['notelp']; ?>
-                                <a href="https://wa.me/<?php echo '62' . ltrim($detail['notelp'], '0'); ?>" target="_blank" class="btn btn-success btn-sm">
+                                <a href="https://wa.me/<?php echo '62' . ltrim($detail['notelp'], '0'); ?>"
+                                    target="_blank" class="btn btn-success btn-sm">
                                     Hubungi via WhatsApp
                                 </a>
 
@@ -162,7 +183,10 @@
                                 <?php echo formatTanggalIndo($detail['tanggal1']); ?>
                                 <?php if ($detail['timeline'] == 'Review Berkas Awal') { ?>
 
-
+                                    <button type="button" class="btn btn-warning btn-sm ms-2" data-bs-toggle="modal"
+                                        data-bs-target="#editTanggalMulaiModal">
+                                        Edit
+                                    </button>
                                 <?php } ?>
                             </td>
                         </tr>
@@ -172,7 +196,8 @@
                                 <?php echo formatTanggalIndo($detail['tanggal2']); ?>
                                 <?php if ($detail['timeline'] == 'Review Berkas Awal') { ?>
 
-                                    <button type="button" class="btn btn-warning btn-sm ms-2" data-bs-toggle="modal" data-bs-target="#editTanggalModal">
+                                    <button type="button" class="btn btn-warning btn-sm ms-2" data-bs-toggle="modal"
+                                        data-bs-target="#editTanggalSelesaiModal">
                                         Edit
                                     </button>
                                 <?php } ?>
@@ -183,18 +208,31 @@
                             <td style="color:white">
                                 <span class="badge 
                                     <?php
-                                    if ($detail['status'] === 'Accept') echo 'bg-success text-light';
-                                    elseif ($detail['status'] === 'reject') echo 'bg-danger text-light';
-                                    else echo 'bg-warning text-light';
+                                    if ($detail['status'] === 'Accept')
+                                        echo 'bg-success text-light';
+                                    elseif ($detail['status'] === 'reject')
+                                        echo 'bg-danger text-light';
+                                    else
+                                        echo 'bg-warning text-light';
                                     ?>">
                                     <?php echo $detail['status'] ? ucfirst($detail['status']) : 'Belum Diterima'; ?>
                                 </span>
                             </td>
                         </tr>
                         <tr>
-                            <th>Minat Satuan Kerja</th>
-                            <td><?php echo $detail['minat']; ?></td>
+                            <th>Satuan Kerja</th>
+                            <td>
+                                <!-- Menampilkan Satuan Kerja yang sudah ada -->
+                                <?php echo $detail['minat']; ?>
+
+                                <!-- Tombol Edit untuk membuka Modal -->
+                                <button type="button" class="btn btn-warning btn-sm ms-2" data-bs-toggle="modal"
+                                    data-bs-target="#editSatuanKerjaModal">
+                                    Edit
+                                </button>
+                            </td>
                         </tr>
+
                         <tr>
                             <th>Tipe Magang</th>
                             <td><?php echo $detail['tipe']; ?></td>
@@ -258,7 +296,8 @@
 
                         <!-- Tombol Download Semua -->
                         <div class="mt-3">
-                            <a href="<?php echo base_url('admin/dashboard/download_all/' . $detail['id_register']); ?>" class="btn btn-success btn-sm">Download Semua Lampiran</a>
+                            <a href="<?php echo base_url('admin/dashboard/download_all/' . $detail['encrypt_id']); ?>"
+                                class="btn btn-success btn-sm">Download Semua Lampiran</a>
                         </div>
                         <br>
                     </tbody>
@@ -269,9 +308,10 @@
                 <!-- Progress bar dan data lainnya di sini -->
 
                 <!-- Tombol Previous dan Next -->
-                <div class="d-flex justify-content-between mt-4" style="margin-left: 890px;">
-                    
-                    <a href="<?php echo base_url('admin/dashboard/cari_mentor/' . $detail['id_register']); ?>" class="btn btn-warning">
+                <div class="d-flex justify-content-between mt-4" style="margin-left: 970px;">
+
+                    <a href="<?php echo base_url('admin/dashboard/cari_mentor/' . $detail['encrypt_id']); ?>"
+                        class="btn btn-warning">
                         Next
                     </a>
                 </div>
@@ -286,6 +326,43 @@
 </div>
 </div>
 </div>
+
+<!-- Modal Edit Satuan Kerja -->
+<div class="modal fade" id="editSatuanKerjaModal" tabindex="-1" aria-labelledby="editSatuanKerjaModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editSatuanKerjaModalLabel">Edit Satuan Kerja</h5>
+            </div>
+            <form method="post" action="<?php echo base_url('admin/dashboard/update_satuan_kerja'); ?>">
+                <div class="modal-body">
+                    <!-- Menyertakan ID peserta untuk update -->
+                    <input type="hidden" name="id" value="<?php echo $detail['id_register']; ?>">
+
+                    <div class="mb-3">
+                        <label for="minat" class="form-label">Pilih Satuan Kerja</label>
+                        <select class="form-select" id="minat" name="minat" required>
+                            <option value="" disabled selected>Pilih Satuan Kerja...</option>
+                            <?php foreach ($daftar_minat as $minat): ?>
+                                <option value="<?= htmlspecialchars($minat['nama_satker']); ?>"
+                                    <?= $detail['minat'] == $minat['nama_satker'] ? 'selected' : ''; ?>>
+                                    <?= htmlspecialchars($minat['nama_satker']); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <div class="invalid-feedback">Silakan pilih satuan kerja.</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 
 <!-- Modal Konfirmasi -->
 <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
@@ -309,20 +386,49 @@
 </div>
 
 <!-- Modal Edit Tanggal -->
-<div class="modal fade" id="editTanggalModal" tabindex="-1" aria-labelledby="editTanggalModalLabel" aria-hidden="true">
+<div class="modal fade" id="editTanggalMulaiModal" tabindex="-1" aria-labelledby="editTanggalMulaiModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="editTanggalModalLabel">Edit Tanggal Magang</h5>
+                <h5 class="modal-title" id="editTanggalMulaiModalLabel">Edit Tanggal Mulai Magang</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form method="post" action="<?php echo base_url('admin/dashboard/update_tanggal'); ?>">
+            <form method="post" action="<?php echo base_url('admin/dashboard/update_tanggal_mulai'); ?>">
+                <div class="modal-body">
+                    <input type="hidden" name="id" value="<?php echo $detail['id_register']; ?>">
+
+                    <div class="mb-3">
+                        <label for="tanggalMulai" class="form-label">Tanggal Mulai</label>
+                        <input type="date" class="form-control" id="tanggalMulai" name="tanggalMulai"
+                            value="<?php echo $detail['tanggal1']; ?>" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editTanggalSelesaiModal" tabindex="-1" aria-labelledby="editTanggalSelesaiModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editTanggalSelesaiModalLabel">Edit Tanggal Selesai Magang</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="<?php echo base_url('admin/dashboard/update_tanggal_selesai'); ?>">
                 <div class="modal-body">
                     <input type="hidden" name="id" value="<?php echo $detail['id_register']; ?>">
 
                     <div class="mb-3">
                         <label for="tanggalSelesai" class="form-label">Tanggal Selesai</label>
-                        <input type="date" class="form-control" id="tanggalSelesai" name="tanggalSelesai" value="<?php echo $detail['tanggal2']; ?>" required>
+                        <input type="date" class="form-control" id="tanggalSelesai" name="tanggalSelesai"
+                            value="<?php echo $detail['tanggal2']; ?>" required>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -343,7 +449,7 @@
         actionType = action; // Simpan aksi yang dipilih
     }
 
-    document.getElementById('confirmAction').addEventListener('click', function() {
+    document.getElementById('confirmAction').addEventListener('click', function () {
         // Ambil nilai nipg dari select
 
         if (actionType) {

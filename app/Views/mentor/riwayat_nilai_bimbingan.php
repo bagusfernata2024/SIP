@@ -72,7 +72,7 @@
                                                                     <?= $item->status; ?>
                                                                 </span>
                                                             </td>
-                                                            <td><a href="<?php echo site_url('mentor/dashboard/detail_riwayat_nilai_bimbingan/' . $item->id_magang); ?>">
+                                                            <td><a href="<?php echo site_url('mentor/dashboard/detail_riwayat_nilai_bimbingan/' . $item->encrypted_id); ?>">
                                                                     <button class="btn btn-success btn-sm">
                                                                         <i class="fas fa-search" style="color: white;"></i>
                                                                     </button></a>

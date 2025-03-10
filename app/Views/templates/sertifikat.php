@@ -14,7 +14,7 @@
                     <div class="card position-relative">
                         <?php if (!empty($user_register['no_sertif'])): ?>
                             <!-- Tombol untuk mengunduh sertifikat jika nomor sertifikat sudah ada -->
-                            <a href="<?php echo base_url('admin/dashboard/cetak-sertifikat/' . $user_register['id_register']); ?>" class="btn btn-warning btn-sm">
+                            <a href="<?php echo base_url('admin/dashboard/cetak-sertifikat/' . $encrypt_id_register); ?>" class="btn btn-warning btn-sm">
                                 <i class="fas fa-file-pdf"></i> Unduh Sertifikat (PDF)
                             </a>
                         <?php else: ?>

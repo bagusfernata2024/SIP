@@ -53,22 +53,22 @@
         <div class="py-3" style="margin-left: 10px; margin-right: 10px; margin-top: 20px;">
             <div class="progress">
                 <div class="progress-bar bg-secondary" role="progressbar" style="width: 33%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
-                    <a href="<?php echo base_url('admin/dashboard/detail/' . $detail['id_register']); ?>" class="btn btn-secondary w-100">
+                    <a href="<?php echo base_url('admin/dashboard/detail/' . $detail['encrypt_id']); ?>" class="btn btn-secondary w-100">
                         Preview
                     </a>
                 </div>
                 <div class="progress-bar bg-success" role="progressbar" style="width: 33%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
-                    <a href="<?php echo base_url('admin/dashboard/cari_mentor/' . $detail['id_register']); ?>" class="btn btn-success w-100">
+                    <a href="<?php echo base_url('admin/dashboard/cari_mentor/' . $detail['encrypt_id']); ?>" class="btn btn-success w-100">
                         Cari Mentor
                     </a>
                 </div>
                 <div class="progress-bar bg-secondary" role="progressbar" style="width: 33%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
-                    <a href="<?php echo base_url('admin/dashboard/upload_surat/' . $detail['id_register']); ?>" class="btn btn-secondary w-100">
+                    <a href="<?php echo base_url('admin/dashboard/upload_surat/' . $detail['encrypt_id']); ?>" class="btn btn-secondary w-100">
                         Upload Surat
                     </a>
                 </div>
                 <div class="progress-bar bg-secondary" role="progressbar" style="width: 33%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
-                    <a href="<?php echo base_url('admin/dashboard/review_surat/' . $detail['id_register']); ?>" class="btn btn-secondary w-100">
+                    <a href="<?php echo base_url('admin/dashboard/review_surat/' . $detail['encrypt_id']); ?>" class="btn btn-secondary w-100">
                         Review Surat
                     </a>
                 </div>
@@ -174,7 +174,7 @@
                                 <option value="" disabled selected>-- Pilih Mentor --</option>
                                 <?php foreach ($list_mentor as $mentor) { ?>
                                     <option value="<?php echo $mentor['nipg']; ?>">
-                                        <?php echo $mentor['nipg'] . " | " . $mentor['nama'] . " | " . $mentor['division']; ?>
+                                        <?php echo $mentor['nama'] . " | " . $mentor['nipg'] . " | " . $mentor['division']; ?>
                                     </option>
                                 <?php } ?>
                             </select>
@@ -182,7 +182,7 @@
 
                     <!-- Tombol Pilih Mentor -->
                     <input type="hidden" name="id_register" value="<?php echo $detail['id_register']; ?>">
-                    <button type="submit" class="btn btn-primary btn-sm">Pilih Co Mentor</button>
+                    <button type="submit" class="btn btn-primary btn-sm">Pilih Mentor</button>
                     </form>
 
                 <?php } ?>
@@ -194,13 +194,13 @@
             </div>
             <?php if (!$anak_magang) { ?>
                 <div class="form-group mb-4">
-                    <form action="<?php echo base_url('admin/dashboard/assign_mentor/' . $detail['id_register']); ?>" method="POST" class="d-inline">
+                    <form action="<?php echo base_url('admin/dashboard/assign_mentor/' . $detail['encrypt_id']); ?>" method="POST" class="d-inline">
                         <label for="mentor" class="form-label font-weight-bold">Pilih Mentor</label>
                         <select class="form-control form-select" id="mentor" name="nipg" required>
                             <option value="" disabled selected>-- Pilih Mentor --</option>
                             <?php foreach ($list_mentor as $mentor) { ?>
                                 <option value="<?php echo $mentor['nipg']; ?>">
-                                    <?php echo $mentor['nipg'] . " | " . $mentor['nama'] . " | " . $mentor['division']; ?>
+                                    <?php echo $mentor['nama'] . " | " . $mentor['nipg'] . " | " . $mentor['division']; ?>
                                 </option>
                             <?php } ?>
                         </select>
@@ -302,35 +302,18 @@
             <?php } else { ?>
                 <!-- Jika status belum diterima, tampilkan form pemilihan mentor -->
                 <div class="alert alert-warning" role="alert">
-                    <strong>Pendaftar Belum Diterima</strong> Silakan pilih co mentor jika ingin menerima pendaftar magang.
+                    <strong>Co Mentor Belum Dipilih</strong>
                 </div>
-
-                <div class="form-group mb-4">
-                    <form action="<?php echo base_url('admin/dashboard/assign_co_mentor/' . $detail['id_register']); ?>" method="POST" class="d-inline">
-                        <label for="mentor" class="form-label font-weight-bold">Pilih Co Mentor</label>
-                        <select class="form-control form-select" id="mentor" name="nipg" required>
-                            <option value="" disabled selected>-- Pilih Co Mentor --</option>
-                            <?php foreach ($co_mentors as $mentor) { ?>
-                                <option value="<?php echo $mentor['nipg']; ?>">
-                                    <?php echo $mentor['nipg'] . " | " . $mentor['nama'] . " | " . $mentor['division']; ?>
-                                </option>
-                            <?php } ?>
-                        </select>
-                </div>
-                <!-- Tombol Pilih Mentor -->
-                <input type="hidden" name="id_register" value="<?php echo $detail['id_register']; ?>">
-                <button type="submit" class="btn btn-primary btn-sm mb-2">Pilih</button>
-                </form>
             <?php } ?>
             <div class="table-responsive">
                 <!-- Progress bar dan data lainnya di sini -->
 
                 <!-- Tombol Previous dan Next -->
                 <div class="d-flex justify-content-between mt-4" style="margin-bottom: 20px;">
-                    <a href="<?php echo base_url('admin/dashboard/detail/' . $detail['id_register']); ?>" class="btn btn-warning">
+                    <a href="<?php echo base_url('admin/dashboard/detail/' . $detail['encrypt_id']); ?>" class="btn btn-warning">
                         Previous
                     </a>
-                    <a href="<?php echo base_url('admin/dashboard/upload_surat/' . $detail['id_register']); ?>" class="btn btn-warning">
+                    <a href="<?php echo base_url('admin/dashboard/upload_surat/' . $detail['encrypt_id']); ?>" class="btn btn-warning">
                         Next
                     </a>
                 </div>

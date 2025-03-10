@@ -52,23 +52,31 @@
 
         <div class="py-3" style="margin-left: 10px; margin-right: 10px;">
             <div class="progress">
-                <div class="progress-bar bg-secondary" role="progressbar" style="width: 33%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
-                    <a href="<?php echo base_url('admin/dashboard/detail/' . $detail['id_register']); ?>" class="btn btn-secondary w-100">
+                <div class="progress-bar bg-secondary" role="progressbar" style="width: 33%;" aria-valuenow="100"
+                    aria-valuemin="0" aria-valuemax="100">
+                    <a href="<?php echo base_url('admin/dashboard/detail/' . $detail['encrypt_id']); ?>"
+                        class="btn btn-secondary w-100">
                         Preview
                     </a>
                 </div>
-                <div class="progress-bar bg-secondary" role="progressbar" style="width: 33%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
-                    <a href="<?php echo base_url('admin/dashboard/cari_mentor/' . $detail['id_register']); ?>" class="btn btn-secondary w-100">
+                <div class="progress-bar bg-secondary" role="progressbar" style="width: 33%;" aria-valuenow="100"
+                    aria-valuemin="0" aria-valuemax="100">
+                    <a href="<?php echo base_url('admin/dashboard/cari_mentor/' . $detail['encrypt_id']); ?>"
+                        class="btn btn-secondary w-100">
                         Cari Mentor
                     </a>
                 </div>
-                <div class="progress-bar bg-secondary" role="progressbar" style="width: 33%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
-                    <a href="<?php echo base_url('admin/dashboard/upload_surat/' . $detail['id_register']); ?>" class="btn btn-secondary w-100">
+                <div class="progress-bar bg-secondary" role="progressbar" style="width: 33%;" aria-valuenow="100"
+                    aria-valuemin="0" aria-valuemax="100">
+                    <a href="<?php echo base_url('admin/dashboard/upload_surat/' . $detail['encrypt_id']); ?>"
+                        class="btn btn-secondary w-100">
                         Upload Surat
                     </a>
                 </div>
-                <div class="progress-bar bg-success" role="progressbar" style="width: 33%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
-                    <a href="<?php echo base_url('admin/dashboard/review_surat/' . $detail['id_register']); ?>" class="btn btn-success w-100">
+                <div class="progress-bar bg-success" role="progressbar" style="width: 33%;" aria-valuenow="100"
+                    aria-valuemin="0" aria-valuemax="100">
+                    <a href="<?php echo base_url('admin/dashboard/review_surat/' . $detail['encrypt_id']); ?>"
+                        class="btn btn-success w-100">
                         Review Surat
                     </a>
                 </div>
@@ -126,13 +134,7 @@
                                 Pendaftar Ditolak
                             </button>
                         <?php } else { ?>
-                            <!-- Jika belum ada keputusan, tampilkan tombol aktif untuk aksi -->
-                            <button type="submit" class="btn btn-success btn-sm ml-2" data-bs-toggle="modal" data-bs-target="#confirmModal" onclick="setAction('Accept')">
-                                Terima
-                            </button>
-                            <button type="button" class="btn btn-danger btn-sm ml-2" data-bs-toggle="modal" data-bs-target="#confirmModal" onclick="setAction('reject')">
-                                Tolak
-                            </button>
+
                         <?php } ?>
                     <?php } else { ?>
                         <?php if ($detail['status'] === 'Accept') { ?>
@@ -150,9 +152,42 @@
                         <?php } ?>
 
                     <?php } ?>
+                    <?php if ($detail['status'] !== 'Accept' && $detail['status'] !== 'reject') { ?>
+                        <!-- Jika belum ada keputusan, tampilkan tombol aktif untuk aksi -->
+                        <button type="submit" class="btn btn-success btn-sm ml-2" data-bs-toggle="modal"
+                            data-bs-target="#confirmModal" onclick="setAction('Accept')">
+                            Terima
+                        </button>
+
+                        <a
+                            href="<?php echo base_url('admin/dashboard/tolak_surat_perjanjian/' . $detail['encrypt_id']); ?>"><button
+                                type="button" class="btn btn-danger btn-sm ml-2" data-bs-toggle="modal"
+                                data-bs-target="#confirmModal" onclick="setAction('reject')">
+                                Tolak
+                            </button></a>
+                    <?php } ?>
                 </div>
             </form>
         </div>
+
+        <!-- Modal Konfirmasi -->
+        <!-- <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="confirmModalLabel">Konfirmasi Aksi</h5>
+                    </div>
+                    <div class="modal-body">
+                        
+                        Apakah Anda yakin ingin melakukan aksi ini?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="button" class="btn btn-success" id="confirmAction">Ya</button>
+                    </div>
+                </div>
+            </div>
+        </div> -->
 
 
         <div class="tabel-surat" style="margin-left: 30px; margin-right: 20px; margin-bottom: 20px;">
@@ -161,7 +196,8 @@
 
                 <!-- Tombol Previous dan Next -->
                 <div class="d-flex justify-content-between mt-4">
-                    <a href="<?php echo base_url('admin/dashboard/upload_surat/' . $detail['id_register']); ?>" class="btn btn-warning">
+                    <a href="<?php echo base_url('admin/dashboard/upload_surat/' . $detail['encrypt_id']); ?>"
+                        class="btn btn-warning">
                         Previous
                     </a>
                 </div>

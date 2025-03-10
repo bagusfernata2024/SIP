@@ -50,7 +50,7 @@
                                 <td><?php echo $mentor['subsidiaries'] ?></td>
                                 <td><?php echo $mentor['email'] ?></td>
                                 <td><?php echo $mentor['job'] ?></td>
-                                <td><a href="<?php echo site_url('admin/dashboard/detail_data_mentor/' . $mentor['id_mentor']); ?>">
+                                <td><a href="<?php echo site_url('admin/dashboard/detail_data_mentor/' . $mentor['encrypted_id']); ?>">
                                         <button class="btn btn-success btn-sm">
                                             <i class="fas fa-search" style="color: white;"></i>
                                         </button></a>

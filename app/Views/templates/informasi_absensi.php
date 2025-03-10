@@ -1,7 +1,7 @@
 <!-- Begin Page Content -->
 <div class="container-fluid">
     <div class="mt-4 d-flex justify-content-start mb-4">
-        <a href="<?php echo base_url('admin/dashboard/detail_data_peserta/' . $id_magang); ?>" class="btn btn-secondary btn-sm">
+        <a href="<?php echo base_url('admin/dashboard/detail_data_peserta/' . $encrypt_id); ?>" class="btn btn-secondary btn-sm">
             <i class="fa fa-arrow-left"></i> Kembali ke Detail Peserta
         </a>
     </div>
@@ -24,7 +24,7 @@
         </div>
         <div class="container-fluid">
             <!-- Form Filter -->
-            <form action="<?php echo base_url('admin/dashboard/informasi_absensi/' . $id_magang); ?>" method="get">
+            <form action="<?php echo base_url('admin/dashboard/informasi_absensi/' . $encrypt_id); ?>" method="get">
                 <div class="form-group">
                     <label for="filter_type">Filter Berdasarkan</label>
                     <select name="filter_type" id="filter_type" class="form-control">
@@ -45,7 +45,7 @@
             </form>
 
             <!-- Form Cetak -->
-            <form action="<?php echo base_url('admin/dashboard/cetak_informasi_absensi/' . $id_magang); ?>" method="get" target="_blank">
+            <form action="<?php echo base_url('admin/dashboard/cetak_informasi_absensi/' . $encrypt_id); ?>" method="get" target="_blank">
                 <input type="hidden" name="filter_type" id="filter_type_cetak" value="all">
                 <input type="hidden" name="start_date" id="start_date_cetak">
                 <input type="hidden" name="end_date" id="end_date_cetak">

@@ -33,6 +33,54 @@
 
 		<div class="card-body">
 			<?php if ($registrasi['surat_perjanjian_ttd'] == null): ?>
+				<div class="tabel-surat" style="margin-left: 5px; margin-right:5px;">
+					<div class="table-responsive">
+						<table class="table table-bordered">
+							<thead>
+								<tr>
+									<th>#</th>
+									<th>Nama File</th>
+									<th>Aksi</th>
+								</tr>
+							</thead>
+							<tbody>
+								<?php if (!empty($registrasi['surat_perjanjian'])) { ?>
+									<tr>
+										<td>1</td>
+										<td><?php echo $registrasi['surat_perjanjian']; ?></td>
+										<td>
+											<a href="<?php echo base_url('uploads/surat_perjanjian_sent/' . $registrasi['surat_perjanjian']); ?>"
+												class="btn btn-primary btn-sm" download>
+												Download
+											</a>
+										</td>
+									</tr>
+									<tr>
+										<td>2</td>
+										<td><?php echo $registrasi['surat_persetujuan']; ?></td>
+										<td>
+											<a href="<?php echo base_url('uploads/surat_persetujuan_sent/' . $registrasi['surat_persetujuan']); ?>"
+												class="btn btn-primary btn-sm" download>
+												Download
+											</a>
+										</td>
+									</tr>
+								<?php } else { ?>
+									<tr>
+										<td colspan="3" class="text-center text-danger">
+											<strong>Surat belum diunggah.</strong>
+										</td>
+									</tr>
+								<?php } ?>
+							</tbody>
+						</table>
+					</div>
+				</div>
+
+				<hr>
+				<p>Silahkan Download Surat Perjanjian Tersebut Lalu Tanda Tangan dan Kirim Kembali Pada Form Upload Di Bawah.</p>
+				<hr>
+
 				<div class="alert alert-warning">
 					<strong>Perhatian!</strong> Anda belum mengunggah surat perjanjian. Silakan unggah terlebih dahulu.
 				</div>

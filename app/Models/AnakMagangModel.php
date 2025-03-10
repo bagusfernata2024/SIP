@@ -15,6 +15,35 @@ class AnakMagangModel extends Model
         return $this->findAll();
     }
 
+    public function getPesertaHampirSelesai()
+    {
+        $tglReminder = date('Y-m-d', strtotime('+3 days'));
+
+        return $this->where('tgl_selesai', $tglReminder)->findAll();
+    }
+
+    // Method to get Realisasi Satker with pagination
+    public function getRealisasiSatker($page = 1, $perPage = 10)
+    {
+        // Membuat query builder untuk mengelompokkan data berdasarkan unit_kerja
+        $builder = $this->db->table($this->table);
+        $builder->select('unit_kerja, COUNT(id_magang) as jumlah_peserta');
+        $builder->groupBy('unit_kerja');
+        $builder->limit($perPage, ($page - 1) * $perPage);
+
+        // Eksekusi query dan kembalikan hasilnya
+        return $builder->get()->getResultArray();
+    }
+
+    // Fungsi untuk menghitung jumlah total data Realisasi Satker untuk pagination
+    public function countTotalSatker()
+    {
+        $builder = $this->db->table($this->table);
+        $builder->select('unit_kerja');
+        $builder->groupBy('unit_kerja');
+        return $builder->countAllResults(); // Menghitung jumlah unit_kerja
+    }
+
     public function countByStatus($status)
     {
         return $this->db->table($this->table)

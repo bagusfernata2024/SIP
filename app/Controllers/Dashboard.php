@@ -117,6 +117,23 @@ class Dashboard extends BaseController
         return redirect()->to(base_url('dashboard'))->with('error', 'Gagal mengunggah file.');
     }
 
+    private function createRenameFile3($type, $name, $tipe)
+    {
+        $id_register = $this->session->get('id_register');
+        $register = $this->registrasiModel->getRegistrasiById($id_register);
+        $id_magang = $this->anakMagangModel->getIdMagangByRegister($id_register);
+        $anak_magang = $this->anakMagangModel->getPesertaByIdMagang($id_magang);
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'user') {
+            return view('no_access');
+        }
+        $data['anak_magang'] = $anak_magang;
+        $data['registrasi'] = $register;
+        return strtolower($type . '_' . str_replace(' ', '_', $name) . '_' . $tipe . '.pdf');
+    }
+
     private function createRenameFile($type, $name, $tipe, $nim, $instansi, $date)
     {
         $id_register = $this->session->get('id_register');
@@ -638,6 +655,7 @@ class Dashboard extends BaseController
 
         // Ambil informasi user dari session
         $nama_user = $session->get('nama');
+        $tipe = $session->get('tipe');
         $instansi_user = $session->get('instansi');
 
         // Format nama file
@@ -654,10 +672,14 @@ class Dashboard extends BaseController
         ];
 
         // Proses upload file
-        if ($file->isValid() && $file->move($config['uploadPath'])) {
+        if ($file->isValid()) {
+            $nama_file = 'laporan';
+            $newName = $this->createRenameFile3($nama_file, $nama_user, $tipe);
+            $file->move(FCPATH . 'uploads/laporan', $newName);
+
             // Update kolom laporan_akhir di tabel anak_magang
             $data = [
-                'laporan_akhir' => $file->getName()
+                'laporan_akhir' => $newName
             ];
 
             if ($this->anakMagangModel->updateLaporanAkhir($id_magang, $data)) {

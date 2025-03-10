@@ -121,7 +121,7 @@
                     </table>
                     <!-- Tombol Cetak Nilai -->
                     <div class="mt-3">
-                        <a href="<?php echo base_url('mentor/dashboard/cetak_detail_riwayat_nilai_bimbingan/' . $id_magang) ?>" target="_Blank" class="btn btn-success btn-sm">
+                        <a href="<?php echo base_url('mentor/dashboard/cetak_detail_riwayat_nilai_bimbingan/' . $encrypt_id) ?>" target="_Blank" class="btn btn-success btn-sm">
                             <i class="fas fa-print"></i> Cetak
                         </a>
                     </div>

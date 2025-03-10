@@ -45,7 +45,7 @@
                                     <td><?= $item->nama; ?></td>
                                     <td><?= $item->instansi; ?></td>
                                     <td><?= formatTanggalIndo($item->tgl_mulai); ?> - <?= formatTanggalIndo($item->tgl_selesai); ?></td>
-                                    <td><a href="<?php echo site_url('mentor/dashboard/detail_rekap_absensi_bimbingan/' . $item->id_magang); ?>">
+                                    <td><a href="<?php echo site_url('mentor/dashboard/detail_rekap_absensi_bimbingan/' . $item->encrypted_id); ?>">
                                             <button class="btn btn-success btn-sm">
                                                 <i class="fas fa-search" style="color: white;"></i>
                                             </button></a>

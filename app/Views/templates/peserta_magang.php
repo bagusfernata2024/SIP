@@ -1,3 +1,15 @@
+<?php if (session()->getFlashdata('success')): ?>
+    <div class="alert alert-success">
+        <?= session()->getFlashdata('success'); ?>
+    </div>
+<?php endif; ?>
+
+<?php if (session()->getFlashdata('error')): ?>
+    <div class="alert alert-danger">
+        <?= session()->getFlashdata('error'); ?>
+    </div>
+<?php endif; ?>
+
 <!-- Mulai Kontainer Data -->
 <div class="container-fluid">
     <div class="card shadow mb-4">
@@ -8,6 +20,12 @@
             <a href="<?= site_url('admin/dashboard/exportToExcel'); ?>">
                 <button class="btn btn-success btn-sm">
                     <i class="fas fa-file-excel"></i> Export to Excel
+                </button>
+            </a>
+            <!-- Tombol Reminder -->
+            <a href="<?= site_url('admin/dashboard/send-reminder'); ?>">
+                <button class="btn btn-warning btn-sm ml-2">
+                    <i class="fas fa-bell"></i> Kirim Reminder
                 </button>
             </a>
         </div>
@@ -67,20 +85,23 @@
                                     $status_class = 'bg-secondary text-light';
                                     $status_text = 'Menunggu Konfirmasi';
                                 }
-                            ?>
+                                ?>
                                 <tr>
                                     <td><?= $no++; ?></td>
                                     <td><?= $item['nomor']; ?></td> <!-- Nomor dari tabel registrasi -->
                                     <td><?= $item['nama']; ?></td> <!-- Nama dari tabel registrasi -->
                                     <td><?= $item['instansi']; ?></td> <!-- Instansi dari tabel registrasi -->
-                                    <td><?= formatTanggalIndo($item['tanggal1']); ?> - <?= formatTanggalIndo($item['tanggal2']); ?></td> <!-- Periode magang dari tabel registrasi -->
+                                    <td><?= formatTanggalIndo($item['tanggal1']); ?> -
+                                        <?= formatTanggalIndo($item['tanggal2']); ?></td>
+                                    <!-- Periode magang dari tabel registrasi -->
                                     <td>
                                         <span class="badge <?= $status_class; ?>">
                                             <?= $status_text; ?>
                                         </span>
                                     </td> <!-- Status dari tabel anak_magang -->
                                     <td>
-                                        <a href="<?php echo site_url('admin/dashboard/detail_data_peserta/' . $item['id_magang']); ?>">
+                                        <a
+                                            href="<?php echo site_url('admin/dashboard/detail_data_peserta/' . $item['encrypted_id_magang']); ?>">
                                             <button class="btn btn-success btn-sm">
                                                 <i class="fas fa-search" style="color: white; font-size: 9px;"></i>
                                             </button>
@@ -88,7 +109,7 @@
                                         <br>
                                         <br>
                                         <!-- Tombol Generate Sertifikat -->
-                                        <a href="<?= site_url('admin/dashboard/sertifikat/' . $item['id_register']); ?>">
+                                        <a href="<?= site_url('admin/dashboard/sertifikat/' . $item['encrypted_id_register']); ?>">
                                             <button class="btn btn-warning btn-sm">
                                                 <i class="fas fa-file-pdf" style="color: white; font-size: 12px;"></i>
                                             </button>

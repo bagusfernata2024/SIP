@@ -12,9 +12,12 @@ use App\Models\RegistrasiModel;
 use App\Models\DetailRegisModel;
 use App\Models\MentorModel;
 use App\Models\UserModel;
+use App\Models\KaryawanModel;
+use App\Models\DaftarMinatModel;
 use App\Libraries\PdfGenerator;
 use App\Controllers\BaseController;
 
+use ZipArchive;
 
 class DashboardMentor extends BaseController
 {
@@ -27,6 +30,9 @@ class DashboardMentor extends BaseController
     protected $registrasiModel;
     protected $detailRegisModel;
     protected $mentorModel;
+    protected $daftarMinatModel;
+    protected $karyawanModel;
+
     protected $userModel;
     protected $pdfgenerator;
 
@@ -42,7 +48,9 @@ class DashboardMentor extends BaseController
         $this->registrasiModel = new RegistrasiModel();
         $this->detailRegisModel = new DetailRegisModel();
         $this->mentorModel = new MentorModel();
+        $this->daftarMinatModel = new DaftarMinatModel();
         $this->userModel = new UserModel();
+        $this->karyawanModel = new KaryawanModel();
         $this->pdfgenerator = new PdfGenerator();
         $this->session = session();
 
@@ -56,6 +64,39 @@ class DashboardMentor extends BaseController
         //     session()->destroy();
         //     return redirect()->to('login/mentor');
         // }
+    }
+
+    public function encryptor($data)
+    {
+        $output = false;
+        $encrypt_method = "AES-256-CBC";
+
+        $secret_key = 'Tech Area';
+        $secret_iv = 'tech@12345678';
+
+        $key = hash('sha256', $secret_key);
+        $iv = substr(hash('sha256', $secret_iv), 0, 16);
+
+        $output = openssl_encrypt($data, $encrypt_method, $key, 0, $iv);
+        $output = base64_encode($output);
+
+        return $output;
+
+    }
+
+    public function decryptor($data)
+    {
+        $encrypt_method = "AES-256-CBC";
+
+        $secret_key = 'Tech Area';
+        $secret_iv = 'tech@12345678';
+
+        $key = hash('sha256', $secret_key);
+        $iv = substr(hash('sha256', $secret_iv), 0, 16);
+
+        $output = openssl_decrypt(base64_decode($data), $encrypt_method, $key, 0, $iv);
+
+        return $output;
     }
 
     public function index()
@@ -110,6 +151,12 @@ class DashboardMentor extends BaseController
         helper('date');
         $user_nomor = session()->get('nomor');
         $data['peserta'] = $this->pesertaModel->getPesertaByMentor($user_nomor);
+        foreach ($data['peserta'] as &$register) {
+            // Enkripsi ID peserta dan encode dalam base64 untuk digunakan di URL
+            $encryptedID = $this->encryptor($register->id_register);
+            // Tambahkan ID terenkripsi ke array data
+            $register->encrypted_id = $encryptedID;
+        }
         $id_register = $this->request->getPost('id_register');
         $detail_regis = $this->detailRegisModel->getDataByRegisterId($id_register);
         // dd($data['peserta']);
@@ -121,6 +168,267 @@ class DashboardMentor extends BaseController
             view('mentor/footer');
     }
 
+    public function detailDataPeserta($encrypt_id)
+    {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'mentor') {
+            return view('no_access');
+        }
+        helper('date');  // Load helper 'date'
+        $registrasiModel = new RegistrasiModel();
+        $detailRegisModel = new DetailRegisModel();
+        $mentorModel = new MentorModel();
+
+        $id = $this->decryptor($encrypt_id);
+        // $instansi = $this->request->getPost('instansi');
+
+        // dd($this->request->getPost());
+
+        // Ambil detail data registrasi
+        // $encoded = bin2hex(\CodeIgniter\Encryption\Encryption::createKey(32));
+        // $key = hex2bin('key');
+
+        $data['detail'] = $registrasiModel->getDetail($id);
+        $data['detail']['encrypt_id'] = $encrypt_id;
+        // Ambil detail mentor
+        $data['detail_mentor'] = $detailRegisModel->getDetailWithMentor($id);
+        // Ambil daftar mentor
+        $data['list_mentor'] = [];
+        $daftarMinat = $this->daftarMinatModel->findAll(); // Ambil semua data minat
+        $data['daftar_minat'] = $daftarMinat;
+
+        // dd($data['detail_mentor']['nipg'] !== null && $data['detail']['status'] == 'Accept');
+
+        // Ambil daftar mentor dan filter berdasarkan jumlah anak bimbingan
+        $all_mentors = $mentorModel->getData();  // Ambil semua mentor
+        foreach ($all_mentors as $mentor) {
+            $nipg = $mentor['nipg'];
+
+            // Hitung jumlah anak bimbingan berdasarkan nipg
+            $count_children = $detailRegisModel->countMentorChildren($nipg);
+
+            // Jika jumlah anak bimbingan kurang dari 2, tambahkan ke list_mentor
+            if ($count_children < 2) {
+                $data['list_mentor'][] = $mentor;
+            }
+        }
+
+        // Ambil data timeline dari registrasi
+        $data['timeline'] = $registrasiModel->getTimeline($id);
+
+        $id_magang = $this->anakMagangModel->getIdMagangByRegister($id);
+
+        $data['anak_magang'] = $this->anakMagangModel->getPesertaByIdMagang($id_magang);
+        // dd($data['anak_magang']);
+        // dd($data['detail_mentor']);
+        // Split timeline berdasarkan tanda koma (atau tanda lainnya sesuai format)
+        if (!empty($data['timeline'])) {
+            $data['timeline'] = explode(',', $data['timeline']);
+        }
+
+        if (!$data['detail']) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Data tidak ditemukan');
+        }
+        // dd($data);
+        return view('mentor/header')
+            . view('mentor/sidebar')
+            . view('mentor/topbar')
+            . view('mentor/detail', $data)
+            . view('mentor/footer');
+    }
+
+    public function file_lampiran($file_name)
+    {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'mentor') {
+            return view('no_access');
+        }
+        $file_path = FCPATH . 'uploads/' . $file_name;
+
+        if (file_exists($file_path)) {
+            return $this->response->download($file_path, null);
+        } else {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException("File tidak ditemukan");
+        }
+    }
+
+    public function downloadAll($encrypt_id)
+    {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level');
+
+        if ($user_level !== 'mentor') {
+            return view('no_access');
+        }
+
+        $id = $this->decryptor($encrypt_id);
+
+        $user_data = $this->registrasiModel->getUserFiles($id);
+        $user_data_diri = $this->registrasiModel->getUserDataDiri($id);
+
+        if (!$user_data || !$user_data_diri) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Data tidak ditemukan');
+        }
+
+        $upload_path = FCPATH . 'uploads/';
+        $zip = new ZipArchive();
+        // Gunakan direktori sementara yang disediakan sistem
+        $zip_file_path = sys_get_temp_dir() . '/lampiran_magang_' . uniqid() . '.zip';
+
+        if ($zip->open($zip_file_path, ZipArchive::CREATE) !== true) {
+            throw new \RuntimeException('Tidak dapat membuat file ZIP');
+        }
+
+        foreach ($user_data as $file) {
+            $file_path = $upload_path . $file;
+
+            if (file_exists($file_path)) {
+                $zip->addFile($file_path, basename($file_path));
+            } else {
+                log_message('error', "File tidak ditemukan: $file_path");
+            }
+        }
+
+        $nama = $user_data_diri['nama'];
+        $nim = $user_data_diri['nik'];
+        $instansi = $user_data_diri['instansi'];
+        $date = date('Y-m-d');
+
+        $zip_file_name = 'lampiran_magang_' . $instansi . '_' . $nama . '_' . $nim . '_' . $date . '.zip';
+
+        if ($zip->close() === false) {
+            throw new \RuntimeException('Tidak dapat menutup file ZIP');
+        }
+
+        return $this->response->download($zip_file_path, null)->setFileName($zip_file_name);
+    }
+
+    public function cari_co_mentor($encrypt_id)
+    {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'mentor') {
+            return view('no_access');
+        }
+        helper('date');  // Load helper 'date'
+        $registrasiModel = new RegistrasiModel();
+        $detailRegisModel = new DetailRegisModel();
+        $mentorModel = new MentorModel();
+        $id = $this->decryptor($encrypt_id);
+        // $instansi = $this->request->getPost('instansi');
+
+        // dd($this->request->getPost());
+
+        // Ambil detail data registrasi
+        $data['detail'] = $registrasiModel->getDetail($id);
+        $data['detail']['encrypt_id'] = $encrypt_id;
+        // Ambil detail mentor
+        $data['detail_mentor'] = $detailRegisModel->getDetailWithMentor($id);
+        // Ambil daftar mentor
+        $data['list_mentor'] = [];
+
+        // dd($data['detail_mentor']['nipg'] !== null && $data['detail']['status'] == 'Accept');
+
+        // Ambil daftar mentor dan filter berdasarkan jumlah anak bimbingan
+        $all_mentors = $mentorModel->getData();  // Ambil semua mentor
+        foreach ($all_mentors as $mentor) {
+            $nipg = $mentor['nipg'];
+
+            // Hitung jumlah anak bimbingan berdasarkan nipg
+            $count_children = $detailRegisModel->countMentorChildren($nipg);
+
+            // Jika jumlah anak bimbingan kurang dari 2, tambahkan ke list_mentor
+            if ($count_children < 2) {
+                $data['list_mentor'][] = $mentor;
+            }
+        }
+
+        // Ambil data timeline dari registrasi
+        $data['timeline'] = $registrasiModel->getTimeline($id);
+
+        $id_magang = $this->anakMagangModel->getIdMagangByRegister($id);
+
+        $data['anak_magang'] = $this->anakMagangModel->getPesertaByIdMagangOne($id_magang);
+        $coMentors = $this->karyawanModel->getData();  // Misalnya berdasarkan nipg mentor
+        $data['co_mentors'] = $coMentors;
+        if ($data['anak_magang'] !== null) {
+            if ($data['anak_magang']['nipg_co_mentor'] !== null) {
+                $nipg = $data['anak_magang']['nipg_co_mentor'];
+                $data['co_mentor'] = $this->karyawanModel->getDataByNipg($nipg);
+
+            }
+
+        }
+
+        // dd($nipg);
+
+        // Split timeline berdasarkan tanda koma (atau tanda lainnya sesuai format)
+        if (!empty($data['timeline'])) {
+            $data['timeline'] = explode(',', $data['timeline']);
+        }
+
+        if (!$data['detail']) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Data tidak ditemukan');
+        }
+
+        return view('mentor/header')
+            . view('mentor/sidebar')
+            . view('mentor/topbar')
+            . view('mentor/cari_mentor', $data)
+            . view('mentor/footer');
+    }
+
+    public function assign_co_mentor($encrypt_id)
+    {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'mentor') {
+            return view('no_access');
+        }
+        // Ambil data dari form
+        $id_register = $this->decryptor($encrypt_id);
+        $nipg = $this->request->getPost('nipg');  // Mentor yang dipilih
+
+        // Ambil data peserta berdasarkan id_register
+        $peserta = $this->registrasiModel->getPesertaById($id_register);
+
+        // Pastikan data peserta ada
+        if (empty($peserta)) {
+            return redirect()->back()->with('error', 'Peserta tidak ditemukan');
+        }
+
+        // Pastikan mentor yang dipilih ada (nipg tidak kosong)
+        if (empty($nipg)) {
+            return redirect()->back()->with('error', 'Silakan pilih mentor');
+        }
+
+        // Update nipg_co_mentor di tabel anak_magang berdasarkan id_register
+        $anakMagangModel = new AnakMagangModel();  // Model untuk tabel anak_magang
+
+        $dataToUpdate = [
+            'nipg_co_mentor' => $nipg  // Menyimpan nipg co-mentor
+        ];
+
+        $this->registrasiModel->updateTimelineAcc($id_register, 'Upload Surat');
+
+
+        // Lakukan update pada tabel anak_magang untuk peserta yang sesuai id_register
+        $updateResult = $anakMagangModel->updateByRegisterId($id_register, $dataToUpdate);
+
+        if ($updateResult) {
+            // Redirect kembali ke halaman detail dengan pesan sukses
+            return redirect()->to('/mentor/dashboard/detail_data_peserta/' . $encrypt_id)->with('success', 'Co-mentor berhasil dipilih');
+        } else {
+            // Jika update gagal
+            return redirect()->back()->with('error', 'Gagal memperbarui co-mentor');
+        }
+    }
     public function approve_peserta()
     {
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
@@ -156,7 +464,7 @@ class DashboardMentor extends BaseController
                 }
 
                 // Update timeline status di tabel registrasi
-                $registrasiModel->updateTimelineAccMentor($idRegister, 'Review Surat Perjanjian');
+                // $registrasiModel->updateTimelineAccMentor($idRegister, 'Review Surat Perjanjian');
 
                 // Update timeline status di tabel registrasi
                 // $registrasiModel->updateStatusAccMentor($idRegister, 'Accept');
@@ -686,6 +994,13 @@ class DashboardMentor extends BaseController
         helper('date');
         $user_nomor = session()->get('nomor');
         $data['peserta'] = $this->pesertaModel->getPesertaByMentor($user_nomor);
+        // dd($data['peserta']);
+        foreach ($data['peserta'] as &$peserta) {
+            // Enkripsi ID peserta dan encode dalam base64 untuk digunakan di URL
+            $encryptedID = $this->encryptor($peserta->id_magang);
+            // Tambahkan ID terenkripsi ke array data
+            $peserta->encrypted_id = $encryptedID;
+        }
 
         return view('mentor/header') .
             view('mentor/sidebar') .
@@ -694,7 +1009,7 @@ class DashboardMentor extends BaseController
             view('mentor/footer');
     }
 
-    public function detailRekapAbsensiBimbingan($id_magang)
+    public function detailRekapAbsensiBimbingan($encrypt_id)
     {
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
         $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
@@ -703,6 +1018,7 @@ class DashboardMentor extends BaseController
             return view('no_access');
         }
         helper('date');
+        $id_magang = $this->decryptor($encrypt_id);
         $user_nomor = session()->get('nomor');
 
         $start_date = $this->request->getGet('start_date');
@@ -722,7 +1038,8 @@ class DashboardMentor extends BaseController
 
         $data = [
             'peserta' => $this->pesertaModel->getDetailAbsenPesertaByMentor($user_nomor, $id_magang, $start_date, $end_date),
-            'id_magang' => $id_magang
+            'id_magang' => $id_magang,
+            'encrypt_id' => $encrypt_id
         ];
 
         return view('mentor/header') .
@@ -733,7 +1050,7 @@ class DashboardMentor extends BaseController
     }
 
 
-    public function cetakDetailRekapAbsensiBimbingan($id_magang)
+    public function cetakDetailRekapAbsensiBimbingan($encrypt_id)
     {
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
         $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
@@ -742,7 +1059,7 @@ class DashboardMentor extends BaseController
             return view('no_access');
         }
         helper('date');
-
+        $id_magang = $this->decryptor($encrypt_id);
         $user_nomor = session()->get('nomor');
 
         $start_date = $this->request->getGet('start_date');
@@ -762,7 +1079,8 @@ class DashboardMentor extends BaseController
 
         $data = [
             'peserta' => $this->pesertaModel->getDetailAbsenPesertaByMentor($user_nomor, $id_magang, $start_date, $end_date),
-            'id_magang' => $id_magang
+            'id_magang' => $id_magang,
+            'encrypt_id' => $encrypt_id
         ];
 
         $this->pdfgenerator->generate(
@@ -961,6 +1279,14 @@ class DashboardMentor extends BaseController
 
         // Mengambil data nilai
         $data['nilai'] = $model->getNilaiByMentor($user_nomor);
+        foreach ($data['nilai'] as &$nilai) {
+            // Enkripsi ID peserta dan encode dalam base64 untuk digunakan di URL
+            $encryptedID = $this->encryptor($nilai->id_magang);
+            // Tambahkan ID terenkripsi ke array data
+            $nilai->encrypted_id = $encryptedID;
+        }
+
+        // dd($data['nilai']);
 
         foreach ($data['nilai'] as $item) {
             $item->total_nilai = $this->hitungTotalNilai($item);
@@ -974,7 +1300,7 @@ class DashboardMentor extends BaseController
             view('mentor/footer');
     }
 
-    public function detailRiwayatNilaiBimbingan($id_magang)
+    public function detailRiwayatNilaiBimbingan($encrypt_id)
     {
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
         $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
@@ -990,6 +1316,7 @@ class DashboardMentor extends BaseController
         $model = new NilaiModel();
 
         // Mengambil nilai berdasarkan mentor
+        $id_magang = $this->decryptor($encrypt_id);
         $data['nilai_akhir'] = $model->getNilaiByIdMagangFull($id_magang);
         $data['nilai_akhir_pure'] = $model->getNilaiByIdMagangPure($id_magang);
         // dd($data['nilai_akhir']);
@@ -1028,6 +1355,7 @@ class DashboardMentor extends BaseController
         $total = $total / 14;
 
         $data['status'] = $total > 75 ? 'Lulus' : 'Tidak Lulus';
+        $data['encrypt_id'] = $encrypt_id;
 
 
         // Menampilkan view
@@ -1091,7 +1419,9 @@ class DashboardMentor extends BaseController
         helper('date');
 
         $user_nomor = session()->get('nomor');
-        $id_magang = $this->request->getUri()->getSegment(4);
+        $id = $this->request->getUri()->getSegment(4);
+        $id_magang = $this->decryptor($id);
+
         // Memuat model
         // Mengambil nilai berdasarkan mentor
         $data['nilai_akhir'] = $this->nilaiModel->getNilaiByIdMagangFull($id_magang);
@@ -1251,4 +1581,70 @@ class DashboardMentor extends BaseController
     //     $html = view('mentor/cetak_detail_riwayat_nilai_bimbingan', $data);  // Menggunakan view() di CI4
     //     $pdf->generate($html, $file_pdf, $paper, $orientation);
     // }
+
+    public function review_surat($encrypt_id)
+    {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'mentor') {
+            return view('no_access');
+        }
+        helper('date');  // Load helper 'date'
+        $registrasiModel = new RegistrasiModel();
+        $detailRegisModel = new DetailRegisModel();
+        $mentorModel = new MentorModel();
+        $id = $this->decryptor($encrypt_id);
+
+        // $instansi = $this->request->getPost('instansi');
+
+        // dd($this->request->getPost());
+
+        // Ambil detail data registrasi
+        $data['detail'] = $registrasiModel->getDetail($id);
+        $data['detail']['encrypt_id'] = $encrypt_id;
+        // Ambil detail mentor
+        $data['detail_mentor'] = $detailRegisModel->getDetailWithMentor($id);
+        // Ambil daftar mentor
+        $data['list_mentor'] = [];
+
+        // dd($data['detail_mentor']['nipg'] !== null && $data['detail']['status'] == 'Accept');
+
+        // Ambil daftar mentor dan filter berdasarkan jumlah anak bimbingan
+        $all_mentors = $mentorModel->getData();  // Ambil semua mentor
+        foreach ($all_mentors as $mentor) {
+            $nipg = $mentor['nipg'];
+
+            // Hitung jumlah anak bimbingan berdasarkan nipg
+            $count_children = $detailRegisModel->countMentorChildren($nipg);
+
+            // Jika jumlah anak bimbingan kurang dari 2, tambahkan ke list_mentor
+            if ($count_children < 2) {
+                $data['list_mentor'][] = $mentor;
+            }
+        }
+
+        // Ambil data timeline dari registrasi
+        $data['timeline'] = $registrasiModel->getTimeline($id);
+
+        $id_magang = $this->anakMagangModel->getIdMagangByRegister($id);
+
+        $data['anak_magang'] = $this->anakMagangModel->getPesertaByIdMagang($id_magang);
+        // dd($data['anak_magang']);
+        // dd($data['detail_mentor']);
+        // Split timeline berdasarkan tanda koma (atau tanda lainnya sesuai format)
+        if (!empty($data['timeline'])) {
+            $data['timeline'] = explode(',', $data['timeline']);
+        }
+
+        if (!$data['detail']) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Data tidak ditemukan');
+        }
+        // dd($data);
+        return view('mentor/header')
+            . view('mentor/sidebar')
+            . view('mentor/topbar')
+            . view('mentor/review_surat', $data)
+            . view('mentor/footer');
+    }
 }

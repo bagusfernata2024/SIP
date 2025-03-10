@@ -10,8 +10,10 @@ use App\Models\AnakMagangModel;
 use App\Models\NilaiModel;
 use App\Models\UserModel;
 use App\Models\KaryawanModel;
+use App\Models\DaftarMinatModel;
 use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\IOFactory;
+use Config\Services;
 
 
 use Dompdf\Dompdf;
@@ -38,6 +40,8 @@ class Dashboard extends BaseController
     protected $userModel;
     protected $detailRegisModel;
     protected $karyawanModel;
+    protected $daftarMinatModel;
+
 
     protected $encryption;
     private $encryption_key = 'ThisIsASecretKeyForEncryption';
@@ -52,9 +56,44 @@ class Dashboard extends BaseController
         $this->userModel = new UserModel;
         $this->detailRegisModel = new DetailRegisModel;
         $this->karyawanModel = new KaryawanModel;
+        $this->daftarMinatModel = new DaftarMinatModel();
         $this->encryption = \Config\Services::encryption(); // Memanggil pustaka enkripsi
 
     }
+
+    public function encryptor($data)
+    {
+        $output = false;
+        $encrypt_method = "AES-256-CBC";
+
+        $secret_key = 'Tech Area';
+        $secret_iv = 'tech@12345678';
+
+        $key = hash('sha256', $secret_key);
+        $iv = substr(hash('sha256', $secret_iv), 0, 16);
+
+        $output = openssl_encrypt($data, $encrypt_method, $key, 0, $iv);
+        $output = base64_encode($output);
+
+        return $output;
+
+    }
+
+    public function decryptor($data)
+    {
+        $encrypt_method = "AES-256-CBC";
+
+        $secret_key = 'Tech Area';
+        $secret_iv = 'tech@12345678';
+
+        $key = hash('sha256', $secret_key);
+        $iv = substr(hash('sha256', $secret_iv), 0, 16);
+
+        $output = openssl_decrypt(base64_decode($data), $encrypt_method, $key, 0, $iv);
+
+        return $output;
+    }
+
 
     public function index()
     {
@@ -83,6 +122,16 @@ class Dashboard extends BaseController
             default:
                 $data['registrasi'] = $registrasiModel->getData();
         }
+
+        // Enkripsi ID untuk tiap peserta
+        // $encryption = Services::encryption(); // Inisialisasi enkripsi
+        foreach ($data['registrasi'] as &$register) {
+            // Enkripsi ID peserta dan encode dalam base64 untuk digunakan di URL
+            $encryptedID = $this->encryptor($register['id_register']);
+            // Tambahkan ID terenkripsi ke array data
+            $register['encrypted_id'] = $encryptedID;
+        }
+
         // dd($this->encryption = \Config\Services::encryption());
         // $data['registrasi'] = $this->registrasiModel->findAll(); // Misalnya ambil semua peserta
 
@@ -108,6 +157,34 @@ class Dashboard extends BaseController
         // Menghitung total pendaftar berdasarkan semua data registrasi
         $data['total_pendaftar'] = $data['total_accept'] + $data['total_reject']; // Mengambil total pendaftar dari tabel registrasi
 
+        $peserta_hampir_selesai = $this->anakMagangModel->getPesertaHampirSelesai();
+        $hampir_selesai = count($peserta_hampir_selesai);
+        // dd($hampir_selesai);
+        $data['hampir_selesai'] = $hampir_selesai;
+
+        // Mendapatkan top 10 jurusan terbanyak untuk peserta diterima
+        $data['top_10_jurusan'] = $registrasiModel->getTop10Jurusan();
+
+        $page = $this->request->getVar('page') ? $this->request->getVar('page') : 1;
+        $realisasiSatkerData = $anakMagangModel->getRealisasiSatker($page);
+        $totalRows = $anakMagangModel->countTotalSatker();
+        $totalPages = ceil($totalRows / 10);
+        $data['realisasi_satker'] = $realisasiSatkerData;
+        $data['page'] = $page;
+        $data['totalPages'] = $totalPages;
+
+        // Cek apakah permintaan AJAX
+        if ($this->request->isAJAX()) {
+            return $this->response->setJSON([
+                'realisasi_satker' => view('partials/realisasi_satker', $data), // Partial view untuk Realisasi Satker
+                'page' => $page,
+                'totalPages' => $totalPages
+            ]);
+        }
+
+        // dd($data['top_10_jurusan']);
+
+        // dd($peserta_hampir_selesai);
         // Total keseluruhan peserta (hanya untuk keperluan informasi)
         $data['total'] = $data['total_accept'] + $data['total_reject'] + $data['total_waiting'] + $data['total_done'];
 
@@ -118,8 +195,56 @@ class Dashboard extends BaseController
             . view('templates/footer');
     }
 
+    public function sendReminder()
+    {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'admin') {
+            return view('no_access');
+        }
+        $model = new RegistrasiModel();
+        $peserta = $model->getPesertaHampirSelesai();
+
+        if (empty($peserta)) {
+            return redirect()->to(base_url('admin/dashboard'))->with('error', 'Tidak ada peserta yang perlu diingatkan.');
+        }
+
+        $email = \Config\Services::email();
+
+        foreach ($peserta as $p) {
+            $email->setFrom('mdndfzn@gmail.com');
+            $email->setTo($p['email']);
+            $email->setSubject('Pengingat Selesai Magang');
+            $email->setMessage("
+                <p>Yth. {$p['nama']}</p>
+                <br>
+                <p>Dengan Hormat</p>
+                <p>Sehubungan dengan akan berakhirnya periode {$p['tipe']} Anda, bersama ini kami mengingatkan untuk mengirimkan laporan akhir {$p['tipe']} untuk diserahkan kepada mentor.</p>
+                <br>
+                <p>Regards</p>
+                <p>HCM Division</p>
+                <p>PT Perusahaan Gas Negara Tbk</p>
+            ");
+
+            if ($email->send()) {
+                session()->setFlashdata('success', "Email berhasil dikirim");
+            } else {
+                session()->setFlashdata('error', "Gagal mengirim email");
+            }
+        }
+
+        return redirect()->back();
+    }
+
     public function generateSuratMagang()
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'admin') {
+            return view('no_access');
+        }
         // Membuat objek PhpWord
         $phpWord = new \PhpOffice\PhpWord\PhpWord();
         $section = $phpWord->addSection([
@@ -218,7 +343,7 @@ class Dashboard extends BaseController
         return $this->response->download($filePath, null)->setFileName($fileName);
     }
 
-    public function review_surat($id)
+    public function review_surat($encrypt_id)
     {
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
         $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
@@ -230,6 +355,7 @@ class Dashboard extends BaseController
         $registrasiModel = new RegistrasiModel();
         $detailRegisModel = new DetailRegisModel();
         $mentorModel = new MentorModel();
+        $id = $this->decryptor($encrypt_id);
 
         // $instansi = $this->request->getPost('instansi');
 
@@ -237,6 +363,7 @@ class Dashboard extends BaseController
 
         // Ambil detail data registrasi
         $data['detail'] = $registrasiModel->getDetail($id);
+        $data['detail']['encrypt_id'] = $encrypt_id;
         // Ambil detail mentor
         $data['detail_mentor'] = $detailRegisModel->getDetailWithMentor($id);
         // Ambil daftar mentor
@@ -282,7 +409,7 @@ class Dashboard extends BaseController
             . view('templates/footer');
     }
 
-    public function upload_surat($id)
+    public function upload_surat($encrypt_id)
     {
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
         $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
@@ -294,6 +421,7 @@ class Dashboard extends BaseController
         $registrasiModel = new RegistrasiModel();
         $detailRegisModel = new DetailRegisModel();
         $mentorModel = new MentorModel();
+        $id = $this->decryptor($encrypt_id);
 
         // $instansi = $this->request->getPost('instansi');
 
@@ -301,6 +429,7 @@ class Dashboard extends BaseController
 
         // Ambil detail data registrasi
         $data['detail'] = $registrasiModel->getDetail($id);
+        $data['detail']['encrypt_id'] = $encrypt_id;
         // Ambil detail mentor
         $data['detail_mentor'] = $detailRegisModel->getDetailWithMentor($id);
         // Ambil daftar mentor
@@ -345,7 +474,7 @@ class Dashboard extends BaseController
             . view('templates/footer');
     }
 
-    public function cari_mentor($id)
+    public function cari_mentor($encrypt_id)
     {
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
         $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
@@ -357,13 +486,14 @@ class Dashboard extends BaseController
         $registrasiModel = new RegistrasiModel();
         $detailRegisModel = new DetailRegisModel();
         $mentorModel = new MentorModel();
-
+        $id = $this->decryptor($encrypt_id);
         // $instansi = $this->request->getPost('instansi');
 
         // dd($this->request->getPost());
 
         // Ambil detail data registrasi
         $data['detail'] = $registrasiModel->getDetail($id);
+        $data['detail']['encrypt_id'] = $encrypt_id;
         // Ambil detail mentor
         $data['detail_mentor'] = $detailRegisModel->getDetailWithMentor($id);
         // Ambil daftar mentor
@@ -393,8 +523,15 @@ class Dashboard extends BaseController
         $data['anak_magang'] = $this->anakMagangModel->getPesertaByIdMagangOne($id_magang);
         $coMentors = $this->karyawanModel->getData();  // Misalnya berdasarkan nipg mentor
         $data['co_mentors'] = $coMentors;
-        $nipg = $data['anak_magang']['nipg_co_mentor'];
-        $data['co_mentor'] = $this->karyawanModel->getDataByNipg($nipg);
+        if ($data['anak_magang'] !== null) {
+            if ($data['anak_magang']['nipg_co_mentor'] !== null) {
+                $nipg = $data['anak_magang']['nipg_co_mentor'];
+                $data['co_mentor'] = $this->karyawanModel->getDataByNipg($nipg);
+
+            }
+
+        }
+
         // dd($nipg);
 
         // Split timeline berdasarkan tanda koma (atau tanda lainnya sesuai format)
@@ -413,11 +550,18 @@ class Dashboard extends BaseController
             . view('templates/footer');
     }
 
-    public function assign_mentor($id_register)
+    public function assign_mentor($encrypt_id)
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'admin') {
+            return view('no_access');
+        }
         // Ambil data dari form
         // $id_register = $this->request->getPost('id_register');
         $nipg = $this->request->getPost('nipg');  // Mentor yang dipilih
+        $id_register = $this->decryptor($encrypt_id);
 
         $peserta = $this->registrasiModel->getPesertaById($id_register);
         // Pastikan data yang dipilih ada
@@ -433,6 +577,8 @@ class Dashboard extends BaseController
             'nipg' => $nipg,
             'approved' => 'W'
         ];
+
+        $this->registrasiModel->updateTimelineAcc($id_register, 'Pencarian Mentor');
 
         $detailRegisModel->insertDetailRegis($dataDetailRegis);
 
@@ -471,12 +617,19 @@ class Dashboard extends BaseController
         // Perbarui data
 
         // Redirect kembali ke halaman detail dengan pesan sukses
-        return redirect()->to('/admin/dashboard/detail/' . $id_register)->with('success', 'Mentor berhasil dipilih');
+        return redirect()->to('/admin/dashboard/detail/' . $encrypt_id)->with('success', 'Mentor berhasil dipilih');
     }
 
-    public function assign_co_mentor($id_register)
+    public function assign_co_mentor($encrypt_id)
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'admin') {
+            return view('no_access');
+        }
         // Ambil data dari form
+        $id_register = $this->decryptor($encrypt_id);
         $nipg = $this->request->getPost('nipg');  // Mentor yang dipilih
 
         // Ambil data peserta berdasarkan id_register
@@ -499,12 +652,15 @@ class Dashboard extends BaseController
             'nipg_co_mentor' => $nipg  // Menyimpan nipg co-mentor
         ];
 
+        $this->registrasiModel->updateTimelineAcc($id_register, 'Upload Surat');
+
+
         // Lakukan update pada tabel anak_magang untuk peserta yang sesuai id_register
         $updateResult = $anakMagangModel->updateByRegisterId($id_register, $dataToUpdate);
 
         if ($updateResult) {
             // Redirect kembali ke halaman detail dengan pesan sukses
-            return redirect()->to('/admin/dashboard/detail/' . $id_register)->with('success', 'Co-mentor berhasil dipilih');
+            return redirect()->to('/admin/dashboard/detail/' . $encrypt_id)->with('success', 'Co-mentor berhasil dipilih');
         } else {
             // Jika update gagal
             return redirect()->back()->with('error', 'Gagal memperbarui co-mentor');
@@ -512,7 +668,7 @@ class Dashboard extends BaseController
     }
 
 
-    public function detail($id)
+    public function detail($encrypt_id)
     {
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
         $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
@@ -525,16 +681,23 @@ class Dashboard extends BaseController
         $detailRegisModel = new DetailRegisModel();
         $mentorModel = new MentorModel();
 
+        $id = $this->decryptor($encrypt_id);
         // $instansi = $this->request->getPost('instansi');
 
         // dd($this->request->getPost());
 
         // Ambil detail data registrasi
+        // $encoded = bin2hex(\CodeIgniter\Encryption\Encryption::createKey(32));
+        // $key = hex2bin('key');
+
         $data['detail'] = $registrasiModel->getDetail($id);
+        $data['detail']['encrypt_id'] = $encrypt_id;
         // Ambil detail mentor
         $data['detail_mentor'] = $detailRegisModel->getDetailWithMentor($id);
         // Ambil daftar mentor
         $data['list_mentor'] = [];
+        $daftarMinat = $this->daftarMinatModel->findAll(); // Ambil semua data minat
+        $data['daftar_minat'] = $daftarMinat;
 
         // dd($data['detail_mentor']['nipg'] !== null && $data['detail']['status'] == 'Accept');
 
@@ -576,36 +739,71 @@ class Dashboard extends BaseController
             . view('templates/footer');
     }
 
+    public function update_satuan_kerja()
+    {
+        $id = $this->request->getPost('id');
+        $encrypt_id = $this->encryptor($id);
+        $minat = $this->request->getPost('minat');
+
+        // Update data di database berdasarkan ID
+        $registrasiModel = new RegistrasiModel();
+        $registrasiModel->update($id, ['minat' => $minat]);
+
+        // Setelah update, beri pesan flash dan redirect kembali ke detail
+        session()->setFlashdata('success', 'Satuan Kerja berhasil diperbarui!');
+        return redirect()->to('admin/dashboard/detail/' . $encrypt_id);
+    }
+
+
     private function createRenameFile($type, $name, $tipe, $nim, $instansi, $date)
     {
         return strtolower($type . '_' . str_replace(' ', '_', $name) . '_' . $tipe . '_' . $nim . '_' . $instansi . '_' . $date . '.' . pathinfo($_FILES[$type]['name'], PATHINFO_EXTENSION));
     }
 
-    public function kirim_surat($id_register)
+    public function kirim_surat($encrypt_id)
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
 
+        if ($user_level !== 'admin') {
+            return view('no_access');
+        }
+        $id_register = $this->decryptor($encrypt_id);
         $registrasi = $this->registrasiModel->getRegistrasiById($id_register);
-
-        // dd($this->request->getPost());
-        // Pindahkan file ke direktori yang sudah ditentukan
 
         // Simpan nama file ke database (misalnya di tabel 'detail' atau tabel lain yang relevan)
 
         $id_magang = $this->anakMagangModel->getIdMagangByRegister($id_register);
         $anak_magang = $this->anakMagangModel->getPesertaByIdMagangOne($id_magang);
         $peserta = $this->registrasiModel->getPesertaById($id_register);
+
+        $dataUpdate = 'Y';
+
+        $this->registrasiModel->updateSurat($id_register, $dataUpdate);
+
         // dd($anak_magang);
+
         $mentor = $this->mentorModel->getMentorByIdMentor($anak_magang['id_mentor']);
         $statusUpdate = 'Accept';
         $fileName = $peserta['surat_perjanjian'];
         $fileName2 = $peserta['surat_persetujuan'];
+        $lastPrimaryKey = $this->pesertaModel->selectMax('id_register')->first();
+
+        $this->registrasiModel->updateTimelineAcc($id_register, 'Review Surat');
         $this->sendEmailToPesertaSuratPerjanjian($mentor, $peserta, $statusUpdate, $fileName, $fileName2);
+        $this->sendEmailToMentorSuratPerjanjian($mentor, $peserta, $statusUpdate, $fileName, $fileName2);
 
         // Redirect kembali ke halaman sebelumnya (atau halaman detail)
         return redirect()->back();
     }
     public function upload_surat_perjanjian()
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'admin') {
+            return view('no_access');
+        }
         // Cek apakah ada file yang diupload
         if ($this->request->getFile('surat_perjanjian')->isValid()) {
             $file = $this->request->getFile('surat_perjanjian');
@@ -658,6 +856,12 @@ class Dashboard extends BaseController
 
     public function upload_surat_persetujuan()
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'admin') {
+            return view('no_access');
+        }
         // Cek apakah ada file yang diupload
         if ($this->request->getFile('surat_persetujuan')->isValid()) {
             $file = $this->request->getFile('surat_persetujuan');
@@ -808,9 +1012,9 @@ class Dashboard extends BaseController
         $email->setTo($peserta['email']);
 
         if ($statusUpdate === 'Accept') {
-            $username = strtolower($peserta['tipe']) . $peserta['id_register'];
+            $username = strtolower($peserta['tipe'] . $peserta['id_register']);
             $password = bin2hex(random_bytes(4));
-            $userModel->insert([
+            $this->userModel->insert([
                 'nomor' => $peserta['nomor'],
                 'username' => $username,
                 'password' => password_hash($password, PASSWORD_BCRYPT),
@@ -818,7 +1022,8 @@ class Dashboard extends BaseController
                 'aktif' => 'Y',
                 'id_register' => $peserta['id_register']
             ]);
-            $email->setSubject('Pendaftaran Anda Telah Diterima');
+
+            $email->setSubject('Upload Surat Perjanjian');
             $email->setMessage("
             <html>
             <head>
@@ -840,19 +1045,29 @@ class Dashboard extends BaseController
                 </style>
             </head>
             <body>
-                <p>Kepada Yth.</p>
-                <p>{$peserta['nama']}</p>
+                <p>Yth. {$peserta['nama']}</p>
                 <br>
-                <p>Sehubungan dengan pengajuan {$peserta['tipe']}, bersama ini dimohon kesediaannya untuk mengisi surat perjanjian sesuai template.</p>
-                <p>Silahkan upload surat perjanjian yang telah ditandatangani ke dalam sistem.</p>
-                <p>Berikut merupakan data akun anda.</p>
+                <p>Dengan Hormat</p>
+                <br>
+                <p>Kami dengan senang hati menginformasikan bahwa pendaftaran Anda dalam program {$peserta['tipe']} sedang diproses.</p>
+                <p>Berikut adalah informasi terkait akun anda</p>
 
                 <br>
                 <p>Username : {$username}</p>
                 <p>Password : {$password}</p>
                 <br>
-                <p>Silakan login ke sistem untuk informasi lebih lanjut, atau klik link berikut:</p>
+
+                <p>Silahkan menandatangani surat perjanjian sesuai template yang bisa diunduh di dalam sistem setelah anda login.</p>
+                <p>Selanjutnya unggah surat perjanjian yang telah ditandatangani ke dalam sistem sebelum {$peserta['tanggal1']}.</p>
+                <p>Login ke sistem kami untuk informasi lebih lanjut dan memulai program {$peserta['tipe']} Anda atau klik link berikut.</p>
                 <p><a href='" . base_url('login') . "'>Link</a></p>
+                <p>Jika anda memiliki pertanyaan, jangan ragu untuk menghubungi kami</p>
+                <p>Terima kasih atas partisipasi Anda</p>
+                <br>
+                <p>Regards</p>
+                <p>HCM Division</p>
+                <p>PT Perusahaan Gas Negara Tbk</p>
+
             </body>
             </html>
         ");
@@ -897,7 +1112,10 @@ class Dashboard extends BaseController
                 <p>{$peserta['nama']}</p>
                 <br>
                 <p>Pendaftaran program yang anda pilih tidak diterima</p>
-                <p>Salam Admin Program</p>
+                <br>
+                <p>Regards</p>
+                <p>HCM Division</p>
+                <p>PT Perusahaan Gas Negara Tbk</p>
             </body>
             </html>
         ");
@@ -907,8 +1125,163 @@ class Dashboard extends BaseController
         return redirect()->to('/admin/dashboard');
     }
 
-    public function update_tanggal()
+    private function sendEmailToMentorSuratPerjanjian($mentor, $peserta, $statusUpdate, $fileName = null, $fileName2)
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+        helper('date');
+
+        $registrasiModel = new RegistrasiModel();
+        $userModel = new UserModel();
+
+        if ($user_level !== 'admin') {
+            return view('no_access');
+        }
+
+
+        $email = \Config\Services::email();
+
+        $email->setFrom('mdndfzn@gmail.com', 'PGN GAS Admin Internship Program');
+        $email->setTo($mentor[0]->email);
+
+        if ($statusUpdate === 'Accept') {
+
+            $email->setSubject('Upload Surat Perjanjian');
+            $email->setMessage("
+            <html>
+            <head>
+                <style>
+                    table {
+                        border-collapse: collapse;
+                        width: 100%;
+                    }
+                    th, td {
+                        text-align: left;
+                        padding: 8px;
+                    }
+                    th {
+                        background-color: #f2f2f2;
+                    }
+                    tr:nth-child(even) {
+                        background-color: #f9f9f9;
+                    }
+                </style>
+            </head>
+            <body>
+                <p>Yth. {$mentor[0]->nama}</p>
+                <br>
+                <p>Dengan Hormat</p>
+                <br>
+                <p>Kami dengan senang hati menginformasikan bahwa pendaftaran calon peserta magang bimbingan Anda pada program {$peserta['tipe']} sedang diproses untuk pendandatanganan surat perjanjian oleh calon peserta magang.</p>
+                <p>Proses akan berlanjut setelah calon peserta magang menandatangani surat perjanjian dan mengunggahnya ke sistem</p>
+                <p>Peserta magang harus mengunggah surat perjanjian yang telah ditandatangani ke dalam sistem sebelum {$peserta['tanggal1']}.</p>
+                <br>
+                <p>Regards</p>
+                <p>HCM Division</p>
+                <p>PT Perusahaan Gas Negara Tbk</p>
+
+            </body>
+            </html>
+        ");
+            $email->setMailType('html'); // Mengatur email dalam format HTML
+            // Jika ada file surat perjanjian yang diupload, lampirkan file
+            // dd($fileName);
+            // if ($fileName) {
+            //     $filePath = FCPATH . 'uploads/surat_perjanjian_sent/' . $fileName;
+            //     // dd($filePath);
+            //     $email->attach($filePath);
+            // }
+
+            // if ($fileName2) {
+            //     $filePath = FCPATH . 'uploads/surat_persetujuan_sent/' . $fileName2;
+            //     // dd($filePath);
+            //     $email->attach($filePath);
+            // }
+        } elseif ($statusUpdate === 'reject') {
+            $email->setSubject('Hasil Pendaftaran Program');
+            $email->setMessage("
+            <html>
+            <head>
+                <style>
+                    table {
+                        border-collapse: collapse;
+                        width: 100%;
+                    }
+                    th, td {
+                        text-align: left;
+                        padding: 8px;
+                    }
+                    th {
+                        background-color: #f2f2f2;
+                    }
+                    tr:nth-child(even) {
+                        background-color: #f9f9f9;
+                    }
+                </style>
+            </head>
+            <body>
+                <p>Kepada Yth.</p>
+                <p>{$mentor[0]->nama}</p>
+                <br>
+                <p>Pendaftaran program oleh calon peserta magang bimbingan anda tidak diterima</p>
+                <br>
+                <p>Regards</p>
+                <p>HCM Division</p>
+                <p>PT Perusahaan Gas Negara Tbk</p>
+            </body>
+            </html>
+        ");
+            $email->setMailType('html'); // Mengatur email dalam format HTML
+        }
+        $email->send();
+        return redirect()->to('/admin/dashboard');
+    }
+
+    public function update_tanggal_mulai()
+    {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'admin') {
+            return view('no_access');
+        }
+        // Validasi request
+        $id = $this->request->getPost('id');
+        $tanggalMulai = $this->request->getPost('tanggalMulai');
+        $registrasiModel = new RegistrasiModel();
+        $detailRegisModel = new DetailRegisModel();
+        $mentorModel = new MentorModel();
+
+        // Ambil detail data registrasi
+        $registrasi = $registrasiModel->getDetail($id);
+
+        if (!$id || !$tanggalMulai) {
+            return redirect()->back()->with('error', 'Data tidak lengkap.');
+        }
+
+        // Load model
+        $anakMagangModel = new AnakMagangModel();
+
+        // Update data di database
+        $data = [
+            'tanggal1' => $tanggalMulai
+        ];
+
+        if ($registrasiModel->update($id, $data)) {
+            return redirect()->back()->with('success', 'Tanggal berhasil diperbarui.');
+        } else {
+            return redirect()->back()->with('error', 'Gagal memperbarui tanggal.');
+        }
+    }
+
+    public function update_tanggal_selesai()
+    {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'admin') {
+            return view('no_access');
+        }
         // Validasi request
         $id = $this->request->getPost('id');
         $tanggalSelesai = $this->request->getPost('tanggalSelesai');
@@ -940,8 +1313,15 @@ class Dashboard extends BaseController
 
     public function terima_surat_perjanjian()
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'admin') {
+            return view('no_access');
+        }
         // Pastikan id_register diterima dari form
         $id_register = $this->request->getPost('id_register');
+        $encrypt_id = $this->encryptor($id_register);
         $id_magang = $this->anakMagangModel->getIdMagangByRegister($id_register);
         $anak_magang = $this->anakMagangModel->getPesertaByIdMagangOne($id_magang);
         $mentor = $this->mentorModel->getMentorByIdMentorOne($anak_magang['id_mentor']);
@@ -974,17 +1354,77 @@ class Dashboard extends BaseController
 
         if ($mentor) {
             $this->sendEmailToPesertaAcc($mentor, $detail, true);
+            $this->sendEmailToMentorAcc($mentor, $detail, true);
         } else {
             $this->session->setFlashdata('error', 'Informasi mentor tidak ditemukan.');
             return redirect()->to('/admin/dashboard');
         }
 
         // Redirect kembali ke halaman detail dengan pesan sukses
-        return redirect()->to('/admin/dashboard/detail/' . $id_register)->with('success', 'Surat Perjanjian diterima');
+        return redirect()->to('/admin/dashboard/detail/' . $encrypt_id)->with('success', 'Peserta diterima');
+    }
+
+    public function tolak_surat_perjanjian($encrypt_id)
+    {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'admin') {
+            return view('no_access');
+        }
+        $id_register = $this->decryptor($encrypt_id);
+        // Pastikan id_register diterima dari form
+        $id_magang = $this->anakMagangModel->getIdMagangByRegister($id_register);
+        // dd($id_magang);
+        $anak_magang = $this->anakMagangModel->getPesertaByIdMagangOne($id_magang);
+        $mentor = 'A';
+        // dd($nipg);
+        // Model Registrasi
+        $registrasiModel = new RegistrasiModel();
+
+        // Cek apakah id_register ada
+        $detail = $registrasiModel->find($id_register);
+        if (!$detail) {
+            return redirect()->back()->with('error', 'Data tidak ditemukan');
+        }
+
+        // Perbarui status menjadi 'Accept'
+        $data = [
+            'status' => 'reject'
+        ];
+
+        $registrasiModel->update($id_register, $data);
+
+        if ($id_magang !== null) {
+            $data = [
+                'status' => 'reject'
+            ];
+            $this->anakMagangModel->update($id_magang, $data);
+        }
+
+
+        // $mentor = $this->mentorModel->getMentorByNipg($nipg);
+        // dd($peserta);
+
+        if ($mentor) {
+            $this->sendEmailToPesertaAcc($mentor, $detail, false);
+        } else {
+            $this->session->setFlashdata('error', 'Informasi mentor tidak ditemukan.');
+            return redirect()->to('/admin/dashboard');
+        }
+
+        // Redirect kembali ke halaman detail dengan pesan sukses
+        return redirect()->to('/admin/dashboard/detail/' . $encrypt_id)->with('success', 'Peserta ditolak');
     }
 
     public function pilih_mentor()
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'admin') {
+            return view('no_access');
+        }
         // Ambil data dari form
         $id_register = $this->request->getPost('id_register');
         $nipg = $this->request->getPost('nipg');  // Mentor yang dipilih
@@ -1177,15 +1617,24 @@ class Dashboard extends BaseController
                 <p>Kepada Yth.</p>
                 <p>{$mentor['nama']}</p>
                 <br>
-                <p>Sehubungan dengan pengajuan {$peserta['tipe']}, bersama ini dimohon kesediaannya untuk dapat menjadi mentor dari:</p>
+                <p>Sehubungan dengan pengajuan {$peserta['tipe']}, bersama ini anda ditugaskan untuk menjadi mentor dari:</p>
                 <br>
                 <p>Nama : {$peserta['nama']}</p>
+                <p>Jurusan : {$peserta['prodi']}</p>
+                <p>Universitas : {$peserta['instansi']}</p>
                 <p>Alamat : {$peserta['alamat']}</p>
                 <p>Telepon : {$peserta['notelp']}</p>
                 <p>Alamat Email : {$peserta['email']}</p>
+                <p>Periode Magang : {$peserta['tanggal1']} - {$peserta['tanggal2']}
                 <br>
+                <p>Seluruh berkas peserta magang bisa Anda lihat pada sistem.</p>
+                <p>Anda dipersilahkan menunjuk Co-mentor dengan menggunakan fitur di dalam sistem.</p>
                 <p>Silakan login ke sistem untuk informasi lebih lanjut, atau klik link berikut:</p>
                 <p><a href='" . base_url('mentor/dashboard/daftar_peserta') . "'>Link</a></p>
+                <br>
+                <p>Regards</p>
+                <p>HCM Division</p>
+                <p>PT Perusahaan Gas Negara Tbk</p>
             </body>
             </html>
         ");
@@ -1206,9 +1655,11 @@ class Dashboard extends BaseController
 
         // Mengirim email
         if ($email->send()) {
+            echo $email->printDebugger();
             log_message('info', 'Email berhasil dikirim ke ' . $mentor['email']);
             return true;
         } else {
+            echo $email->printDebugger();
             log_message('error', 'Gagal mengirim email ke ' . $mentor['email']);
             log_message('error', $email->printDebugger(['headers']));
             return false;
@@ -1321,14 +1772,140 @@ class Dashboard extends BaseController
                 <br>
                 <p>Silakan login ke sistem kami untuk informasi lebih lanjut dan memulai program ini. Jika Anda memiliki pertanyaan, jangan ragu untuk menghubungi kami.</p>
                 <p>Terima kasih atas partisipasi Anda.</p>
-                <p>Hormat kami,</p>
-                <p>Admin Program</p>
+                <br>
+                <p>Regards</p>
+                <p>HCM Division</p>
+                <p>PT Perusahaan Gas Negara Tbk</p>
 
             </body>
             </html>
             ");
-        } elseif ($status == 'reject') {
-            $email->setSubject('Hasil Pendaftaran Program');
+        } elseif ($status == false) {
+            $email->setSubject('Hasil Pendaftaran Anda Ditolak');
+            $email->setMessage("
+
+            <html>
+            <head>
+                <style>
+                    table {
+                        border-collapse: collapse;
+                        width: 100%;
+                    }
+                    th, td {
+                        text-align: left;
+                        padding: 8px;
+                    }
+                    th {
+                        background-color: #f2f2f2;
+                    }
+                    tr:nth-child(even) {
+                        background-color: #f9f9f9;
+                    }
+                </style>
+            </head>
+            <body>
+                <p>Yth. {$peserta['nama']}</p>
+                <p>Dengan berat hati, kami sampaikan bahwa pendaftaran anda ditolak.</p>
+                <p>Silahkan kembali mendaftar jika kebutuhan masih tersedia</p>
+
+                <p>Terima kasih atas partisipasi Anda.</p>
+                <br>
+                <p>Regards</p>
+                <p>HCM Division</p>
+                <p>PT Perusahaan Gas Negara Tbk</p>
+
+            </body>
+            </html>
+            ");
+        }
+
+        return $email->send();
+    }
+
+    private function sendEmailToMentorAcc($mentor, $peserta, $status)
+    {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'admin') {
+            return view('no_access');
+        }
+        $email = \Config\Services::email();
+
+        $email->setFrom('mdndfzn@gmail.com', 'PGN GAS Admin Internship Program');
+        $email->setTo($mentor['email']);
+
+        if ($status && $mentor) {
+            $email->setSubject('Pendaftaran Calon Peserta Magang Bimbingan Anda Telah Diterima');
+            $email->setMessage("
+
+            <html>
+            <head>
+                <style>
+                    table {
+                        border-collapse: collapse;
+                        width: 100%;
+                    }
+                    th, td {
+                        text-align: left;
+                        padding: 8px;
+                    }
+                    th {
+                        background-color: #f2f2f2;
+                    }
+                    tr:nth-child(even) {
+                        background-color: #f9f9f9;
+                    }
+                </style>
+            </head>
+            <body>
+                <p>Kepada Yth. {$mentor['nama']}</p>
+                <p>Dengan Hormat</p>
+                <br>
+                <p>Kami dengan senang hati menginformasikan bahwa pendaftaran calon peserta bimbingan Anda dalam program ini telah diterima.</p>
+                <p>Anda bisa melihat surat perjanjian yang telah ditandatangani oleh peserta magang pada sistem.</p>
+                <br>
+                <p>Regards</p>
+                <p>HCM Division</p>
+                <p>PT Perusahaan Gas Negara Tbk</p>
+
+            </body>
+            </html>
+            ");
+        } elseif ($status == false) {
+            $email->setSubject('Hasil Pendaftaran Calon Peserta Bimbingan Anda Ditolak');
+            $email->setMessage("
+
+            <html>
+            <head>
+                <style>
+                    table {
+                        border-collapse: collapse;
+                        width: 100%;
+                    }
+                    th, td {
+                        text-align: left;
+                        padding: 8px;
+                    }
+                    th {
+                        background-color: #f2f2f2;
+                    }
+                    tr:nth-child(even) {
+                        background-color: #f9f9f9;
+                    }
+                </style>
+            </head>
+            <body>
+                <p>Yth. {$mentor['nama']}</p>
+                <p>Dengan berat hati, kami sampaikan bahwa pendaftaran calon peserta magang bimbingan anda ditolak.</p>
+                <br>
+                <p>Regards</p>
+                <p>HCM Division</p>
+                <p>PT Perusahaan Gas Negara Tbk</p>
+
+            </body>
+            </html>
+            ");
         }
 
         return $email->send();
@@ -1350,7 +1927,7 @@ class Dashboard extends BaseController
             throw new \CodeIgniter\Exceptions\PageNotFoundException('File tidak ditemukan');
         }
     }
-    public function downloadAll($id)
+    public function downloadAll($encrypt_id)
     {
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
         $user_level = $this->session->get('level');
@@ -1358,6 +1935,8 @@ class Dashboard extends BaseController
         if ($user_level !== 'admin') {
             return view('no_access');
         }
+
+        $id = $this->decryptor($encrypt_id);
 
         $user_data = $this->registrasiModel->getUserFiles($id);
         $user_data_diri = $this->registrasiModel->getUserDataDiri($id);
@@ -1409,6 +1988,13 @@ class Dashboard extends BaseController
         }
         $data['mentor'] = $this->mentorModel->getDataDesc();
 
+        foreach ($data['mentor'] as &$mentor) {
+            // Enkripsi ID peserta dan encode dalam base64 untuk digunakan di URL
+            $encryptedID = $this->encryptor($mentor['id_mentor']);
+            // Tambahkan ID terenkripsi ke array data
+            $mentor['encrypted_id'] = $encryptedID;
+        }
+
         return view('templates/header') .
             view('templates/sidebar') .
             view('templates/topbar') .
@@ -1416,7 +2002,7 @@ class Dashboard extends BaseController
             view('templates/footer');
     }
 
-    public function detailDataMentor($id_mentor)
+    public function detailDataMentor($encrypt_id)
     {
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
         $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
@@ -1425,7 +2011,19 @@ class Dashboard extends BaseController
             return view('no_access');
         }
         helper('date');
+        $id_mentor = $this->decryptor($encrypt_id);
+        $data['mentor'] = $this->mentorModel->getMentorByIdMentorOne($id_mentor);
+        $data['mentor']['encrypt_id'] = $encrypt_id;
         $data['detail_mentor'] = $this->mentorModel->getMentorByIdMentor($id_mentor);
+        // dd($data['detail_mentor']);
+        foreach ($data['detail_mentor'] as &$detail_mentor) {
+            // Enkripsi ID peserta dan encode dalam base64 untuk digunakan di URL
+            $encryptedID = $this->encryptor($detail_mentor->id_magang);
+            // Tambahkan ID terenkripsi ke array data
+            $detail_mentor->encrypted_id = $encryptedID;
+        }
+
+        // dd($data['detail_mentor']);
         $data['nilai'] = $this->nilaiModel->getNilaiByIdMentor($id_mentor);
 
         foreach ($data['nilai'] as $item) {
@@ -1440,7 +2038,7 @@ class Dashboard extends BaseController
         echo view('templates/footer');
     }
 
-    public function detailDataPeserta($id_magang)
+    public function detailDataPeserta($encrypt_id)
     {
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
         $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
@@ -1449,9 +2047,12 @@ class Dashboard extends BaseController
             return view('no_access');
         }
         helper('date');
-
+        $id_magang = $this->decryptor($encrypt_id);
         $data['detail_peserta'] = $this->pesertaModel->getDetailPeserta($id_magang);
+        // dd($data['detail_peserta']);
         $data['id_magang'] = $id_magang;
+        $data['encrypt_id'] = $encrypt_id;
+        $data['encrypt_id_register'] = $this->encryptor($data['detail_peserta'][0]->id_register);
         if (!$data['detail_peserta']) {
             throw new \CodeIgniter\Exceptions\PageNotFoundException('Data peserta tidak ditemukan');
         }
@@ -1463,7 +2064,7 @@ class Dashboard extends BaseController
         echo view('templates/footer');
     }
 
-    public function detail_data_m_peserta($id_magang)
+    public function detail_data_m_peserta($encrypt_id)
     {
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
         $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
@@ -1473,9 +2074,13 @@ class Dashboard extends BaseController
         }
 
         helper('date');
-
+        $id_magang = $this->decryptor($encrypt_id);
         $data['detail_peserta'] = $this->pesertaModel->getDetailPeserta($id_magang);
+
+        $data['encrypt_id'] = $this->encryptor($data['detail_peserta'][0]->id_register);
         $data['id_magang'] = $id_magang;
+        $data['encrypted_id'] = $this->encryptor($id_magang);
+        $data['encrypt_buku_rekening'] = $this->encryptor($data['detail_peserta'][0]->buku_rek);
 
         if (!$data['detail_peserta']) {
             throw new \CodeIgniter\Exceptions\PageNotFoundException('Data peserta tidak ditemukan');
@@ -1527,6 +2132,15 @@ class Dashboard extends BaseController
         }
         helper('date');
         $data['data_peserta'] = $this->anakMagangModel->getPesertaMagangDesc(); // Ambil data peserta magang
+        foreach ($data['data_peserta'] as &$data_peserta) {
+            // Enkripsi ID peserta dan encode dalam base64 untuk digunakan di URL
+            $encrypted_id_magang = $this->encryptor($data_peserta['id_magang']);
+            $encrypted_id_register = $this->encryptor($data_peserta['id_register']);
+            // Tambahkan ID terenkripsi ke array data
+            $data_peserta['encrypted_id_magang'] = $encrypted_id_magang;
+            $data_peserta['encrypted_id_register'] = $encrypted_id_register;
+
+        }
         echo view('templates/header');
         echo view('templates/sidebar');
         echo view('templates/topbar');
@@ -1534,7 +2148,7 @@ class Dashboard extends BaseController
         echo view('templates/footer');
     }
 
-    public function informasiAbsensi($id_magang)
+    public function informasiAbsensi($encrypt_id)
     {
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
         $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
@@ -1542,6 +2156,7 @@ class Dashboard extends BaseController
         if ($user_level !== 'admin') {
             return view('no_access');
         }
+        $id_magang = $this->decryptor($encrypt_id);
         $start_date = $this->request->getGet('start_date');
         $end_date = $this->request->getGet('end_date');
         $filter_type = $this->request->getGet('filter_type');
@@ -1559,6 +2174,7 @@ class Dashboard extends BaseController
 
         $data['peserta'] = $this->pesertaModel->getDetailAbsenPeserta($id_magang, $start_date, $end_date);
         $data['id_magang'] = $id_magang;
+        $data['encrypt_id'] = $encrypt_id;
 
         echo view('templates/header');
         echo view('templates/sidebar');
@@ -1568,7 +2184,7 @@ class Dashboard extends BaseController
     }
 
 
-    public function informasi_m_absensi($id_magang)
+    public function informasi_m_absensi($encrypt_id)
     {
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
         $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
@@ -1576,6 +2192,7 @@ class Dashboard extends BaseController
         if ($user_level !== 'admin') {
             return view('no_access');
         }
+        $id_magang = $this->decryptor($encrypt_id);
         $start_date = $this->request->getGet('start_date');
         $end_date = $this->request->getGet('end_date');
         $filter_type = $this->request->getGet('filter_type');
@@ -1593,6 +2210,7 @@ class Dashboard extends BaseController
 
         $data['peserta'] = $this->pesertaModel->getDetailAbsenPeserta($id_magang, $start_date, $end_date);
         $data['id_magang'] = $id_magang;
+        $data['encrypt_id'] = $encrypt_id;
 
         echo view('templates/header');
         echo view('templates/sidebar');
@@ -1601,7 +2219,7 @@ class Dashboard extends BaseController
         echo view('templates/footer');
     }
 
-    public function cetakInformasiAbsensi($id_magang)
+    public function cetakInformasiAbsensi($encrypt_id)
     {
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
         $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
@@ -1610,6 +2228,7 @@ class Dashboard extends BaseController
             return view('no_access');
         }
         helper('date');
+        $id_magang = $this->decryptor($encrypt_id);
         $start_date = $this->request->getGet('start_date');
         $end_date = $this->request->getGet('end_date');
         $filter_type = $this->request->getGet('filter_type');
@@ -1627,6 +2246,7 @@ class Dashboard extends BaseController
 
         $data['peserta'] = $this->pesertaModel->getDetailAbsenPeserta($id_magang, $start_date, $end_date);
         $data['id_magang'] = $id_magang;
+        $data['encrypt_id'] = $encrypt_id;
 
         $dompdf = new Dompdf();
         $html = view('mentor/cetak_detail_rekap_absensi_bimbingan', $data);
@@ -1637,7 +2257,7 @@ class Dashboard extends BaseController
         $dompdf->stream('Detail_Rekap_Absensi.pdf', ['Attachment' => 0]);
     }
 
-    public function informasi_nilai_akhir($id_magang)
+    public function informasi_nilai_akhir($encrypt_id)
     {
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
         $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
@@ -1646,9 +2266,10 @@ class Dashboard extends BaseController
             return view('no_access');
         }
         helper('date');
-
+        $id_magang = $this->decryptor($encrypt_id);
         $data['nilai_akhir'] = $this->pesertaModel->getNilaiPeserta($id_magang);
         $data['id_magang'] = $id_magang;
+        $data['encrypt_id'] = $encrypt_id;
 
         foreach ($data['nilai_akhir'] as $item) {
             $item->total_nilai = $this->hitungTotalNilai($item);
@@ -1662,7 +2283,7 @@ class Dashboard extends BaseController
         echo view('templates/footer');
     }
 
-    public function informasi_m_nilai_akhir($id_magang)
+    public function informasi_m_nilai_akhir($encrypt_id)
     {
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
         $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
@@ -1671,8 +2292,10 @@ class Dashboard extends BaseController
             return view('no_access');
         }
         helper('date');
+        $id_magang = $this->decryptor($encrypt_id);
         $data['nilai_akhir'] = $this->pesertaModel->getNilaiPeserta($id_magang);
         $data['id_magang'] = $id_magang;
+        $data['encrypt_id'] = $encrypt_id;
 
         foreach ($data['nilai_akhir'] as $item) {
             $item->total_nilai = $this->hitungTotalNilai($item);
@@ -1728,7 +2351,7 @@ class Dashboard extends BaseController
         return $total / 14;
     }
 
-    public function cetak_informasi_nilai_akhir($id_magang)
+    public function cetak_informasi_nilai_akhir($encrypt_id)
     {
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
         $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
@@ -1737,8 +2360,10 @@ class Dashboard extends BaseController
             return view('no_access');
         }
         helper('date');
+        $id_magang = $this->decryptor($encrypt_id);
         $data['nilai_akhir'] = $this->pesertaModel->getNilaiPeserta($id_magang);
         $data['id_magang'] = $id_magang;
+        $data['encrypt_id'] = $encrypt_id;
 
         foreach ($data['nilai_akhir'] as $item) {
             $item->total_nilai = $this->hitungTotalNilai($item);
@@ -1755,7 +2380,7 @@ class Dashboard extends BaseController
         $dompdf->stream('Detail_Nilai_Akhir.pdf', ['Attachment' => 0]);
     }
 
-    public function informasi_laporan($id_magang)
+    public function informasi_laporan($encrypt_id)
     {
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
         $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
@@ -1763,9 +2388,11 @@ class Dashboard extends BaseController
         if ($user_level !== 'admin') {
             return view('no_access');
         }
+        $id_magang = $this->decryptor($encrypt_id);
         $data['detail_peserta'] = $this->pesertaModel->getDetailPeserta($id_magang);
         $data['laporan'] = $this->pesertaModel->getLaporanPeserta($id_magang);
         $data['id_magang'] = $id_magang;
+        $data['encrypt_id'] = $encrypt_id;
 
         echo view('templates/header');
         echo view('templates/sidebar');
@@ -1774,7 +2401,7 @@ class Dashboard extends BaseController
         echo view('templates/footer');
     }
 
-    public function informasi_m_laporan($id_magang)
+    public function informasi_m_laporan($encrypt_id)
     {
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
         $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
@@ -1782,9 +2409,11 @@ class Dashboard extends BaseController
         if ($user_level !== 'admin') {
             return view('no_access');
         }
+        $id_magang = $this->decryptor($encrypt_id);
         $data['detail_peserta'] = $this->pesertaModel->getDetailPeserta($id_magang);
         $data['laporan'] = $this->pesertaModel->getLaporanPeserta($id_magang);
         $data['id_magang'] = $id_magang;
+        $data['encrypt_id'] = $encrypt_id;
 
         echo view('templates/header');
         echo view('templates/sidebar');
@@ -1844,7 +2473,7 @@ class Dashboard extends BaseController
         }
     }
 
-    public function perpanjang_peserta($id_magang)
+    public function perpanjang_peserta($encrypt_id)
     {
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
         $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
@@ -1854,8 +2483,10 @@ class Dashboard extends BaseController
         }
 
         helper('date');
+        $id_magang = $this->decryptor($encrypt_id);
         $data['detail_peserta'] = $this->pesertaModel->getDetailPeserta($id_magang);
         $data['id_magang'] = $id_magang;
+        $data['encrypt_id'] = $encrypt_id;
 
         if (!$data['detail_peserta']) {
             throw new \CodeIgniter\Exceptions\PageNotFoundException("Peserta tidak ditemukan");
@@ -1886,12 +2517,14 @@ class Dashboard extends BaseController
 
         // Ambil data yang diperlukan
         $id_magang = $this->request->getPost('id_magang');
+        $encrypt_id = $this->encryptor($id_magang);
+        // dd($encrypt_id);
         $tgl_perpanjangan = $this->request->getPost('tgl_perpanjangan');
 
         // Validasi input
         if (empty($id_magang) || empty($tgl_perpanjangan)) {
             session()->setFlashdata('message', 'ID Magang atau Tanggal Perpanjangan tidak valid.');
-            return redirect()->to('admin/dashboard/perpanjang_peserta/' . $id_magang);
+            return redirect()->to('admin/dashboard/perpanjang_peserta/' . $encrypt_id);
         }
 
         // Langkah 1: Cari id_register berdasarkan id_magang dari tabel anak_magang
@@ -1916,7 +2549,7 @@ class Dashboard extends BaseController
             session()->setFlashdata('message', 'ID Magang tidak ditemukan.');
         }
 
-        return redirect()->to('admin/dashboard/perpanjang_peserta/' . $id_magang);
+        return redirect()->to('admin/dashboard/perpanjang_peserta/' . $encrypt_id);
     }
 
     // public function perpanjang_magang()
@@ -1957,6 +2590,12 @@ class Dashboard extends BaseController
 
     private function tambahAbsensiBaru($id_magang, $tgl_perpanjangan, $id_register)
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'admin') {
+            return view('no_access');
+        }
         // Ambil data tanggal selesai lama
         $detail = $this->pesertaModel->getDetailPesertaByIdMagang($id_magang);
         $tgl_selesai_lama = $detail['tgl_selesai']; // Tanggal selesai lama dari tabel anak_magang
@@ -2033,7 +2672,7 @@ class Dashboard extends BaseController
     //     return redirect()->to('admin/dashboard/perpanjang_peserta/' . $id_magang);
     // }
 
-    public function changeStatus($id_magang)
+    public function changeStatus($encrypt_id)
     {
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
         $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
@@ -2041,6 +2680,7 @@ class Dashboard extends BaseController
         if ($user_level !== 'admin') {
             return view('no_access');
         }
+        $id_magang = $this->decryptor($encrypt_id);
         $status = $this->request->getPost('status');
 
         if ($status) {
@@ -2056,7 +2696,7 @@ class Dashboard extends BaseController
             }
         }
 
-        return redirect()->to('admin/dashboard/detail_data_m_peserta/' . $id_magang);
+        return redirect()->to('admin/dashboard/detail_data_m_peserta/' . $encrypt_id);
     }
 
     public function exportToExcel()
@@ -2142,7 +2782,7 @@ class Dashboard extends BaseController
         $dompdf->stream("sertifikat_" . $peserta['nama'] . ".pdf", ["Attachment" => false]);
     }
 
-    public function sertifikat($id)
+    public function sertifikat($encrypt_id)
     {
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
         $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
@@ -2150,6 +2790,7 @@ class Dashboard extends BaseController
         if ($user_level !== 'admin') {
             return view('no_access');
         }
+        $id = $this->decryptor($encrypt_id);
         $id_magang = $id;
         $anakMagang = $this->anakMagangModel->find($id);
         $user_register = $this->registrasiModel->getRegistrasiById($id);
@@ -2169,9 +2810,12 @@ class Dashboard extends BaseController
         }
 
         $data['id_magang'] = $id_magang; // Tambahkan ini agar tersedia di view
+        $data['encrypt_id'] = $encrypt_id;
         $data['anakMagangModel'] = $this->anakMagangModel;
         $data['anakMagang'] = $anakMagang;
         $data['user_register'] = $user_register;
+        // dd($data['user_register']);
+        $data['encrypt_id_register'] = $this->encryptor($data['user_register']['id_register']);
 
         return view('templates/header') .
             view('templates/sidebar') .
@@ -2180,7 +2824,7 @@ class Dashboard extends BaseController
             view('templates/footer');
     }
 
-    public function cetak($id)
+    public function cetak($encrypt_id)
     {
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
         $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
@@ -2188,12 +2832,14 @@ class Dashboard extends BaseController
         if ($user_level !== 'admin') {
             return view('no_access');
         }
+        $id = $this->decryptor($encrypt_id);
         $registrasiModel = new RegistrasiModel();
         $user_nomor = $this->session->get('nomor');
         // Ambil data nilai dan data registrasi
         $registrasi_data = $this->registrasiModel->getRegistrasiById($id); // Ambil data dari tabel registrasi berdasarkan nomo
 
         $data['registrasi'] = $registrasi_data;
+        $data['encrypt_id'] = $encrypt_id;
 
         if (!$data['registrasi']) {
             return redirect()->to('/')->with('error', 'Data tidak ditemukan.');
@@ -2205,6 +2851,12 @@ class Dashboard extends BaseController
     // Submit nomor sertifikat dan update ke database
     public function submitNoSertifikat()
     {
+        // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+        $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+        if ($user_level !== 'admin') {
+            return view('no_access');
+        }
         $no_sertif = $this->request->getPost('no_sertif');
         $id_register = $this->request->getPost('id_register');
         // Validasi input

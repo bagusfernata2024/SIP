@@ -6,6 +6,7 @@ use App\Models\MentorModel;
 use App\Models\UserModel;
 use App\Models\PesertaModel;
 use App\Models\DaftarMinatModel;
+
 use CodeIgniter\Controller;
 
 class Registrasi extends BaseController
@@ -124,7 +125,6 @@ class Registrasi extends BaseController
             'nik' => 'required|numeric',
             'tanggal1' => 'required',
             'tanggal2' => 'required',
-            'minat' => 'required',
         ]);
 
         if (!$validation->withRequest($this->request)->run()) {
@@ -187,7 +187,6 @@ class Registrasi extends BaseController
         $newPrimaryKey = isset($lastPrimaryKey['id_register']) ? $lastPrimaryKey['id_register'] + 1 : 1;
         $timeline = 'Review Berkas Awal';
         $data = [
-            'id' => $newPrimaryKey, // Memastikan id berurutan
             'tipe' => $tipe,
             'nomor' => $nik,
             'nama' => $nama,
@@ -202,7 +201,6 @@ class Registrasi extends BaseController
             'instansi' => $instansi,
             'tanggal1' => $this->request->getPost('tanggal1'),
             'tanggal2' => $this->request->getPost('tanggal2'),
-            'minat' => $this->request->getPost('minat'),
             'status' => 'Waiting',
             'tgl_regis' => $tglRegis,
             'lama_pkl' => $lamaPkl,
@@ -216,19 +214,25 @@ class Registrasi extends BaseController
         ];
 
         if ($this->pesertaModel->insert($data)) {
+            
             // Kirim email ke peserta
             session()->setFlashdata('status', 'success');
             $email = \Config\Services::email();
 
             $email->setFrom('mdndfzn@gmail.com', 'PGN GAS Admin Internship Program');
             $email->setTo($this->request->getPost('email'));
-            $email->setSubject('Pendaftaran Sedang Diproses');
+            $email->setSubject('Pendaftaran Sedang Dievaluasi');
             $email->setMessage("
-            <p>Kepada Yth.</p>
-            <p>$nama</p>
-            <p>Terima kasih telah mendaftar program kami dengan tipe program: <b>{$tipe}</b>.</p>
-            <p>Saat ini, pendaftaran Anda sedang kami proses. Mohon menunggu informasi lebih lanjut.</p>
-            <p>Salam hangat,<br>Tim Administrasi</p>
+            <p>Yth. $nama</p>
+            <br>
+            <p>Terima kasih atas pendaftaran Anda dalam program <b>{$tipe}</b>.</p>
+            <p>Berkas Anda sedang dalam proses evaluasi, dan kami akan segera menginformasikan hasilnya.</p>
+            <p>Mohon menunggu pemberitahuan lebih lanjut.</p>
+            <br>
+            <p>Regards</p>
+            <p>HCM Division</p>
+            <p>PT Perusahaan Gas Negara Tbk</p>
+
         ");
 
             if ($email->send()) {

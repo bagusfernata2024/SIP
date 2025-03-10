@@ -12,9 +12,9 @@
         <div class="card-body">
             <div class="table-responsive">
                 <div class="py-3">
-                    <a href="<?php echo base_url('admin/dashboard/informasi_absensi/' . $id_magang) ?>" class="btn btn-info mr-2">Informasi Absensi</a>
-                    <a href="<?php echo base_url('admin/dashboard/informasi_laporan/' . $id_magang) ?>" class="btn btn-primary mr-2">Informasi Laporan</a>
-                    <a href="<?php echo base_url('admin/dashboard/informasi_nilai_akhir/' . $id_magang) ?>" class="btn btn-warning">Informasi Nilai Akhir</a>
+                    <a href="<?php echo base_url('admin/dashboard/informasi_absensi/' . $encrypt_id) ?>" class="btn btn-info mr-2">Informasi Absensi</a>
+                    <a href="<?php echo base_url('admin/dashboard/informasi_laporan/' . $encrypt_id) ?>" class="btn btn-primary mr-2">Informasi Laporan</a>
+                    <a href="<?php echo base_url('admin/dashboard/informasi_nilai_akhir/' . $encrypt_id) ?>" class="btn btn-warning">Informasi Nilai Akhir</a>
                 </div>
                 <h5 class="font-weight-bold mt-4">Informasi Mentor:</h5>
                 <table class="table table-bordered">
@@ -302,7 +302,7 @@
 
                         <!-- Tombol Download Semua -->
                         <div class="mt-3">
-                            <a href="<?php echo base_url('admin/dashboard/download_all/' . $detail_peserta[0]->id_register); ?>" class="btn btn-success btn-sm">Download Semua Lampiran</a>
+                            <a href="<?php echo base_url('admin/dashboard/download_all/' . $encrypt_id_register); ?>" class="btn btn-success btn-sm">Download Semua Lampiran</a>
                         </div>
                         <br>
                     </tbody>

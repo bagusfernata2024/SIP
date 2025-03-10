@@ -53,22 +53,22 @@
         <div class="py-3" style="margin-left: 10px; margin-right: 10px; margin-top: 20px;">
             <div class="progress">
                 <div class="progress-bar bg-secondary" role="progressbar" style="width: 33%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
-                    <a href="<?php echo base_url('admin/dashboard/detail/' . $detail['id_register']); ?>" class="btn btn-secondary w-100">
+                    <a href="<?php echo base_url('admin/dashboard/detail/' . $detail['encrypt_id']); ?>" class="btn btn-secondary w-100">
                         Preview
                     </a>
                 </div>
                 <div class="progress-bar bg-secondary" role="progressbar" style="width: 33%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
-                    <a href="<?php echo base_url('admin/dashboard/cari_mentor/' . $detail['id_register']); ?>" class="btn btn-secondary w-100">
+                    <a href="<?php echo base_url('admin/dashboard/cari_mentor/' . $detail['encrypt_id']); ?>" class="btn btn-secondary w-100">
                         Cari Mentor
                     </a>
                 </div>
                 <div class="progress-bar bg-success" role="progressbar" style="width: 33%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
-                    <a href="<?php echo base_url('admin/dashboard/upload_surat/' . $detail['id_register']); ?>" class="btn btn-success w-100">
+                    <a href="<?php echo base_url('admin/dashboard/upload_surat/' . $detail['encrypt_id']); ?>" class="btn btn-success w-100">
                         Upload Surat
                     </a>
                 </div>
                 <div class="progress-bar bg-secondary" role="progressbar" style="width: 33%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
-                    <a href="<?php echo base_url('admin/dashboard/review_surat/' . $detail['id_register']); ?>" class="btn btn-secondary w-100">
+                    <a href="<?php echo base_url('admin/dashboard/review_surat/' . $detail['encrypt_id']); ?>" class="btn btn-secondary w-100">
                         Review Surat
                     </a>
                 </div>
@@ -87,7 +87,7 @@
                 <form method="POST" action="<?php echo base_url('admin/dashboard/upload_surat_persetujuan'); ?>" enctype="multipart/form-data">
                     <div class="mb-3">
                         <label for="suratPersetujuan" class="form-label">Pilih Surat Persetujuan</label>
-                        <input type="file" class="form-control" id="suratPersetujuan" name="surat_persetujuan" required>
+                        <input type="file" class="form-control" id="suratPersetujuan" name="surat_persetujuan" accept=".pdf" required>
                     </div>
                     <input type="hidden" name="id_register" value="<?php echo $detail['id_register']; ?>">
                     <button type="submit" class="btn btn-primary">Upload</button>
@@ -107,7 +107,7 @@
                 <form method="POST" action="<?php echo base_url('admin/dashboard/upload_surat_perjanjian'); ?>" enctype="multipart/form-data">
                     <div class="mb-3">
                         <label for="suratPerjanjian" class="form-label">Pilih Surat Perjanjian</label>
-                        <input type="file" class="form-control" id="suratPerjanjian" name="surat_perjanjian" required>
+                        <input type="file" class="form-control" id="suratPerjanjian" name="surat_perjanjian" accept=".pdf" required>
                     </div>
                     <input type="hidden" name="id_register" value="<?php echo $detail['id_register']; ?>">
                     <button type="submit" class="btn btn-primary">Upload</button>
@@ -119,7 +119,8 @@
                     </button>
 
             <?php else: ?>
-                <a href="<?php echo base_url('admin/dashboard/kirim_surat/' . $detail['id_register']); ?>"><button type="button" class="btn btn-success btn-sm ml-2">
+                <br>
+                <a href="<?php echo base_url('admin/dashboard/kirim_surat/' . $detail['encrypt_id']); ?>"><button type="button" class="btn btn-success btn-sm ml-2">
                         Kirim
                     </button></a>
             <?php endif; ?>
@@ -131,10 +132,10 @@
 
                 <!-- Tombol Previous dan Next -->
                 <div class="d-flex justify-content-between mt-4">
-                    <a href="<?php echo base_url('admin/dashboard/cari_mentor/' . $detail['id_register']); ?>" class="btn btn-warning">
+                    <a href="<?php echo base_url('admin/dashboard/cari_mentor/' . $detail['encrypt_id']); ?>" class="btn btn-warning">
                         Previous
                     </a>
-                    <a href="<?php echo base_url('admin/dashboard/review_surat/' . $detail['id_register']); ?>" class="btn btn-warning">
+                    <a href="<?php echo base_url('admin/dashboard/review_surat/' . $detail['encrypt_id']); ?>" class="btn btn-warning">
                         Next
                     </a>
                 </div>

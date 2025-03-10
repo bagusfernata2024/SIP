@@ -88,9 +88,9 @@
         <img src="<?= base_url('templates/sertifikat_template.png') ?>" class="background-img">
 
         <div class="sertifikat">
-            <h1 style="color: black;"></h1>
+            <h1 style="color: black; margin-bottom: 10px;"></h1>
             <br><br><br><br><br><br>
-            <p style="color: black; font-size: 15px; font-family:Calibri; margin-top: 16px;">00<?= $registrasi['no_sertif'] ?>.S/DL.03/HCM/2024</p>
+            <p style="color: black; font-size: 15px; font-family:Calibri; margin-top: 16px;">00<?= $registrasi['no_sertif'] ?>.S/DL.03/HCM/2025</p>
             <br><br><br>
             <p style="color: #1F497D; font-size:28px; margin-top:6px; font-family:Calibri;"><b><?= $registrasi['nama'] ?></b></p>
             <br><br>
@@ -131,7 +131,7 @@
                 dengan hasil
             </p>
             <p style="color: black; font-size: 28px; font-family:Calibri; margin-top: 5px;"><b>Memuaskan</b></p>
-            <p style="margin-top: 30px; font-size: 18px; font-family:Calibri;">
+            <p style="margin-top: 40px; font-size: 18px; font-family:Calibri;">
                 <?php
                 // Format tanggal selesai dengan bulan dalam bahasa Indonesia
                 $tanggal_selesai = date('d', strtotime($registrasi['tanggal2']));

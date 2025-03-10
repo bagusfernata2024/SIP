@@ -16,39 +16,39 @@
                     <tbody>
                         <tr>
                             <th>Nama</th>
-                            <td><?php echo $detail_mentor[0]->nama ?></td>
+                            <td><?php echo $mentor['nama'] ?></td>
                         </tr>
                         <tr>
                             <th>NIPG</th>
-                            <td><?php echo $detail_mentor[0]->nipg ?></td>
+                            <td><?php echo $mentor['nipg'] ?></td>
                         </tr>
                         <tr>
                             <th>Email</th>
-                            <td><?php echo $detail_mentor[0]->email ?></td>
+                            <td><?php echo $mentor['email'] ?></td>
                         </tr>
                         <tr>
                             <th>Posisi</th>
-                            <td><?php echo $detail_mentor[0]->posisi ?></td>
+                            <td><?php echo $mentor['posisi'] ?></td>
                         </tr>
                         <tr>
                             <th>Direktorat</th>
-                            <td><?php echo $detail_mentor[0]->direktorat ?></td>
+                            <td><?php echo $mentor['direktorat'] ?></td>
                         </tr>
                         <tr>
                             <th>Divisi</th>
-                            <td><?php echo $detail_mentor[0]->division ?></td>
+                            <td><?php echo $mentor['division'] ?></td>
                         </tr>
                         <tr>
                             <th>Subsidiaries</th>
-                            <td><?php echo $detail_mentor[0]->subsidiaries ?></td>
+                            <td><?php echo $mentor['subsidiaries'] ?></td>
                         </tr>
                         <tr>
                             <th>Jenis Kelamin</th>
                             <td>
                                 <?php
-                                if ($detail_mentor[0]->gender === 'L') {
+                                if ($mentor['gender'] === 'L') {
                                     echo 'Laki-laki';
-                                } elseif ($detail_mentor[0]->gender === 'P') {
+                                } elseif ($mentor['gender'] === 'P') {
                                     echo 'Perempuan';
                                 } else {
                                     echo 'Tidak Diketahui';
@@ -58,7 +58,7 @@
                         </tr>
                         <tr>
                             <th>Job</th>
-                            <td><?php echo $detail_mentor[0]->job ?></td>
+                            <td><?php echo $mentor['job'] ?></td>
                         </tr>
                     </tbody>
                 </table>
@@ -128,7 +128,7 @@
                                                 <?php echo $status_text; ?> </span>
                                         </td>
 
-                                        <td><a href="<?php echo site_url('admin/dashboard/detail_data_m_peserta/' . $item->id_magang); ?>">
+                                        <td><a href="<?php echo site_url('admin/dashboard/detail_data_m_peserta/' . $item->encrypted_id); ?>">
                                                 <button class="btn btn-success btn-sm">
                                                     <i class="fas fa-search" style="color: white;"></i>
                                                 </button></a>

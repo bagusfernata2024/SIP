@@ -31,7 +31,7 @@
                 class="btn btn-danger"
                 id="btnCheckOut"
                 <?= ($absensi_today && !empty($absensi_today['jam_masuk']) && empty($absensi_today['jam_pulang'])) || $isTodayAbsent ? 'disabled' : '' ?>>
-                Check-Out
+                Clock-Out
             </button>
 
             <a href="<?= base_url('dashboard/cetak_absensi') ?>" target="_blank" class="btn btn-warning">
@@ -313,14 +313,14 @@
         const today = new Date().toISOString().split('T')[0]; // Format tanggal hari ini: YYYY-MM-DD
 
         // Fungsi untuk mengecek apakah hari ini berada dalam rentang absensi
-        function isWithinAbsencePeriod() {
-            // Cek apakah hari ini dalam rentang tanggal mulai dan selesai absensi
-            console.log(today);
-            console.log(tglMulai);
-            console.log(tglSelesai);
-            console.log(today >= tglMulai && today <= tglSelesai);
-            return today >= tglMulai && today <= tglSelesai;
-        }
+        // function isWithinAbsencePeriod() {
+        //     // Cek apakah hari ini dalam rentang tanggal mulai dan selesai absensi
+        //     console.log(today);
+        //     console.log(tglMulai);
+        //     console.log(tglSelesai);
+        //     console.log(today >= tglMulai && today <= tglSelesai);
+        //     return today >= tglMulai && today <= tglSelesai;
+        // }
 
         // Fungsi untuk mengupdate status tombol Check-In dan Check-Out
         function updateButtonState() {
@@ -328,14 +328,14 @@
             const btnCheckOut = document.getElementById("btnCheckOut");
 
             // Jika hari ini tidak dalam rentang absensi, nonaktifkan tombol dan keluar
-            if (!isWithinAbsencePeriod()) {
-                btnCheckIn.disabled = true;
-                btnCheckOut.disabled = true;
-                btnCheckIn.classList.add("disabled");
-                btnCheckOut.classList.add("disabled");
-                console.log("Tombol Check-In dan Check-Out dinonaktifkan karena hari ini tidak dalam periode absensi.");
-                return; // Hentikan eksekusi lebih lanjut jika hari ini tidak dalam rentang absensi
-            }
+            // if (!isWithinAbsencePeriod()) {
+            //     btnCheckIn.disabled = true;
+            //     btnCheckOut.disabled = true;
+            //     btnCheckIn.classList.add("disabled");
+            //     btnCheckOut.classList.add("disabled");
+            //     console.log("Tombol Check-In dan Check-Out dinonaktifkan karena hari ini tidak dalam periode absensi.");
+            //     return; // Hentikan eksekusi lebih lanjut jika hari ini tidak dalam rentang absensi
+            // }
 
             // Logika untuk Clock-In (hanya aktif sebelum jam 20:00)
             const currentTime = new Date();
@@ -343,7 +343,7 @@
             const currentMinute = currentTime.getMinutes();
 
             // Logika untuk Check-In (hanya aktif sebelum jam 20:00)
-            if (currentHour < 20) {
+            if (currentHour < 23) {
                 btnCheckIn.disabled = false;
                 btnCheckIn.classList.remove("disabled");
             } else {

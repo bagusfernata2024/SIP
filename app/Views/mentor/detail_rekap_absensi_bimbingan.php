@@ -19,7 +19,7 @@
         </div>
         <div class="container-fluid">
             <!-- Form Filter -->
-            <form action="<?php echo base_url('mentor/dashboard/detail_rekap_absensi_bimbingan/' . $id_magang); ?>" method="get">
+            <form action="<?php echo base_url('mentor/dashboard/detail_rekap_absensi_bimbingan/' . $encrypt_id); ?>" method="get">
                 <div class="form-group">
                     <label for="filter_type">Filter Berdasarkan</label>
                     <select name="filter_type" id="filter_type" class="form-control">
@@ -40,7 +40,7 @@
             </form>
 
             <!-- Form Cetak -->
-            <form action="<?php echo base_url('mentor/dashboard/cetak_detail_rekap_absensi_bimbingan/' . $id_magang); ?>" method="get" target="_blank">
+            <form action="<?php echo base_url('mentor/dashboard/cetak_detail_rekap_absensi_bimbingan/' . $encrypt_id); ?>" method="get" target="_blank">
                 <input type="hidden" name="filter_type" id="filter_type_cetak" value="all">
                 <input type="hidden" name="start_date" id="start_date_cetak">
                 <input type="hidden" name="end_date" id="end_date_cetak">

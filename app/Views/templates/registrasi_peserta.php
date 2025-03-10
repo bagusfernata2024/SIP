@@ -18,7 +18,8 @@ log_message('debug', 'Flashdata email di view: ' . $email);
                         <h2 class="text-center mb-4">Formulir Registrasi Peserta Magang</h2>
                         <p class="text-center mb-4">Isi formulir berikut untuk mendaftar program magang.</p>
 
-                        <form action="<?= site_url('registrasi/proses_registrasi_peserta'); ?>" method="POST" class="needs-validation" novalidate enctype="multipart/form-data">
+                        <form action="<?= site_url('registrasi/proses_registrasi_peserta'); ?>" method="POST"
+                            class="needs-validation" novalidate enctype="multipart/form-data">
                             <!-- Tipe -->
                             <div class="mb-3">
                                 <label for="tujuan" class="form-label">Tujuan</label>
@@ -41,14 +42,8 @@ log_message('debug', 'Flashdata email di view: ' . $email);
                             <!-- Email -->
                             <div class="mb-3">
                                 <label for="email" class="form-label">Email</label>
-                                <input
-                                    type="email"
-                                    class="form-control"
-                                    id="email"
-                                    name="email"
-                                    required
-                                    placeholder="Harus menggunakan @gmail.com"
-                                    pattern="^[a-zA-Z0-9._%+-]+@gmail\.com$"
+                                <input type="email" class="form-control" id="email" name="email" required
+                                    placeholder="Harus menggunakan @gmail.com" pattern="^[a-zA-Z0-9._%+-]+@gmail\.com$"
                                     required>
                                 <div class="invalid-feedback" id="emailFeedback"></div>
                             </div>
@@ -72,11 +67,13 @@ log_message('debug', 'Flashdata email di view: ' . $email);
                                 <label class="form-label">Jenis Kelamin</label>
                                 <div>
                                     <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" id="jkLaki" name="jk" value="L" required>
+                                        <input class="form-check-input" type="radio" id="jkLaki" name="jk" value="L"
+                                            required>
                                         <label class="form-check-label" for="jkLaki">Laki-laki</label>
                                     </div>
                                     <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" id="jkPerempuan" name="jk" value="P" required>
+                                        <input class="form-check-input" type="radio" id="jkPerempuan" name="jk"
+                                            value="P" required>
                                         <label class="form-check-label" for="jkPerempuan">Perempuan</label>
                                     </div>
                                 </div>
@@ -126,38 +123,31 @@ log_message('debug', 'Flashdata email di view: ' . $email);
 
                             <!-- Lama PKL -->
 
-                            <!-- NIM / NIS -->
-                            <div class="mb-3">
+                            <!-- NIM / NIS or NIK -->
+                            <div class="mb-3" id="nimNisContainer">
                                 <label for="NIM / NIS" class="form-label">NIM / NIS</label>
-                                <input type="number" class="form-control" id="NIM / NIS" name="nik" required>
+                                <input type="number" class="form-control" id="NIM_NIS" name="nik" required>
                                 <div class="invalid-feedback">NIM / NIS wajib diisi.</div>
+                            </div>
+
+                            <div class="mb-3" id="nikContainer" style="display:none;">
+                                <label for="nik" class="form-label">NIK</label>
+                                <input type="number" class="form-control" id="nik" name="nik" required>
+                                <div class="invalid-feedback">NIK wajib diisi.</div>
                             </div>
 
                             <!-- Tanggal PKL -->
                             <div class="mb-0">
                                 <label class="form-label">Periode PKL</label>
                                 <div class="input-group">
-                                    <input
-                                        type="date"
-                                        class="form-control"
-                                        id="tanggal1"
-                                        name="tanggal1"
-                                        placeholder="Tanggal Mulai"
-                                        min="<?= date('Y-m-d'); ?>"
-                                        required
+                                    <input type="date" class="form-control" id="tanggal1" name="tanggal1"
+                                        placeholder="Tanggal Mulai" min="<?= date('Y-m-d'); ?>" required
                                         onchange="updatePeriode(); document.getElementById('tanggal2').min = this.value;"
                                         required>
                                     <span class="input-group-text">sampai</span>
-                                    <input
-                                        type="date"
-                                        class="form-control"
-                                        id="tanggal2"
-                                        name="tanggal2"
-                                        placeholder="Tanggal Selesai"
-                                        min="<?= date('Y-m-d'); ?>"
-                                        required
-                                        onchange="updatePeriode();"
-                                        required>
+                                    <input type="date" class="form-control" id="tanggal2" name="tanggal2"
+                                        placeholder="Tanggal Selesai" min="<?= date('Y-m-d'); ?>" required
+                                        onchange="updatePeriode();" required>
                                 </div>
                                 <!-- Area untuk menampilkan durasi PKL dalam bulan -->
                                 <div id="keteranganPeriode" class="mt-2 text-muted"></div>
@@ -165,7 +155,7 @@ log_message('debug', 'Flashdata email di view: ' . $email);
 
                             <?php if (session()->getFlashdata('status')): ?>
                                 <script>
-                                    document.addEventListener('DOMContentLoaded', function() {
+                                    document.addEventListener('DOMContentLoaded', function () {
                                         const status = '<?= session()->getFlashdata('status') ?>';
                                         const emailPeserta = '<?= session()->getFlashdata('email') ?>'; // Ambil email peserta
 
@@ -219,7 +209,7 @@ log_message('debug', 'Flashdata email di view: ' . $email);
                             </script>
 
                             <!-- Minat -->
-                            <div class="mb-3">
+                            <!-- <div class="mb-3">
                                 <label for="minat" class="form-label">Minat Satuan Kerja</label>
                                 <select class="form-select" id="minat" name="minat" required>
                                     <option value="" disabled selected>Pilih minat satuan kerja...</option>
@@ -228,7 +218,7 @@ log_message('debug', 'Flashdata email di view: ' . $email);
                                     <?php endforeach; ?>
                                 </select>
                                 <div class="invalid-feedback">Silakan pilih minat satuan kerja.</div>
-                            </div>
+                            </div> -->
 
 
                             <!-- LAMPIRAN -->
@@ -236,15 +226,19 @@ log_message('debug', 'Flashdata email di view: ' . $email);
 
                             <!-- Surat Permohonan -->
                             <div class="mb-3">
-                                <label for="surat_permohonan" class="form-label">Surat Permohonan / Surat Lamaran</label>
-                                <input type="file" class="form-control" id="surat_permohonan" name="surat_permohonan" accept=".pdf" required>
+                                <label for="surat_permohonan" class="form-label">Surat Permohonan / Surat
+                                    Lamaran</label>
+                                <input type="file" class="form-control" id="surat_permohonan" name="surat_permohonan"
+                                    accept=".pdf" required>
                                 <div class="invalid-feedback">Unggah surat permohonan (PDF).</div>
                             </div>
 
                             <!-- Proposal Magang -->
                             <div class="mb-3">
-                                <label for="proposal_magang" class="form-label">Proposal Magang / Surat Keterangan Lulus</label>
-                                <input type="file" class="form-control" id="proposal_magang" name="proposal_magang" accept=".pdf" required>
+                                <label for="proposal_magang" class="form-label">Proposal Magang / Surat Keterangan
+                                    Lulus</label>
+                                <input type="file" class="form-control" id="proposal_magang" name="proposal_magang"
+                                    accept=".pdf" required>
                                 <div class="invalid-feedback">Unggah proposal magang (PDF).</div>
                             </div>
 
@@ -264,7 +258,8 @@ log_message('debug', 'Flashdata email di view: ' . $email);
                             <!-- FC KTP -->
                             <div class="mb-3">
                                 <label for="fc_ktp" class="form-label">Fotokopi KTP</label>
-                                <input type="file" class="form-control" id="fc_ktp" name="fc_ktp" accept=".pdf" required>
+                                <input type="file" class="form-control" id="fc_ktp" name="fc_ktp" accept=".pdf"
+                                    required>
                                 <div class="invalid-feedback">Unggah fotokopi KTP (PDF).</div>
                             </div>
 
@@ -278,7 +273,8 @@ log_message('debug', 'Flashdata email di view: ' . $email);
             </div>
 
             <!-- Modal Berhasil -->
-            <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+            <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel"
+                aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -286,7 +282,8 @@ log_message('debug', 'Flashdata email di view: ' . $email);
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            Pendaftaran Anda berhasil. Silahkan menunggu informasi lebih lanjut yang akan dikirim ke email Anda:
+                            Pendaftaran Anda berhasil. Silahkan menunggu informasi lebih lanjut yang akan dikirim ke
+                            email Anda:
                             <strong id="emailPeserta"></strong>.
                         </div>
 
@@ -339,19 +336,19 @@ log_message('debug', 'Flashdata email di view: ' . $email);
 
     </section><!-- /Hero Section -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const emailInput = document.getElementById('email');
             const emailFeedback = document.getElementById('emailFeedback');
             const tipeSelect = document.getElementById('tujuan');
 
             // Reset feedback saat pengguna mengubah input
-            emailInput.addEventListener('input', function() {
+            emailInput.addEventListener('input', function () {
                 emailInput.classList.remove('is-invalid');
                 emailFeedback.style.display = 'none'; // Sembunyikan feedback error
             });
 
             // Cek setelah user selesai mengetik email (gunakan blur atau delay)
-            emailInput.addEventListener('blur', function() {
+            emailInput.addEventListener('blur', function () {
                 const email = emailInput.value;
                 const tipe = tipeSelect.value;
 
@@ -372,15 +369,15 @@ log_message('debug', 'Flashdata email di view: ' . $email);
             // Fungsi untuk mengecek email sudah terdaftar atau belum
             function checkEmailRegistrasi(tipe, email) {
                 fetch('<?= site_url('registrasi/cek_email') ?>', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            tipe: tipe,
-                            email: email
-                        })
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        tipe: tipe,
+                        email: email
                     })
+                })
                     .then(response => response.json())
                     .then(data => {
                         if (data.status === 'fail' && data.status_code !== 'reject') {
@@ -402,6 +399,23 @@ log_message('debug', 'Flashdata email di view: ' . $email);
                     });
             }
 
+        });
+    </script>
+
+    <script>
+        document.getElementById('tujuan').addEventListener('change', function () {
+            const tipe = this.value;
+            const nimNisContainer = document.getElementById('nimNisContainer');
+            const nikContainer = document.getElementById('nikContainer');
+
+            // Jika tipe adalah Internship, sembunyikan NIM/NIS dan tampilkan NIK
+            if (tipe === 'Internship') {
+                nimNisContainer.style.display = 'none';
+                nikContainer.style.display = 'block';
+            } else {
+                nimNisContainer.style.display = 'block';
+                nikContainer.style.display = 'none';
+            }
         });
     </script>
 

@@ -3,9 +3,11 @@
     <!-- Page Heading -->
     <h1 class="h3 mb-2 text-gray-800">Unggah Laporan Akhir</h1>
     <p class="mb-4">
-        Halaman ini digunakan untuk mengunggah file laporan akhir. Jika Anda telah mendapatkan izin untuk mengirimkan laporan akhir dalam periode tertentu, silakan gunakan halaman ini untuk mengunggah file Anda.
+        Halaman ini digunakan untuk mengunggah file laporan akhir. Jika Anda telah mendapatkan izin untuk mengirimkan
+        laporan akhir dalam periode tertentu, silakan gunakan halaman ini untuk mengunggah file Anda.
         <br>
-        Jika halaman ini belum berfungsi atau Anda mengalami kendala, harap segera menghubungi mentor Anda untuk bantuan lebih lanjut.
+        Jika halaman ini belum berfungsi atau Anda mengalami kendala, harap segera menghubungi mentor Anda untuk bantuan
+        lebih lanjut.
     </p>
     <!-- DataTales Example -->
     <div class="card shadow mb-4">
@@ -20,8 +22,8 @@
                 <!-- Grow In Utility -->
                 <div class="col-lg-12">
                     <div class="card position-relative">
-                        <?php if ($id_magang != NULL) : ?>
-                            <?php if ($laporan->laporan_akhir != NULL) : ?>
+                        <?php if ($id_magang != NULL): ?>
+                            <?php if ($laporan->laporan_akhir != NULL): ?>
                                 <div class="card-header py-3">
                                     <h6 class="m-0 font-weight-bold text-primary">
                                         <?php if ($laporan->approved_laporan_akhir == NULL): ?>
@@ -30,7 +32,7 @@
                                             Laporan anda telah diterima
                                         <?php elseif ($laporan->approved_laporan_akhir == 'N'): ?>
                                             Laporan anda ditolak
-                                        <?php else : ?>
+                                        <?php else: ?>
                                             Masukan data laporan akhir
                                         <?php endif; ?>
                                     </h6>
@@ -53,7 +55,7 @@
                                                     <strong>File laporan anda ditolak</strong>
                                                     (Hubungi mentor jika terjadi kesalahan).
                                                 </div>
-                                            <?php else : ?>
+                                            <?php else: ?>
                                                 Masukan data laporan akhir
                                             <?php endif; ?>
                                             <!-- File Section -->
@@ -72,7 +74,8 @@
                                                             <td>Laporan Akhir</td>
                                                             <td><?php echo $laporan->laporan_akhir ?></td>
                                                             <td>
-                                                                <a href="<?php echo base_url('dashboard/file/' . urlencode($laporan->laporan_akhir)); ?>" class="btn btn-primary btn-sm">Download</a>
+                                                                <a href="<?php echo base_url('dashboard/file/' . urlencode($laporan->laporan_akhir)); ?>"
+                                                                    class="btn btn-primary btn-sm">Download</a>
                                                             </td>
                                                         </tr>
                                                         <br>
@@ -98,19 +101,20 @@
                                             </div>
                                         <?php endif; ?>
                                         <div class="small mb-2">Tekan tombol dibawah ini untuk mengirim laporan:</div>
-                                </div>
+                                    </div>
+                                <?php endif ?>
+                            <?php endif; ?>
+                            <?php if ($laporan->laporan_akhir == NULL): ?>
+                                <button type="button" class="btn btn-danger" data-bs-toggle="modal"
+                                    data-bs-target="#confirmModal" onclick="setAction('Accept')">
+                                    Kirim laporan
+                                </button>
                             <?php endif ?>
-                        <?php endif; ?>
-                        <?php if ($laporan->laporan_akhir == NULL): ?>
-                            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmModal" onclick="setAction('Accept')">
-                                Kirim laporan
-                            </button>
+                        <?php elseif ($id_magang == NULL): ?>
+                            <div class="alert alert-warning" role="alert">
+                                <strong>Pendaftaran belum diterima</strong>
+                            </div>
                         <?php endif ?>
-                    <?php elseif ($id_magang == NULL) : ?>
-                        <div class="alert alert-warning" role="alert">
-                            <strong>Pendaftaran belum diterima</strong>
-                        </div>
-                    <?php endif ?>
                     </div>
                 </div>
 
@@ -131,14 +135,20 @@
             </div>
             <div class="modal-body">
                 <div class="alert alert-warning" role="alert">
-                    <strong>Silahkan pilih file laporan akhir</strong> (Pastikan anda tidak salah memilih file laporan akhir).
+                    <strong>Silahkan pilih file laporan akhir</strong> (Pastikan anda tidak salah memilih file laporan
+                    akhir).
                 </div>
-                <form action="<?php echo base_url('dashboard/proses_upload_laporan_akhir'); ?>" method="post" enctype="multipart/form-data">
+                <form action="<?php echo base_url('dashboard/proses_upload_laporan_akhir'); ?>" method="post"
+                    enctype="multipart/form-data">
                     <input type="hidden" name="id" value="<?php echo $id_magang; ?>">
                     <div class="form-group">
                         <label for="file_laporan">Unggah Laporan Akhir</label>
-                        <input type="file" class="form-control" id="file_laporan" name="file_laporan" accept=".pdf" required>
+                        <input type="file" class="form-control" id="file_laporan" name="file_laporan" accept=".pdf"
+                            required onchange="validateFileSize(this)">
+                        <small class="form-text text-muted">Ukuran file maksimal 2MB. Pastikan file Anda tidak melebihi
+                            batas ini.</small>
                     </div>
+
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                         <button type="submit" class="btn btn-success">Unggah</button>
@@ -158,7 +168,19 @@
         actionType = action; // Simpan aksi yang dipilih
     }
 
-    document.getElementById('confirmAction').addEventListener('click', function() {
+    function validateFileSize(input) {
+        const file = input.files[0];
+        const maxSize = 2 * 1024 * 1024; // 2MB in bytes
+        const errorMessage = "Ukuran file harus kurang dari 2MB.";
+
+        if (file.size > maxSize) {
+            alert(errorMessage);
+            input.value = ''; // Reset file input
+        }
+    }
+
+
+    document.getElementById('confirmAction').addEventListener('click', function () {
         // Ambil nilai nipg dari select
         const nipgValue = document.getElementById('mentor').value;
 
