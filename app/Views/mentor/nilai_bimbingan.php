@@ -85,31 +85,15 @@
 
                     <div class="mb-3">
                         <div class="alert alert-danger" role="alert">
-                            <strong>Berikan nilai rentang 0 - 100</strong>
+                            <strong>Berikan nilai rentang 40 - 100</strong>
                             (Pastikan anda memberikan nilai sesuai dengan kinerja peserta magang).
                         </div>
                     </div>
 
-                    <!-- Ketepatan Waktu -->
+                    <!-- Kehadiran -->
                     <div class="mb-3">
-                        <label for="ketepatan_waktu" class="form-label">Ketepatan Waktu</label>
-                        <select class="form-control" id="ketepatan_waktu" name="ketepatan_waktu" required>
-                            <option value="" disabled selected>Pilih...</option>
-                            <option value="40">40</option>
-                            <option value="50">50</option>
-                            <option value="60">60</option>
-                            <option value="70">70</option>
-                            <option value="80">80</option>
-                            <option value="90">90</option>
-                            <option value="100">100</option>
-                        </select>
-                        <div class="invalid-feedback">Nilai harus dipilih dari daftar yang tersedia.</div>
-                    </div>
-
-                    <!-- Sikap Kerja -->
-                    <div class="mb-3">
-                        <label for="sikap_kerja" class="form-label">Sikap Kerja</label>
-                        <select class="form-control" id="sikap_kerja" name="sikap_kerja" required>
+                        <label for="kehadiran" class="form-label">Kehadiran</label>
+                        <select class="form-control" id="kehadiran" name="kehadiran" required>
                             <option value="" disabled selected>Pilih...</option>
                             <option value="40">40</option>
                             <option value="50">50</option>
@@ -138,22 +122,6 @@
                         <div class="invalid-feedback">Nilai harus dipilih dari daftar yang tersedia.</div>
                     </div>
 
-                    <!-- Kehadiran -->
-                    <div class="mb-3">
-                        <label for="kehadiran" class="form-label">Kehadiran</label>
-                        <select class="form-control" id="kehadiran" name="kehadiran" required>
-                            <option value="" disabled selected>Pilih...</option>
-                            <option value="40">40</option>
-                            <option value="50">50</option>
-                            <option value="60">60</option>
-                            <option value="70">70</option>
-                            <option value="80">80</option>
-                            <option value="90">90</option>
-                            <option value="100">100</option>
-                        </select>
-                        <div class="invalid-feedback">Nilai harus dipilih dari daftar yang tersedia.</div>
-                    </div>
-
                     <!-- Kemampuan Kerja -->
                     <div class="mb-3">
                         <label for="kemampuan_kerja" class="form-label">Kemampuan Kerja</label>
@@ -170,10 +138,10 @@
                         <div class="invalid-feedback">Nilai harus dipilih dari daftar yang tersedia.</div>
                     </div>
 
-                    <!-- Keterampilan Kerja -->
+                    <!-- Integritas -->
                     <div class="mb-3">
-                        <label for="keterampilan_kerja" class="form-label">Keterampilan Kerja</label>
-                        <select class="form-control" id="keterampilan_kerja" name="keterampilan_kerja" required>
+                        <label for="integritas" class="form-label">Integritas</label>
+                        <select class="form-control" id="integritas" name="integritas" required>
                             <option value="" disabled selected>Pilih...</option>
                             <option value="40">40</option>
                             <option value="50">50</option>
@@ -185,128 +153,19 @@
                         </select>
                         <div class="invalid-feedback">Nilai harus dipilih dari daftar yang tersedia.</div>
                     </div>
-
-                    <!-- Kualitas Hasil -->
-                    <div class="mb-3">
-                        <label for="kualitas_hasil" class="form-label">Kualitas Hasil</label>
-                        <select class="form-control" id="kualitas_hasil" name="kualitas_hasil" required>
-                            <option value="" disabled selected>Pilih...</option>
-                            <option value="40">40</option>
-                            <option value="50">50</option>
-                            <option value="60">60</option>
-                            <option value="70">70</option>
-                            <option value="80">80</option>
-                            <option value="90">90</option>
-                            <option value="100">100</option>
-                        </select>
-                        <div class="invalid-feedback">Nilai harus dipilih dari daftar yang tersedia.</div>
-                    </div>
-
-                    <!-- Kemampuan Komunikasi -->
-                    <div class="mb-3">
-                        <label for="kemampuan_komunikasi" class="form-label">Kemampuan Komunikasi</label>
-                        <select class="form-control" id="kemampuan_komunikasi" name="kemampuan_komunikasi" required>
-                            <option value="" disabled selected>Pilih...</option>
-                            <option value="40">40</option>
-                            <option value="50">50</option>
-                            <option value="60">60</option>
-                            <option value="70">70</option>
-                            <option value="80">80</option>
-                            <option value="90">90</option>
-                            <option value="100">100</option>
-                        </select>
-                        <div class="invalid-feedback">Nilai harus dipilih dari daftar yang tersedia.</div>
-                    </div>
-
-                    <!-- Kerjasama -->
-                    <div class="mb-3">
-                        <label for="kerjasama" class="form-label">Kerjasama</label>
-                        <select class="form-control" id="kerjasama" name="kerjasama" required>
-                            <option value="" disabled selected>Pilih...</option>
-                            <option value="40">40</option>
-                            <option value="50">50</option>
-                            <option value="60">60</option>
-                            <option value="70">70</option>
-                            <option value="80">80</option>
-                            <option value="90">90</option>
-                            <option value="100">100</option>
-                        </select>
-                        <div class="invalid-feedback">Nilai harus dipilih dari daftar yang tersedia.</div>
-                    </div>
-
-                    <!-- Kerajinan -->
-                    <div class="mb-3">
-                        <label for="kerajinan" class="form-label">Kerajinan</label>
-                        <select class="form-control" id="kerajinan" name="kerajinan" required>
-                            <option value="" disabled selected>Pilih...</option>
-                            <option value="40">40</option>
-                            <option value="50">50</option>
-                            <option value="60">60</option>
-                            <option value="70">70</option>
-                            <option value="80">80</option>
-                            <option value="90">90</option>
-                            <option value="100">100</option>
-                        </select>
-                        <div class="invalid-feedback">Nilai harus dipilih dari daftar yang tersedia.</div>
-                    </div>
-
-                    <!-- Percaya Diri -->
-                    <div class="mb-3">
-                        <label for="percaya_diri" class="form-label">Percaya Diri</label>
-                        <select class="form-control" id="percaya_diri" name="percaya_diri" required>
-                            <option value="" disabled selected>Pilih...</option>
-                            <option value="40">40</option>
-                            <option value="50">50</option>
-                            <option value="60">60</option>
-                            <option value="70">70</option>
-                            <option value="80">80</option>
-                            <option value="90">90</option>
-                            <option value="100">100</option>
-                        </select>
-                        <div class="invalid-feedback">Nilai harus dipilih dari daftar yang tersedia.</div>
-                    </div>
-
-                    <!-- Mematuhi Aturan -->
-                    <div class="mb-3">
-                        <label for="mematuhi_aturan" class="form-label">Mematuhi Aturan</label>
-                        <select class="form-control" id="mematuhi_aturan" name="mematuhi_aturan" required>
-                            <option value="" disabled selected>Pilih...</option>
-                            <option value="40">40</option>
-                            <option value="50">50</option>
-                            <option value="60">60</option>
-                            <option value="70">70</option>
-                            <option value="80">80</option>
-                            <option value="90">90</option>
-                            <option value="100">100</option>
-                        </select>
-                        <div class="invalid-feedback">Nilai harus dipilih dari daftar yang tersedia.</div>
-                    </div>
-
-                    <!-- Penampilan -->
-                    <div class="mb-3">
-                        <label for="penampilan" class="form-label">Penampilan</label>
-                        <select class="form-control" id="penampilan" name="penampilan" required>
-                            <option value="" disabled selected>Pilih...</option>
-                            <option value="40">40</option>
-                            <option value="50">50</option>
-                            <option value="60">60</option>
-                            <option value="70">70</option>
-                            <option value="80">80</option>
-                            <option value="90">90</option>
-                            <option value="100">100</option>
-                        </select>
-                        <div class="invalid-feedback">Nilai harus dipilih dari daftar yang tersedia.</div>
-                    </div>
-
 
                     <!-- Perilaku -->
                     <div class="mb-3">
                         <label for="perilaku" class="form-label">Perilaku</label>
                         <select class="form-control" id="perilaku" name="perilaku" required>
-                            <option value="Sangat Baik">Sangat Baik</option>
-                            <option value="Baik">Baik</option>
-                            <option value="Cukup Baik">Cukup Baik</option>
-                            <option value="Tidak Baik">Tidak Baik</option>
+                            <option value="" disabled selected>Pilih...</option>
+                            <option value="40">40</option>
+                            <option value="50">50</option>
+                            <option value="60">60</option>
+                            <option value="70">70</option>
+                            <option value="80">80</option>
+                            <option value="90">90</option>
+                            <option value="100">100</option>
                         </select>
                     </div>
                 </div>

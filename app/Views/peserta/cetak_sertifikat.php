@@ -130,8 +130,8 @@
                 ?>
                 dengan hasil
             </p>
-            <p style="color: black; font-size: 28px; font-family:Calibri; margin-top: 5px;"><b>Memuaskan</b></p>
-            <p style="margin-top: 25px; font-size: 18px; font-family:Calibri;">
+            <p style="color: black; font-size: 28px; font-family:Calibri; margin-top: 5px;"><b><?= $nilai['predikat'] ?></b></p>
+            <p style="margin-top: 45px; font-size: 18px; font-family:Calibri;">
                 <?php
                 // Format tanggal selesai dengan bulan dalam bahasa Indonesia
                 $tanggal_selesai = date('d', strtotime($registrasi['tanggal2']));

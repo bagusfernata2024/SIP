@@ -52,23 +52,31 @@
 
         <div class="py-3" style="margin-left: 10px; margin-right: 10px; margin-top: 20px;">
             <div class="progress">
-                <div class="progress-bar bg-secondary" role="progressbar" style="width: 33%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
-                    <a href="<?php echo base_url('admin/dashboard/detail/' . $detail['encrypt_id']); ?>" class="btn btn-secondary w-100">
+                <div class="progress-bar bg-secondary" role="progressbar" style="width: 33%;" aria-valuenow="100"
+                    aria-valuemin="0" aria-valuemax="100">
+                    <a href="<?php echo base_url('admin/dashboard/detail/' . $detail['encrypt_id']); ?>"
+                        class="btn btn-secondary w-100">
                         Preview
                     </a>
                 </div>
-                <div class="progress-bar bg-secondary" role="progressbar" style="width: 33%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
-                    <a href="<?php echo base_url('admin/dashboard/cari_mentor/' . $detail['encrypt_id']); ?>" class="btn btn-secondary w-100">
+                <div class="progress-bar bg-secondary" role="progressbar" style="width: 33%;" aria-valuenow="100"
+                    aria-valuemin="0" aria-valuemax="100">
+                    <a href="<?php echo base_url('admin/dashboard/cari_mentor/' . $detail['encrypt_id']); ?>"
+                        class="btn btn-secondary w-100">
                         Cari Mentor
                     </a>
                 </div>
-                <div class="progress-bar bg-success" role="progressbar" style="width: 33%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
-                    <a href="<?php echo base_url('admin/dashboard/upload_surat/' . $detail['encrypt_id']); ?>" class="btn btn-success w-100">
+                <div class="progress-bar bg-success" role="progressbar" style="width: 33%;" aria-valuenow="100"
+                    aria-valuemin="0" aria-valuemax="100">
+                    <a href="<?php echo base_url('admin/dashboard/upload_surat/' . $detail['encrypt_id']); ?>"
+                        class="btn btn-success w-100">
                         Upload Surat
                     </a>
                 </div>
-                <div class="progress-bar bg-secondary" role="progressbar" style="width: 33%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
-                    <a href="<?php echo base_url('admin/dashboard/review_surat/' . $detail['encrypt_id']); ?>" class="btn btn-secondary w-100">
+                <div class="progress-bar bg-secondary" role="progressbar" style="width: 33%;" aria-valuenow="100"
+                    aria-valuemin="0" aria-valuemax="100">
+                    <a href="<?php echo base_url('admin/dashboard/review_surat/' . $detail['encrypt_id']); ?>"
+                        class="btn btn-secondary w-100">
                         Review Surat
                     </a>
                 </div>
@@ -81,13 +89,18 @@
 
             <?php if (!empty($detail['surat_persetujuan'])): ?>
                 <!-- Jika surat perjanjian sudah ada di database -->
-                <p>Surat Persetujuan telah diupload: <a href="<?php echo base_url('uploads/' . $detail['surat_persetujuan']); ?>" target="_blank"><?php echo $detail['surat_persetujuan']; ?></a></p>
+                <p>Surat Persetujuan telah diupload: <a
+                        href="<?php echo base_url('uploads/surat_persetujuan_sent/' . $detail['surat_persetujuan']); ?>"
+                        target="_blank"><?php echo $detail['surat_persetujuan']; ?></a></p>
             <?php else: ?>
                 <!-- Jika surat perjanjian belum diupload -->
-                <form method="POST" action="<?php echo base_url('admin/dashboard/upload_surat_persetujuan'); ?>" enctype="multipart/form-data">
+                <form method="POST" action="<?php echo base_url('admin/dashboard/upload_surat_persetujuan'); ?>"
+                    enctype="multipart/form-data">
                     <div class="mb-3">
                         <label for="suratPersetujuan" class="form-label">Pilih Surat Persetujuan</label>
-                        <input type="file" class="form-control" id="suratPersetujuan" name="surat_persetujuan" accept=".pdf" required>
+                        <input type="file" class="form-control" id="suratPersetujuan" name="surat_persetujuan" accept=".pdf"
+                            required>
+                        <div class="invalid-feedback">Unggah surat persetujuan (PDF) dengan ukuran maksimal 2MB.</div>
                     </div>
                     <input type="hidden" name="id_register" value="<?php echo $detail['id_register']; ?>">
                     <button type="submit" class="btn btn-primary">Upload</button>
@@ -101,26 +114,32 @@
 
             <?php if (!empty($detail['surat_perjanjian'])): ?>
                 <!-- Jika surat perjanjian sudah ada di database -->
-                <p>Surat Perjanjian telah diupload: <a href="<?php echo base_url('uploads/' . $detail['surat_perjanjian']); ?>" target="_blank"><?php echo $detail['surat_perjanjian']; ?></a></p>
+                <p>Surat Perjanjian telah diupload: <a
+                        href="<?php echo base_url('uploads/surat_perjanjian_sent/' . $detail['surat_perjanjian']); ?>"
+                        target="_blank"><?php echo $detail['surat_perjanjian']; ?></a></p>
             <?php else: ?>
                 <!-- Jika surat perjanjian belum diupload -->
-                <form method="POST" action="<?php echo base_url('admin/dashboard/upload_surat_perjanjian'); ?>" enctype="multipart/form-data">
+                <form method="POST" action="<?php echo base_url('admin/dashboard/upload_surat_perjanjian'); ?>"
+                    enctype="multipart/form-data">
                     <div class="mb-3">
                         <label for="suratPerjanjian" class="form-label">Pilih Surat Perjanjian</label>
-                        <input type="file" class="form-control" id="suratPerjanjian" name="surat_perjanjian" accept=".pdf" required>
+                        <input type="file" class="form-control" id="suratPerjanjian" name="surat_perjanjian" accept=".pdf"
+                            required>
+                        <div class="invalid-feedback">Unggah surat perjanjian (PDF) dengan ukuran maksimal 2MB.</div>
                     </div>
                     <input type="hidden" name="id_register" value="<?php echo $detail['id_register']; ?>">
                     <button type="submit" class="btn btn-primary">Upload</button>
                 </form>
             <?php endif; ?>
             <?php if (isset($detail['upload_surat']) && $detail['upload_surat'] === 'Y'): ?>
-                    <button type="button" class="btn btn-success btn-sm ml-2" disabled>
-                        Surat Terkirim
-                    </button>
+                <button type="button" class="btn btn-success btn-sm ml-2" disabled>
+                    Surat Terkirim
+                </button>
 
             <?php else: ?>
                 <br>
-                <a href="<?php echo base_url('admin/dashboard/kirim_surat/' . $detail['encrypt_id']); ?>"><button type="button" class="btn btn-success btn-sm ml-2">
+                <a href="<?php echo base_url('admin/dashboard/kirim_surat/' . $detail['encrypt_id']); ?>"><button
+                        type="button" class="btn btn-success btn-sm ml-2">
                         Kirim
                     </button></a>
             <?php endif; ?>
@@ -132,10 +151,12 @@
 
                 <!-- Tombol Previous dan Next -->
                 <div class="d-flex justify-content-between mt-4">
-                    <a href="<?php echo base_url('admin/dashboard/cari_mentor/' . $detail['encrypt_id']); ?>" class="btn btn-warning">
+                    <a href="<?php echo base_url('admin/dashboard/cari_mentor/' . $detail['encrypt_id']); ?>"
+                        class="btn btn-warning">
                         Previous
                     </a>
-                    <a href="<?php echo base_url('admin/dashboard/review_surat/' . $detail['encrypt_id']); ?>" class="btn btn-warning">
+                    <a href="<?php echo base_url('admin/dashboard/review_surat/' . $detail['encrypt_id']); ?>"
+                        class="btn btn-warning">
                         Next
                     </a>
                 </div>
@@ -169,6 +190,28 @@
 </div>
 </div>
 </div>
+
+<script>
+    // Fungsi untuk validasi ukuran file
+    function validateFileSize(inputId, maxSizeMB) {
+        const fileInput = document.getElementById(inputId);
+        fileInput.addEventListener('change', function () {
+            const file = fileInput.files[0];
+            const maxSize = maxSizeMB * 1024 * 1024; // Ukuran maksimal dalam byte (2MB)
+            if (file && file.size > maxSize) {
+                alert(`File yang diunggah lebih besar dari ${maxSizeMB} MB!`);
+                fileInput.value = ''; // Reset file input
+                fileInput.classList.add('is-invalid'); // Menandai input sebagai invalid
+            } else {
+                fileInput.classList.remove('is-invalid'); // Menghapus tanda invalid jika ukuran file valid
+            }
+        });
+    }
+
+    // Validasi untuk setiap file input
+    validateFileSize('suratPersetujuan', 2); // 2MB
+    validateFileSize('suratPerjanjian', 2); // 2MB
+</script>
 
 <!-- JS Bootstrap Bundle -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.x.x/dist/js/bootstrap.bundle.min.js"></script>

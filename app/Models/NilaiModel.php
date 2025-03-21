@@ -8,7 +8,7 @@ class NilaiModel extends Model
 {
     protected $table = 'nilai';
     protected $primaryKey = 'id_nilai';
-    protected $allowedFields = ['id_nilai', 'id_magang', 'ketepatan_waktu', 'sikap_kerja', 'tanggung_jawab', 'kehadiran', 'kemampuan_kerja', 'keterampilan_kerja', 'kualitas_hasil', 'kemampuan_komunikasi', 'kerjasama', 'kerajinan', 'percaya_diri', 'mematuhi_aturan', 'penampilan', 'tgl_input', 'perilaku']; // Pastikan ini sesuai dengan field tabel
+    protected $allowedFields = ['id_nilai', 'id_magang', 'ketepatan_waktu', 'sikap_kerja', 'tanggung_jawab', 'kehadiran', 'kemampuan_kerja', 'keterampilan_kerja', 'kualitas_hasil', 'kemampuan_komunikasi', 'kerjasama', 'kerajinan', 'percaya_diri', 'mematuhi_aturan', 'penampilan', 'tgl_input', 'perilaku', 'integritas', 'predikat', 'rata']; // Pastikan ini sesuai dengan field tabel
 
 
     public function getNilaiByMentor($user_nomor)
@@ -134,7 +134,7 @@ class NilaiModel extends Model
 
     public function getNilaiByIdMagangPure($id_magang)
     {
-        return $this->select('ketepatan_waktu, sikap_kerja, tanggung_jawab, kehadiran, kemampuan_kerja, keterampilan_kerja, kualitas_hasil, kemampuan_komunikasi, kerjasama, kerajinan, percaya_diri, mematuhi_aturan, penampilan, perilaku') // Kolom yang ingin diambil
+        return $this->select('ketepatan_waktu, sikap_kerja, tanggung_jawab, kehadiran, kemampuan_kerja, keterampilan_kerja, kualitas_hasil, kemampuan_komunikasi, kerjasama, kerajinan, percaya_diri, mematuhi_aturan, penampilan, perilaku, integritas, predikat, rata') // Kolom yang ingin diambil
             ->where('id_magang', $id_magang)
             ->first();
     }

@@ -3,7 +3,8 @@
     <!-- Page Heading -->
     <h1 class="h3 mb-2 text-gray-800">Nilai Akhir</h1>
     <p class="mb-4">
-        Halaman ini menampilkan nilai akhir yang diberikan oleh mentor kepada peserta magang selama proses magang di PGN.
+        Halaman ini menampilkan nilai akhir yang diberikan oleh mentor kepada peserta magang selama proses magang di
+        PGN.
     </p>
     <!-- DataTales Example -->
     <div class="card shadow mb-4">
@@ -27,82 +28,51 @@
                             <tbody>
                                 <tr>
                                     <td>1</td>
-                                    <td>Ketepatan Waktu</td>
-                                    <td><?= isset($nilai_akhir['ketepatan_waktu']) ? $nilai_akhir['ketepatan_waktu'] : '-' ?></td>
-                                </tr>
-                                <tr>
-                                    <td>2</td>
-                                    <td>Sikap Kerja</td>
-                                    <td><?= isset($nilai_akhir['sikap_kerja']) ? $nilai_akhir['sikap_kerja'] : '-' ?></td>
-                                </tr>
-                                <tr>
-                                    <td>3</td>
-                                    <td>Tanggung Jawab</td>
-                                    <td><?= isset($nilai_akhir['tanggung_jawab']) ? $nilai_akhir['tanggung_jawab'] : '-' ?></td>
-                                </tr>
-                                <tr>
-                                    <td>4</td>
                                     <td>Kehadiran</td>
                                     <td><?= isset($nilai_akhir['kehadiran']) ? $nilai_akhir['kehadiran'] : '-' ?></td>
                                 </tr>
                                 <tr>
-                                    <td>5</td>
+                                    <td>2</td>
+                                    <td>Tanggung Jawab</td>
+                                    <td><?= isset($nilai_akhir['tanggung_jawab']) ? $nilai_akhir['tanggung_jawab'] : '-' ?></td>
+                                </tr>
+                                <tr>
+                                    <td>3</td>
                                     <td>Kemampuan Kerja</td>
-                                    <td><?= isset($nilai_akhir['kemampuan_kerja']) ? $nilai_akhir['kemampuan_kerja'] : '-' ?></td>
+                                    <td><?= isset($nilai_akhir['kemampuan_kerja']) ? $nilai_akhir['kemampuan_kerja'] : '-' ?>
+                                    </td>
                                 </tr>
                                 <tr>
-                                    <td>6</td>
-                                    <td>Keterampilan Kerja</td>
-                                    <td><?= isset($nilai_akhir['keterampilan_kerja']) ? $nilai_akhir['keterampilan_kerja'] : '-' ?></td>
+                                    <td>4</td>
+                                    <td>Integritas</td>
+                                    <td><?= isset($nilai_akhir['integritas']) ? $nilai_akhir['integritas'] : '-' ?></td>
                                 </tr>
                                 <tr>
-                                    <td>7</td>
-                                    <td>Kualitas Hasil</td>
-                                    <td><?= isset($nilai_akhir['kualitas_hasil']) ? $nilai_akhir['kualitas_hasil'] : '-' ?></td>
-                                </tr>
-                                <tr>
-                                    <td>8</td>
-                                    <td>Kemampuan Komunikasi</td>
-                                    <td><?= isset($nilai_akhir['kemampuan_komunikasi']) ? $nilai_akhir['kemampuan_komunikasi'] : '-' ?></td>
-                                </tr>
-                                <tr>
-                                    <td>9</td>
-                                    <td>Kerjasama</td>
-                                    <td><?= isset($nilai_akhir['kerjasama']) ? $nilai_akhir['kerjasama'] : '-' ?></td>
-                                </tr>
-                                <tr>
-                                    <td>10</td>
-                                    <td>Kerajinan</td>
-                                    <td><?= isset($nilai_akhir['kerajinan']) ? $nilai_akhir['kerajinan'] : '-' ?></td>
-                                </tr>
-                                <tr>
-                                    <td>11</td>
-                                    <td>Percaya Diri</td>
-                                    <td><?= isset($nilai_akhir['percaya_diri']) ? $nilai_akhir['percaya_diri'] : '-' ?></td>
-                                </tr>
-                                <tr>
-                                    <td>12</td>
-                                    <td>Mematuhi Aturan</td>
-                                    <td><?= isset($nilai_akhir['mematuhi_aturan']) ? $nilai_akhir['mematuhi_aturan'] : '-' ?></td>
-                                </tr>
-                                <tr>
-                                    <td>13</td>
-                                    <td>Penampilan</td>
-                                    <td><?= isset($nilai_akhir['penampilan']) ? $nilai_akhir['penampilan'] : '-' ?></td>
-                                </tr>
-                                <tr>
-                                    <td>14</td>
+                                    <td>5</td>
                                     <td>Perilaku</td>
                                     <td><?= isset($nilai_akhir['perilaku']) ? $nilai_akhir['perilaku'] : '-' ?></td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" style="text-end"><strong>Rata-Rata</strong></td>
+                                    <td class="text-end" style="text-end">
+                                        <?= $nilai_akhir['rata'] ?>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2"><strong>Predikat</strong></td>
+                                    <td class="text-end" style="text-end">
+                                        <?= $nilai_akhir['predikat'] ?>
+                                    </td>
                                 </tr>
                                 <!-- Lanjutkan untuk kolom lainnya -->
                             </tbody>
                         </table>
                         <div class="mt-3">
-                            <?php if($nilai_akhir['ketepatan_waktu'] != null): ?>
-                            <a href="<?php echo base_url('dashboard/cetak_nilai') ?>" target="_blank" class="btn btn-success btn-sm">
-                                <i class="fas fa-print"></i> Cetak
-                            </a>
+                            <?php if ($nilai_akhir['kehadiran'] != null): ?>
+                                <a href="<?php echo base_url('dashboard/cetak_nilai') ?>" target="_blank"
+                                    class="btn btn-success btn-sm">
+                                    <i class="fas fa-print"></i> Cetak
+                                </a>
                             <?php endif; ?>
                         </div>
                     <?php else: ?>

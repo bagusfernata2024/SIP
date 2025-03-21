@@ -123,17 +123,11 @@ log_message('debug', 'Flashdata email di view: ' . $email);
 
                             <!-- Lama PKL -->
 
-                            <!-- NIM / NIS or NIK -->
+                            <!-- NIM / NIS -->
                             <div class="mb-3" id="nimNisContainer">
-                                <label for="NIM / NIS" class="form-label">NIM / NIS</label>
-                                <input type="number" class="form-control" id="NIM_NIS" name="nik" required>
-                                <div class="invalid-feedback">NIM / NIS wajib diisi.</div>
-                            </div>
-
-                            <div class="mb-3" id="nikContainer" style="display:none;">
-                                <label for="nik" class="form-label">NIK</label>
+                                <label for="nik" class="form-label" id="nimNisLabel">NIM / NIS</label>
                                 <input type="number" class="form-control" id="nik" name="nik" required>
-                                <div class="invalid-feedback">NIK wajib diisi.</div>
+                                <div class="invalid-feedback">NIM / NIS wajib diisi.</div>
                             </div>
 
                             <!-- Tanggal PKL -->
@@ -230,7 +224,8 @@ log_message('debug', 'Flashdata email di view: ' . $email);
                                     Lamaran</label>
                                 <input type="file" class="form-control" id="surat_permohonan" name="surat_permohonan"
                                     accept=".pdf" required>
-                                <div class="invalid-feedback">Unggah surat permohonan (PDF).</div>
+                                <div class="invalid-feedback">Unggah surat permohonan (PDF) dengan ukuran maksimal 2MB.
+                                </div>
                             </div>
 
                             <!-- Proposal Magang -->
@@ -239,20 +234,21 @@ log_message('debug', 'Flashdata email di view: ' . $email);
                                     Lulus</label>
                                 <input type="file" class="form-control" id="proposal_magang" name="proposal_magang"
                                     accept=".pdf" required>
-                                <div class="invalid-feedback">Unggah proposal magang (PDF).</div>
+                                <div class="invalid-feedback">Unggah proposal magang (PDF) dengan ukuran maksimal 2MB.
+                                </div>
                             </div>
 
                             <!-- CV -->
                             <div class="mb-3">
                                 <label for="cv" class="form-label">CV</label>
                                 <input type="file" class="form-control" id="cv" name="cv" accept=".pdf" required>
-                                <div class="invalid-feedback">Unggah CV (PDF).</div>
+                                <div class="invalid-feedback">Unggah CV (PDF) dengan ukuran maksimal 2MB.</div>
                             </div>
 
                             <div class="mb-3">
                                 <label for="foto" class="form-label">Foto</label>
                                 <input type="file" class="form-control" id="foto" name="foto" accept="image/*" required>
-                                <div class="invalid-feedback">Unggah Foto.</div>
+                                <div class="invalid-feedback">Unggah Foto dengan ukuran maksimal 2MB.</div>
                             </div>
 
                             <!-- FC KTP -->
@@ -260,7 +256,8 @@ log_message('debug', 'Flashdata email di view: ' . $email);
                                 <label for="fc_ktp" class="form-label">Fotokopi KTP</label>
                                 <input type="file" class="form-control" id="fc_ktp" name="fc_ktp" accept=".pdf"
                                     required>
-                                <div class="invalid-feedback">Unggah fotokopi KTP (PDF).</div>
+                                <div class="invalid-feedback">Unggah fotokopi KTP (PDF) dengan ukuran maksimal 2MB.
+                                </div>
                             </div>
 
                             <!-- Submit -->
@@ -335,6 +332,45 @@ log_message('debug', 'Flashdata email di view: ' . $email);
         </div>
 
     </section><!-- /Hero Section -->
+    <!-- JavaScript/jQuery untuk mengubah label sesuai dengan tujuan -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // Menggunakan jQuery untuk menangani perubahan pada select tujuan
+        $('#tujuan').on('change', function () {
+            var tujuan = $(this).val(); // Mendapatkan nilai tujuan yang dipilih
+
+            // Jika tujuan adalah internship, ubah label menjadi 'NIK'
+            if (tujuan === 'Internship') {
+                $('#nimNisLabel').text('NIK');  // Ubah label menjadi 'NIK'
+            } else {
+                $('#nimNisLabel').text('NIM / NIS');  // Kembalikan label ke 'NIM / NIS'
+            }
+        });
+    </script>
+    <script>
+        // Fungsi untuk validasi ukuran file
+        function validateFileSize(inputId, maxSizeMB) {
+            const fileInput = document.getElementById(inputId);
+            fileInput.addEventListener('change', function () {
+                const file = fileInput.files[0];
+                const maxSize = maxSizeMB * 1024 * 1024; // Ukuran maksimal dalam byte (2MB)
+                if (file && file.size > maxSize) {
+                    alert(`File yang diunggah lebih besar dari ${maxSizeMB} MB!`);
+                    fileInput.value = ''; // Reset file input
+                    fileInput.classList.add('is-invalid'); // Menandai input sebagai invalid
+                } else {
+                    fileInput.classList.remove('is-invalid'); // Menghapus tanda invalid jika ukuran file valid
+                }
+            });
+        }
+
+        // Validasi untuk setiap file input
+        validateFileSize('surat_permohonan', 2); // 2MB
+        validateFileSize('proposal_magang', 2); // 2MB
+        validateFileSize('cv', 2); // 2MB
+        validateFileSize('foto', 2); // 2MB
+        validateFileSize('fc_ktp', 2); // 2MB
+    </script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const emailInput = document.getElementById('email');
@@ -402,22 +438,7 @@ log_message('debug', 'Flashdata email di view: ' . $email);
         });
     </script>
 
-    <script>
-        document.getElementById('tujuan').addEventListener('change', function () {
-            const tipe = this.value;
-            const nimNisContainer = document.getElementById('nimNisContainer');
-            const nikContainer = document.getElementById('nikContainer');
 
-            // Jika tipe adalah Internship, sembunyikan NIM/NIS dan tampilkan NIK
-            if (tipe === 'Internship') {
-                nimNisContainer.style.display = 'none';
-                nikContainer.style.display = 'block';
-            } else {
-                nimNisContainer.style.display = 'block';
-                nikContainer.style.display = 'none';
-            }
-        });
-    </script>
 
 
 </main>

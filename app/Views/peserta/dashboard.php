@@ -78,7 +78,8 @@
 				</div>
 
 				<hr>
-				<p>Silahkan Download Surat Perjanjian Tersebut Lalu Tanda Tangan dan Kirim Kembali Pada Form Upload Di Bawah.</p>
+				<p>Silahkan Download Surat Perjanjian Tersebut Lalu Tanda Tangan dan Kirim Kembali Pada Form Upload Di
+					Bawah.</p>
 				<hr>
 
 				<div class="alert alert-warning">
@@ -89,6 +90,7 @@
 					<div class="form-group">
 						<label for="surat_perjanjian">Unggah Surat Perjanjian</label>
 						<input type="file" class="form-control" name="surat_perjanjian" required>
+						<div class="invalid-feedback">Unggah surat perjanjian (PDF) dengan ukuran maksimal 2MB.</div>
 					</div>
 					<button type="submit" class="btn btn-primary">Upload</button>
 				</form>
@@ -100,3 +102,24 @@
 		</div>
 	</div>
 </div>
+
+<script>
+	// Fungsi untuk validasi ukuran file
+	function validateFileSize(inputId, maxSizeMB) {
+		const fileInput = document.getElementById(inputId);
+		fileInput.addEventListener('change', function () {
+			const file = fileInput.files[0];
+			const maxSize = maxSizeMB * 1024 * 1024; // Ukuran maksimal dalam byte (2MB)
+			if (file && file.size > maxSize) {
+				alert(`File yang diunggah lebih besar dari ${maxSizeMB} MB!`);
+				fileInput.value = ''; // Reset file input
+				fileInput.classList.add('is-invalid'); // Menandai input sebagai invalid
+			} else {
+				fileInput.classList.remove('is-invalid'); // Menghapus tanda invalid jika ukuran file valid
+			}
+		});
+	}
+
+	// Validasi untuk file surat perjanjian
+	validateFileSize('surat_perjanjian', 2); // 2MB
+</script>

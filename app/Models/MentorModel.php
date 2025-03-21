@@ -53,4 +53,54 @@ class MentorModel extends Model
             ->get()
             ->getResult();
     }
+
+    // Fungsi untuk mendapatkan daftar mentor beserta jumlah peserta yang dibimbing
+    public function getMentorWithParticipants($page = 1, $perPage = 10)
+    {
+        return $this->db->table('mentor')
+            ->select('mentor.nama, COUNT(anak_magang.id_mentor) as jumlah_peserta')
+            ->join('anak_magang', 'mentor.id_mentor = anak_magang.id_mentor', 'left')
+            ->groupBy('mentor.id_mentor')
+            ->limit($perPage, ($page - 1) * $perPage)
+            ->get()->getResultArray();
+    }
+
+    public function countAllMentors()
+    {
+        return $this->db->table('mentor')
+            ->join('anak_magang', 'mentor.id_mentor = anak_magang.id_mentor', 'left')
+            ->select('mentor.id_mentor as mentor_id')  // Alias untuk kolom id_mentor
+            ->groupBy('mentor.id_mentor')
+            ->countAllResults();
+    }
+
+    public function getMentorByEmail($email)
+    {
+        return $this->where('LOWER(email)', strtolower($email))->findAll();
+    }
+
+
+    // Fungsi untuk mencari mentor berdasarkan query
+    public function searchMentor($query)
+    {
+        return $this->table('mentor')
+            ->like('nama_mentor', $query)  // Mencari nama mentor yang mengandung query
+            ->findAll();
+    }
+
+    // Dalam MentorModel.php
+
+
+    public function countAll()
+    {
+        return $this->db->table('mentor')
+            ->select('mentor.id_mentor as mentor_id, anak_magang.id_mentor as anak_magang_id') // Memberikan alias untuk menghindari duplikat kolom
+            ->join('anak_magang', 'mentor.id_mentor = anak_magang.id_mentor', 'left')
+            ->groupBy('mentor.id_mentor')
+            ->countAllResults();
+    }
+
+
+
+
 }

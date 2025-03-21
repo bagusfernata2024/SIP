@@ -94,7 +94,6 @@ class Dashboard extends BaseController
         return $output;
     }
 
-
     public function index()
     {
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
@@ -132,12 +131,7 @@ class Dashboard extends BaseController
             $register['encrypted_id'] = $encryptedID;
         }
 
-        // dd($this->encryption = \Config\Services::encryption());
-        // $data['registrasi'] = $this->registrasiModel->findAll(); // Misalnya ambil semua peserta
-
-        // foreach ($data['registrasi'] as $register) {
-        //     $register['encrypted_id'] = urlencode(base64_encode($this->encryption->encrypt($register['id_register'])));
-        // }
+        // dd(is_numeric('2099761748'));
 
         // Menghitung total pendaftar diterima (berdasarkan tabel anak_magang, status diterima dianggap sebagai sudah ada data di tabel anak_magang)
         $data['total_accept'] = $anakMagangModel->countAll();  // Menghitung peserta aktif dari anak_magang dengan status 'Aktif'
@@ -159,33 +153,22 @@ class Dashboard extends BaseController
 
         $peserta_hampir_selesai = $this->anakMagangModel->getPesertaHampirSelesai();
         $hampir_selesai = count($peserta_hampir_selesai);
-        // dd($hampir_selesai);
         $data['hampir_selesai'] = $hampir_selesai;
 
         // Mendapatkan top 10 jurusan terbanyak untuk peserta diterima
         $data['top_10_jurusan'] = $registrasiModel->getTop10Jurusan();
+        // Memanggil model MentorModel
+        // Pagination setup for Mentor Data
+        $mentorModel = new MentorModel();
+        $page = $this->request->getGet('page') ?: 1;  // Default to page 1 if not set
+        $perPage = 10;  // Number of mentors per page
+        $totalMentors = $mentorModel->countAll();
+        $mentorData = $mentorModel->getMentorWithParticipants($page, $perPage);
 
-        $page = $this->request->getVar('page') ? $this->request->getVar('page') : 1;
-        $realisasiSatkerData = $anakMagangModel->getRealisasiSatker($page);
-        $totalRows = $anakMagangModel->countTotalSatker();
-        $totalPages = ceil($totalRows / 10);
-        $data['realisasi_satker'] = $realisasiSatkerData;
-        $data['page'] = $page;
-        $data['totalPages'] = $totalPages;
-
-        // Cek apakah permintaan AJAX
-        if ($this->request->isAJAX()) {
-            return $this->response->setJSON([
-                'realisasi_satker' => view('partials/realisasi_satker', $data), // Partial view untuk Realisasi Satker
-                'page' => $page,
-                'totalPages' => $totalPages
-            ]);
-        }
-
-        // dd($data['top_10_jurusan']);
-
-        // dd($peserta_hampir_selesai);
-        // Total keseluruhan peserta (hanya untuk keperluan informasi)
+        $data['mentorData'] = $mentorData;
+        $data['totalMentors'] = $totalMentors;
+        $data['perPage'] = $perPage;
+        $data['page'] = $page;  // Pass the page variable to the view
         $data['total'] = $data['total_accept'] + $data['total_reject'] + $data['total_waiting'] + $data['total_done'];
 
         return view('templates/header')
@@ -194,6 +177,133 @@ class Dashboard extends BaseController
             . view('templates/dashboard', $data)
             . view('templates/footer');
     }
+
+    // Fungsi untuk memuat data mentor di partials view
+    public function loadMentorData()
+    {
+        $mentorModel = new MentorModel();
+        $page_mentor = $this->request->getVar('page_mentor') ?? 1;
+        $limit = 10;
+        $offset = ($page_mentor - 1) * $limit;
+
+        // Ambil data mentor
+        $mentorData = $mentorModel->getMentorWithParticipants($limit, $offset);
+        $totalMentors = $mentorModel->countAllMentors();
+        $totalPages = ceil($totalMentors / $limit);
+
+        // Kirim data mentor ke partials view untuk di-update
+        return view('partials/mentor_data', [
+            'mentors' => $mentorData,
+            'totalPages' => $totalPages,
+            'currentPage' => $page_mentor
+        ]);
+    }
+
+    // Ada realisasi satker
+    // public function index()
+    // {
+    //     // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
+    //     $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
+
+    //     if ($user_level !== 'admin') {
+    //         return view('no_access');
+    //     }
+    //     helper('date');  // Load helper 'date'
+    //     $registrasiModel = new RegistrasiModel();
+    //     $anakMagangModel = new AnakMagangModel();  // Model untuk tabel anak_magang
+
+    //     $statusFilter = $this->request->getGet('status');
+
+    //     switch ($statusFilter) {
+    //         case 'Accept':
+    //             $data['registrasi'] = $registrasiModel->getByStatus('Accept');
+    //             break;
+    //         case 'reject':
+    //             $data['registrasi'] = $registrasiModel->getByStatus('reject');
+    //             break;
+    //         case 'null':
+    //             $data['registrasi'] = $registrasiModel->getByStatus('Waiting');
+    //             break;
+    //         default:
+    //             $data['registrasi'] = $registrasiModel->getData();
+    //     }
+
+    //     // Enkripsi ID untuk tiap peserta
+    //     // $encryption = Services::encryption(); // Inisialisasi enkripsi
+    //     foreach ($data['registrasi'] as &$register) {
+    //         // Enkripsi ID peserta dan encode dalam base64 untuk digunakan di URL
+    //         $encryptedID = $this->encryptor($register['id_register']);
+    //         // Tambahkan ID terenkripsi ke array data
+    //         $register['encrypted_id'] = $encryptedID;
+    //     }
+
+    //     // Menghitung total pendaftar diterima (berdasarkan tabel anak_magang, status diterima dianggap sebagai sudah ada data di tabel anak_magang)
+    //     $data['total_accept'] = $anakMagangModel->countAll();  // Menghitung peserta aktif dari anak_magang dengan status 'Aktif'
+
+    //     // Menghitung total peserta aktif (status 'Aktif' di tabel anak_magang)
+    //     $data['total_active'] = $anakMagangModel->countByStatus('Aktif'); // Peserta dengan status aktif
+
+    //     // Menghitung total peserta menunggu (status 'null' di tabel anak_magang)
+    //     $data['total_waiting'] = $registrasiModel->countPesertaByStatus('Waiting');  // Peserta dengan status 'null' di tabel anak_magang
+
+    //     // Menghitung total peserta ditolak (status 'reject' di tabel registrasi)
+    //     $data['total_reject'] = $registrasiModel->countPesertaByStatus('reject');  // Peserta ditolak di registrasi
+
+    //     // Menghitung total peserta selesai kegiatan (status 'Selesai Magang' di tabel anak_magang)
+    //     $data['total_done'] = $anakMagangModel->countByStatus('Selesai Magang'); // Peserta dengan status 'Selesai Magang'
+
+    //     // Menghitung total pendaftar berdasarkan semua data registrasi
+    //     $data['total_pendaftar'] = $data['total_accept'] + $data['total_reject']; // Mengambil total pendaftar dari tabel registrasi
+
+    //     $peserta_hampir_selesai = $this->anakMagangModel->getPesertaHampirSelesai();
+    //     $hampir_selesai = count($peserta_hampir_selesai);
+    //     $data['hampir_selesai'] = $hampir_selesai;
+
+    //     // Mendapatkan top 10 jurusan terbanyak untuk peserta diterima
+    //     $data['top_10_jurusan'] = $registrasiModel->getTop10Jurusan();
+
+    //     $page = $this->request->getVar('page') ? $this->request->getVar('page') : 1;
+    //     $realisasiSatkerData = $anakMagangModel->getRealisasiSatker($page);
+    //     $totalRows = $anakMagangModel->countTotalSatker();
+    //     $totalPages = ceil($totalRows / 10);
+    //     $data['realisasi_satker'] = $realisasiSatkerData;
+    //     $data['page'] = $page;
+    //     $data['totalPages'] = $totalPages;
+
+    //     // Cek apakah permintaan AJAX
+    //     if ($this->request->isAJAX()) {
+    //         return $this->response->setJSON([
+    //             'realisasi_satker' => view('partials/realisasi_satker', $data), // Partial view untuk Realisasi Satker
+    //             'page' => $page,
+    //             'totalPages' => $totalPages
+    //         ]);
+    //     }
+
+    //     // Ambil halaman yang diminta (default 1 jika tidak ada)
+    //     $page_mentor = $this->request->getVar('page_mentor') ?? 1;
+    //     $limit = 10; // Menampilkan 10 data per halaman
+    //     $offset = ($page_mentor - 1) * $limit; // Hitung offset untuk query
+
+    //     // Ambil data mentor beserta jumlah peserta yang dibimbing
+    //     $mentorData = $this->mentorModel->getMentorWithParticipants($limit, $offset);
+
+    //     // Hitung total jumlah mentor
+    //     $totalMentors = $this->mentorModel->countAllMentors();
+    //     $total_Pages = ceil($totalMentors / $limit); // Total halaman
+
+    //     $data['mentorData'] = $mentorData;
+    //     $data['total_pages'] = $total_Pages;
+    //     $data['current_page_mentor'] = $total_Pages;
+
+
+    //     $data['total'] = $data['total_accept'] + $data['total_reject'] + $data['total_waiting'] + $data['total_done'];
+
+    //     return view('templates/header')
+    //         . view('templates/sidebar')
+    //         . view('templates/topbar')
+    //         . view('templates/dashboard', $data)
+    //         . view('templates/footer');
+    // }
 
     public function sendReminder()
     {
@@ -213,9 +323,9 @@ class Dashboard extends BaseController
         $email = \Config\Services::email();
 
         foreach ($peserta as $p) {
-            $email->setFrom('mdndfzn@gmail.com');
+            $email->setFrom('mdndfzn@gmail.com', 'PGN GAS Admin Magang Program');
             $email->setTo($p['email']);
-            $email->setSubject('Pengingat Selesai Magang');
+            $email->setSubject("PGN {$p['nama']} - Pengingat Selesai Magang");
             $email->setMessage("
                 <p>Yth. {$p['nama']}</p>
                 <br>
@@ -562,7 +672,7 @@ class Dashboard extends BaseController
         // $id_register = $this->request->getPost('id_register');
         $nipg = $this->request->getPost('nipg');  // Mentor yang dipilih
         $id_register = $this->decryptor($encrypt_id);
-
+        $mentor = $this->mentorModel->getMentorByNipg($nipg);
         $peserta = $this->registrasiModel->getPesertaById($id_register);
         // Pastikan data yang dipilih ada
         if (empty($nipg)) {
@@ -582,7 +692,6 @@ class Dashboard extends BaseController
 
         $detailRegisModel->insertDetailRegis($dataDetailRegis);
 
-        $mentor = $this->mentorModel->getMentorByNipg($nipg);
 
         $fileName = $peserta['surat_perjanjian'];
 
@@ -791,7 +900,7 @@ class Dashboard extends BaseController
 
         $this->registrasiModel->updateTimelineAcc($id_register, 'Review Surat');
         $this->sendEmailToPesertaSuratPerjanjian($mentor, $peserta, $statusUpdate, $fileName, $fileName2);
-        $this->sendEmailToMentorSuratPerjanjian($mentor, $peserta, $statusUpdate, $fileName, $fileName2);
+        // $this->sendEmailToMentorSuratPerjanjian($mentor, $peserta, $statusUpdate, $fileName, $fileName2);
 
         // Redirect kembali ke halaman sebelumnya (atau halaman detail)
         return redirect()->back();
@@ -904,94 +1013,6 @@ class Dashboard extends BaseController
         return redirect()->back();
     }
 
-    // public function updateStatus()
-    // {
-    //     // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
-    //     $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
-
-    //     if ($user_level !== 'admin') {
-    //         return view('no_access');
-    //     }
-    //     $id = $this->request->getPost('id');
-    //     $action = strtolower($this->request->getPost('action'));
-    //     $nipg = $this->request->getPost('nipg');
-
-    //     if ($id && in_array($action, ['accept', 'reject'])) {
-    //         $registrasiModel = new RegistrasiModel();
-    //         $mentorModel = new MentorModel();
-    //         $detailRegisModel = new DetailRegisModel();
-    //         $anakMagangModel = new AnakMagangModel();
-
-    //         $peserta = $registrasiModel->getPesertaById($id);
-    //         if (!$peserta) {
-    //             $this->session->setFlashdata('error', 'Peserta tidak ditemukan.');
-    //             return redirect()->to('/admin/dashboard');
-    //         }
-
-    //         $statusUpdate = ($action === 'accept') ? 'Accept' : 'reject';
-    //         $registrasiModel->updateTimelineAcc($id, 'Pencarian Mentor');
-
-    //         $lastPrimaryKey = $detailRegisModel->selectMax('iddetail')->first();
-    //         $newPrimaryKey = isset($lastPrimaryKey['iddetail']) ? $lastPrimaryKey['iddetail'] + 1 : 1;
-
-    //         if ($statusUpdate === 'Accept') {
-    //             $dataDetailRegis = [
-    //                 'iddetail' => $newPrimaryKey,
-    //                 'id_register' => $id,
-    //                 'nipg' => $nipg,
-    //                 'approved' => 'W'
-    //             ];
-
-    //             $detailRegisModel->insertDetailRegis($dataDetailRegis);
-
-    //             $mentor = $mentorModel->getMentorByNipg($nipg);
-    //             $peserta = $registrasiModel->getPesertaById($id);
-
-    //             $fileName = $peserta['surat_perjanjian'];
-
-    //             $this->sendEmailToPesertaSuratPerjanjian($mentor, $peserta, $statusUpdate, $fileName);
-
-    //             // $unitKerja = $peserta['minat'];
-    //             // $tglMulai = $peserta['tanggal1'];
-    //             // $tglSelesai = $peserta['tanggal2'];
-
-    //             // $lastPrimaryKey = $anakMagangModel->selectMax('id_magang')->first();
-    //             // $newPrimaryKey = isset($lastPrimaryKey['id_magang']) ? $lastPrimaryKey['id_magang'] + 1 : 1;
-    //             // $dataAnakMagang = [
-    //             //     'id_magang' => $newPrimaryKey,
-    //             //     'id_register' => $id,
-    //             //     'unit_kerja' => $unitKerja,
-    //             //     'tgl_mulai' => $tglMulai,
-    //             //     'tgl_selesai' => $tglSelesai,
-    //             //     'id_mentor' => $mentor['id_mentor'],
-    //             // ];
-
-    //             // $insertSuccess = $anakMagangModel->insertAnakMagang($dataAnakMagang);
-
-    //             // if (!$insertSuccess) {
-    //             //     $this->session->setFlashdata('error', 'Gagal memasukkan data ke tabel anak_magang.');
-    //             //     return redirect()->to('/admin/dashboard');
-    //             // }
-    //             return redirect()->to('/admin/dashboard');
-    //         } elseif ($statusUpdate === 'reject') {
-    //             $mentor = $mentorModel->getMentorByNipg($nipg);
-    //             $registrasiModel->updateTimelineAcc($id, null);
-    //             $data = [
-    //                 'status' => 'reject'
-    //             ];
-    //             $registrasiModel->update($peserta['id_register'], $data);
-    //             $this->sendEmailToPesertaSuratPerjanjian($mentor, $peserta, $statusUpdate);
-    //             return redirect()->to('/admin/dashboard');
-    //         }
-
-    //         $this->session->setFlashdata('success', 'Status berhasil diperbarui.');
-    //         return redirect()->to('/admin/dashboard');
-    //     } else {
-    //         $this->session->setFlashdata('error', 'Data atau aksi tidak valid.');
-    //         return redirect()->to('/admin/dashboard');
-    //     }
-    // }
-
     private function sendEmailToPesertaSuratPerjanjian($mentor, $peserta, $statusUpdate, $fileName = null, $fileName2)
     {
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
@@ -1008,7 +1029,9 @@ class Dashboard extends BaseController
 
         $email = \Config\Services::email();
 
-        $email->setFrom('mdndfzn@gmail.com', 'PGN GAS Admin Internship Program');
+        $tanggal1 = DateTime::createFromFormat('Y-m-d', $peserta['tanggal1'])->format('d-m-Y');
+
+        $email->setFrom('mdndfzn@gmail.com', 'PGN GAS Admin Magang Program');
         $email->setTo($peserta['email']);
 
         if ($statusUpdate === 'Accept') {
@@ -1023,7 +1046,7 @@ class Dashboard extends BaseController
                 'id_register' => $peserta['id_register']
             ]);
 
-            $email->setSubject('Upload Surat Perjanjian');
+            $email->setSubject("PGN {$peserta['tipe']} - Upload Surat Perjanjian");
             $email->setMessage("
             <html>
             <head>
@@ -1048,8 +1071,7 @@ class Dashboard extends BaseController
                 <p>Yth. {$peserta['nama']}</p>
                 <br>
                 <p>Dengan Hormat</p>
-                <br>
-                <p>Kami dengan senang hati menginformasikan bahwa pendaftaran Anda dalam program {$peserta['tipe']} sedang diproses.</p>
+                <p>Diinformasikan bahwa pendaftaran Anda dalam program {$peserta['tipe']} sedang diproses.</p>
                 <p>Berikut adalah informasi terkait akun anda</p>
 
                 <br>
@@ -1058,10 +1080,9 @@ class Dashboard extends BaseController
                 <br>
 
                 <p>Silahkan menandatangani surat perjanjian sesuai template yang bisa diunduh di dalam sistem setelah anda login.</p>
-                <p>Selanjutnya unggah surat perjanjian yang telah ditandatangani ke dalam sistem sebelum {$peserta['tanggal1']}.</p>
+                <p>Selanjutnya unggah surat perjanjian yang telah ditandatangani ke dalam sistem sebelum {$tanggal1}.</p>
                 <p>Login ke sistem kami untuk informasi lebih lanjut dan memulai program {$peserta['tipe']} Anda atau klik link berikut.</p>
                 <p><a href='" . base_url('login') . "'>Link</a></p>
-                <p>Jika anda memiliki pertanyaan, jangan ragu untuk menghubungi kami</p>
                 <p>Terima kasih atas partisipasi Anda</p>
                 <br>
                 <p>Regards</p>
@@ -1086,7 +1107,7 @@ class Dashboard extends BaseController
             //     $email->attach($filePath);
             // }
         } elseif ($statusUpdate === 'reject') {
-            $email->setSubject('Hasil Pendaftaran Program');
+            $email->setSubject("PGN {$peserta['tipe']} - Hasil Pendaftaran Program");
             $email->setMessage("
             <html>
             <head>
@@ -1141,12 +1162,14 @@ class Dashboard extends BaseController
 
         $email = \Config\Services::email();
 
-        $email->setFrom('mdndfzn@gmail.com', 'PGN GAS Admin Internship Program');
-        $email->setTo($mentor[0]->email);
+        $tanggal1 = DateTime::createFromFormat('Y-m-d', $peserta['tanggal1'])->format('d-m-Y');
+
+        $email->setFrom('mdndfzn@gmail.com', 'PGN GAS Admin Magang Program');
+        $email->setTo(strtolower($mentor[0]->email));
 
         if ($statusUpdate === 'Accept') {
 
-            $email->setSubject('Upload Surat Perjanjian');
+            $email->setSubject("PGN {$peserta['tipe']} - Upload Surat Perjanjian");
             $email->setMessage("
             <html>
             <head>
@@ -1171,10 +1194,9 @@ class Dashboard extends BaseController
                 <p>Yth. {$mentor[0]->nama}</p>
                 <br>
                 <p>Dengan Hormat</p>
-                <br>
-                <p>Kami dengan senang hati menginformasikan bahwa pendaftaran calon peserta magang bimbingan Anda pada program {$peserta['tipe']} sedang diproses untuk pendandatanganan surat perjanjian oleh calon peserta magang.</p>
+                <p>Diinformasikan bahwa pendaftaran calon peserta magang bimbingan Anda pada program {$peserta['tipe']} sedang diproses untuk pendandatanganan surat perjanjian oleh calon peserta magang.</p>
                 <p>Proses akan berlanjut setelah calon peserta magang menandatangani surat perjanjian dan mengunggahnya ke sistem</p>
-                <p>Peserta magang harus mengunggah surat perjanjian yang telah ditandatangani ke dalam sistem sebelum {$peserta['tanggal1']}.</p>
+                <p>Peserta magang harus mengunggah surat perjanjian yang telah ditandatangani ke dalam sistem sebelum {$tanggal1}.</p>
                 <br>
                 <p>Regards</p>
                 <p>HCM Division</p>
@@ -1198,7 +1220,7 @@ class Dashboard extends BaseController
             //     $email->attach($filePath);
             // }
         } elseif ($statusUpdate === 'reject') {
-            $email->setSubject('Hasil Pendaftaran Program');
+            $email->setSubject("PGN {$peserta['tipe']} - Hasil Pendaftaran Program");
             $email->setMessage("
             <html>
             <head>
@@ -1325,12 +1347,14 @@ class Dashboard extends BaseController
         $id_magang = $this->anakMagangModel->getIdMagangByRegister($id_register);
         $anak_magang = $this->anakMagangModel->getPesertaByIdMagangOne($id_magang);
         $mentor = $this->mentorModel->getMentorByIdMentorOne($anak_magang['id_mentor']);
+        // dd($mentor);
         // dd($nipg);
         // Model Registrasi
         $registrasiModel = new RegistrasiModel();
 
         // Cek apakah id_register ada
         $detail = $registrasiModel->find($id_register);
+        // dd($detail);
         if (!$detail) {
             return redirect()->back()->with('error', 'Data tidak ditemukan');
         }
@@ -1585,12 +1609,16 @@ class Dashboard extends BaseController
             return false;
         }
 
+
         $email = \Config\Services::email();
 
         // Mengatur alamat pengirim, penerima, dan subjek
-        $email->setFrom('mdndfzn@gmail.com', 'PGN GAS Admin Internship Program');
-        $email->setTo($mentor['email']);
-        $email->setSubject('Permohonan Persetujuan Anak Bimbingan Baru');
+        $tanggal1 = DateTime::createFromFormat('Y-m-d', $peserta['tanggal1'])->format('d-m-Y');
+        $tanggal2 = DateTime::createFromFormat('Y-m-d', $peserta['tanggal2'])->format('d-m-Y');
+
+        $email->setFrom('mdndfzn@gmail.com', 'PGN GAS Admin Magang Program');
+        $email->setTo(strtolower($mentor['email']));
+        $email->setSubject("PGN {$peserta['tipe']} - Permohonan Persetujuan Anak Bimbingan Baru");
 
         // Membuat konten email dalam format HTML
         $email->setMessage("
@@ -1614,18 +1642,16 @@ class Dashboard extends BaseController
                 </style>
             </head>
             <body>
-                <p>Kepada Yth.</p>
-                <p>{$mentor['nama']}</p>
+                <p>Yth. {$mentor['nama']}</p>
                 <br>
-                <p>Sehubungan dengan pengajuan {$peserta['tipe']}, bersama ini anda ditugaskan untuk menjadi mentor dari:</p>
-                <br>
+                <p>Sehubungan dengan pengajuan {$peserta['tipe']} dari calon peserta magang, bersama ini anda ditugaskan untuk menjadi mentor dari:</p>
                 <p>Nama : {$peserta['nama']}</p>
                 <p>Jurusan : {$peserta['prodi']}</p>
                 <p>Universitas : {$peserta['instansi']}</p>
                 <p>Alamat : {$peserta['alamat']}</p>
                 <p>Telepon : {$peserta['notelp']}</p>
                 <p>Alamat Email : {$peserta['email']}</p>
-                <p>Periode Magang : {$peserta['tanggal1']} - {$peserta['tanggal2']}
+                <p>Periode Magang : {$tanggal1} - {$tanggal2}
                 <br>
                 <p>Seluruh berkas peserta magang bisa Anda lihat pada sistem.</p>
                 <p>Anda dipersilahkan menunjuk Co-mentor dengan menggunakan fitur di dalam sistem.</p>
@@ -1730,13 +1756,12 @@ class Dashboard extends BaseController
         }
         $email = \Config\Services::email();
 
-        $email->setFrom('mdndfzn@gmail.com', 'PGN GAS Admin Internship Program');
+        $email->setFrom('mdndfzn@gmail.com', 'PGN GAS Admin Magang Program');
         $email->setTo($peserta['email']);
 
         if ($status && $mentor) {
-            $email->setSubject('Selamat! Pendaftaran Anda Telah Diterima');
+            $email->setSubject("PGN {$peserta['tipe']} - Selamat! Pendaftaran Anda Telah Diterima");
             $email->setMessage("
-
             <html>
             <head>
                 <style>
@@ -1757,31 +1782,28 @@ class Dashboard extends BaseController
                 </style>
             </head>
             <body>
-                <p>Kepada Yth.</p>
-                <p>{$peserta['nama']}</p>
+                <p>Yth. {$peserta['nama']}</p>
                 <p>Dengan Hormat</p>
-                <br>
-                <p>Kami dengan senang hati menginformasikan bahwa pendaftaran Anda dalam program ini telah diterima.</p>
+                <p>Diinformasikan bahwa pendaftaran Anda dalam program ini telah diterima.</p>
                 <p>Berikut adalah informasi terkait mentor Anda:</p>
 
                 <br>
-                <p>- Nama: {$mentor['nama']}</p>
-                <p>- NIPG: {$mentor['nipg']}</p>
-                <p>- Email: {$mentor['email']}</p>
-                <p>- Satuan Kerja: {$mentor['division']}</p>
+                <p>Nama: {$mentor['nama']}</p>
+                <p>NIPG: {$mentor['nipg']}</p>
+                <p>Email: {$mentor['email']}</p>
+                <p>Satuan Kerja: {$mentor['division']}</p>
                 <br>
-                <p>Silakan login ke sistem kami untuk informasi lebih lanjut dan memulai program ini. Jika Anda memiliki pertanyaan, jangan ragu untuk menghubungi kami.</p>
+                <p>Silakan login ke sistem kami untuk informasi lebih lanjut dan memulai program ini. Jika Anda memiliki pertanyaan, jangan ragu untuk menghubungi kami (089622484436) atau dengan membalas email ini.</p>
                 <p>Terima kasih atas partisipasi Anda.</p>
                 <br>
                 <p>Regards</p>
                 <p>HCM Division</p>
                 <p>PT Perusahaan Gas Negara Tbk</p>
-
             </body>
             </html>
             ");
         } elseif ($status == false) {
-            $email->setSubject('Hasil Pendaftaran Anda Ditolak');
+            $email->setSubject("PGN {$peserta['tipe']} - Hasil Pendaftaran Anda Ditolak");
             $email->setMessage("
 
             <html>
@@ -1805,9 +1827,7 @@ class Dashboard extends BaseController
             </head>
             <body>
                 <p>Yth. {$peserta['nama']}</p>
-                <p>Dengan berat hati, kami sampaikan bahwa pendaftaran anda ditolak.</p>
-                <p>Silahkan kembali mendaftar jika kebutuhan masih tersedia</p>
-
+                <p>Bersama ini kami sampaikan, berdasarkan hasil evaluasi kami belum bisa menyetujui permohonan magang saudara/i.</p>
                 <p>Terima kasih atas partisipasi Anda.</p>
                 <br>
                 <p>Regards</p>
@@ -1832,11 +1852,11 @@ class Dashboard extends BaseController
         }
         $email = \Config\Services::email();
 
-        $email->setFrom('mdndfzn@gmail.com', 'PGN GAS Admin Internship Program');
-        $email->setTo($mentor['email']);
+        $email->setFrom('mdndfzn@gmail.com', 'PGN GAS Admin Magang Program');
+        $email->setTo(strtolower($mentor['email']));
 
         if ($status && $mentor) {
-            $email->setSubject('Pendaftaran Calon Peserta Magang Bimbingan Anda Telah Diterima');
+            $email->setSubject("PGN {$peserta['tipe']} - Pendaftaran Calon Peserta Magang Bimbingan Anda Telah Diterima");
             $email->setMessage("
 
             <html>
@@ -1859,10 +1879,9 @@ class Dashboard extends BaseController
                 </style>
             </head>
             <body>
-                <p>Kepada Yth. {$mentor['nama']}</p>
+                <p>Yth. {$mentor['nama']}</p>
                 <p>Dengan Hormat</p>
-                <br>
-                <p>Kami dengan senang hati menginformasikan bahwa pendaftaran calon peserta bimbingan Anda dalam program ini telah diterima.</p>
+                <p>Diinformasikan bahwa pendaftaran calon peserta bimbingan Anda dalam program ini telah diterima.</p>
                 <p>Anda bisa melihat surat perjanjian yang telah ditandatangani oleh peserta magang pada sistem.</p>
                 <br>
                 <p>Regards</p>
@@ -1873,7 +1892,7 @@ class Dashboard extends BaseController
             </html>
             ");
         } elseif ($status == false) {
-            $email->setSubject('Hasil Pendaftaran Calon Peserta Bimbingan Anda Ditolak');
+            $email->setSubject("PGN {$peserta['tipe']} - Hasil Pendaftaran Calon Peserta Bimbingan Anda Ditolak");
             $email->setMessage("
 
             <html>
@@ -2245,6 +2264,7 @@ class Dashboard extends BaseController
         }
 
         $data['peserta'] = $this->pesertaModel->getDetailAbsenPeserta($id_magang, $start_date, $end_date);
+        // dd($data['peserta']);
         $data['id_magang'] = $id_magang;
         $data['encrypt_id'] = $encrypt_id;
 
@@ -2552,42 +2572,6 @@ class Dashboard extends BaseController
         return redirect()->to('admin/dashboard/perpanjang_peserta/' . $encrypt_id);
     }
 
-    // public function perpanjang_magang()
-    // {
-    //     // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
-    //     $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
-
-    //     if ($user_level !== 'admin') {
-    //         return view('no_access');
-    //     }
-
-    //     // Ambil data yang diperlukan
-    //     $id_magang = $this->request->getPost('id_magang');
-    //     $tgl_perpanjangan = $this->request->getPost('tgl_perpanjangan');
-
-    //     // Validasi input
-    //     if (empty($id_magang) || empty($tgl_perpanjangan)) {
-    //         session()->setFlashdata('message', 'ID Magang atau Tanggal Perpanjangan tidak valid.');
-    //         return redirect()->to('admin/dashboard/perpanjang_peserta/' . $id_magang);
-    //     }
-
-    //     // Update tanggal perpanjangan pada tabel registrasi dan anak_magang
-    //     $data = ['tgl_perpanjangan' => $tgl_perpanjangan];
-    //     $success_anak_magang = $this->pesertaModel->updateTglPerpanjanganAnakMagang($id_magang, $data);
-
-    //     // Jika berhasil memperbarui tanggal perpanjangan pada kedua tabel
-    //     if ($success_anak_magang) {
-    //         session()->setFlashdata('message', 'Tanggal perpanjangan berhasil diperbarui.');
-
-    //         // Tambahkan data absensi untuk periode yang baru
-    //         $this->tambahAbsensiBaru($id_magang, $tgl_perpanjangan);
-    //     } else {
-    //         session()->setFlashdata('message', 'Gagal memperbarui tanggal perpanjangan.');
-    //     }
-
-    //     return redirect()->to('admin/dashboard/perpanjang_peserta/' . $id_magang);
-    // }
-
     private function tambahAbsensiBaru($id_magang, $tgl_perpanjangan, $id_register)
     {
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
@@ -2647,30 +2631,6 @@ class Dashboard extends BaseController
             }
         }
     }
-
-
-
-    // public function perpanjang_magang()
-    // {
-    //     $id_magang = $this->request->getPost('id_magang');
-    //     $tgl_perpanjangan = $this->request->getPost('tgl_perpanjangan');
-
-    //     if (empty($id_magang) || empty($tgl_perpanjangan)) {
-    //         session()->setFlashdata('message', 'ID Magang atau Tanggal Perpanjangan tidak valid.');
-    //         return redirect()->to('dashboard/detail/' . $id_magang);
-    //     }
-
-    //     $data = ['tgl_perpanjangan' => $tgl_perpanjangan];
-    //     $success = $this->pesertaModel->updateTglPerpanjangan($id_magang, $data);
-
-    //     if ($success) {
-    //         session()->setFlashdata('message', 'Tanggal perpanjangan berhasil diperbarui.');
-    //     } else {
-    //         session()->setFlashdata('message', 'Gagal memperbarui tanggal perpanjangan.');
-    //     }
-
-    //     return redirect()->to('admin/dashboard/perpanjang_peserta/' . $id_magang);
-    // }
 
     public function changeStatus($encrypt_id)
     {
@@ -2837,9 +2797,11 @@ class Dashboard extends BaseController
         $user_nomor = $this->session->get('nomor');
         // Ambil data nilai dan data registrasi
         $registrasi_data = $this->registrasiModel->getRegistrasiById($id); // Ambil data dari tabel registrasi berdasarkan nomo
-
+        $id_magang = $this->anakMagangModel->getIdMagangByRegister($id);
+        $nilai = $this->nilaiModel->getNilaiByIdMagangPure($id_magang);
         $data['registrasi'] = $registrasi_data;
         $data['encrypt_id'] = $encrypt_id;
+        $data['nilai'] = $nilai;
 
         if (!$data['registrasi']) {
             return redirect()->to('/')->with('error', 'Data tidak ditemukan.');

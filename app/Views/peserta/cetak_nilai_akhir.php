@@ -135,6 +135,19 @@
                 display: none;
             }
         }
+
+        .footer .tanggal,
+        .footer .mentor {
+            font-size: 16px;
+        }
+
+        .footer .tanggal {
+            text-align: left;
+        }
+
+        .footer .mentor {
+            text-align: left;
+        }
     </style>
 </head>
 
@@ -142,16 +155,19 @@
 
     <div class="container">
         <h1>Nilai Akhir</h1>
-        <p class="text-center">Halaman ini menampilkan nilai akhir yang diberikan oleh mentor kepada peserta magang selama proses magang di PGN.</p>
+        <p class="text-center">Halaman ini menampilkan nilai akhir yang diberikan oleh mentor kepada peserta magang
+            selama proses magang di PGN.</p>
 
         <!-- Data Diri -->
         <div class="data-diri">
             <h3>Data Diri Peserta Magang</h3>
 
-                <p><strong>Nama:</strong> <?= $nilai_akhir['nama'] ?></p>
-                <p><strong>NIM:</strong> <?= $nilai_akhir['nomor'] ?></p>
-                <p><strong>Instansi:</strong> <?= $nilai_akhir['instansi'] ?></p>
-                <p><strong>Periode Magang:</strong> <?= formatTanggalIndo($nilai_akhir['tanggal1']) . ' - ' . formatTanggalIndo($nilai_akhir['tanggal2']) ?></p>
+            <p><strong>Nama:</strong> <?= $nilai_akhir['nama'] ?></p>
+            <p><strong>NIM:</strong> <?= $nilai_akhir['nomor'] ?></p>
+            <p><strong>Instansi:</strong> <?= $nilai_akhir['instansi'] ?></p>
+            <p><strong>Periode Magang:</strong>
+                <?= formatTanggalIndo($nilai_akhir['tanggal1']) . ' - ' . formatTanggalIndo($nilai_akhir['tanggal2']) ?>
+            </p>
 
         </div>
 
@@ -170,80 +186,56 @@
                             </tr>
                         </thead>
                         <tbody>
-                                <tr>
-                                    <td>1</td>
-                                    <td>Ketepatan Waktu</td>
-                                    <td><?= $nilai_akhir['ketepatan_waktu'] ?></td>
-                                </tr>
-                                <tr>
-                                    <td>2</td>
-                                    <td>Sikap Kerja</td>
-                                    <td><?= $nilai_akhir['sikap_kerja'] ?></td>
-                                </tr>
-                                <tr>
-                                    <td>3</td>
-                                    <td>Tanggungjawab</td>
-                                    <td><?= $nilai_akhir['tanggung_jawab'] ?></td>
-                                </tr>
-                                <tr>
-                                    <td>4</td>
-                                    <td>Kehadiran</td>
-                                    <td><?= $nilai_akhir['kehadiran'] ?></td>
-                                </tr>
-                                <tr>
-                                    <td>5</td>
-                                    <td>Kemampuan Kerja</td>
-                                    <td><?= $nilai_akhir['kemampuan_kerja'] ?></td>
-                                </tr>
-                                <tr>
-                                    <td>6</td>
-                                    <td>Keterampilan Kerja</td>
-                                    <td><?= $nilai_akhir['keterampilan_kerja'] ?></td>
-                                </tr>
-                                <tr>
-                                    <td>7</td>
-                                    <td>Kualitas Hasil</td>
-                                    <td><?= $nilai_akhir['kualitas_hasil'] ?></td>
-                                </tr>
-                                <tr>
-                                    <td>8</td>
-                                    <td>Kemampuan Komunikasi</td>
-                                    <td><?= $nilai_akhir['kemampuan_komunikasi'] ?></td>
-                                </tr>
-                                <tr>
-                                    <td>9</td>
-                                    <td>Kerjasama</td>
-                                    <td><?= $nilai_akhir['kerjasama'] ?></td>
-                                </tr>
-                                <tr>
-                                    <td>10</td>
-                                    <td>Kerajinan</td>
-                                    <td><?= $nilai_akhir['kerajinan'] ?></td>
-                                </tr>
-                                <tr>
-                                    <td>11</td>
-                                    <td>Percaya diri</td>
-                                    <td><?= $nilai_akhir['percaya_diri'] ?></td>
-                                </tr>
-                                <tr>
-                                    <td>12</td>
-                                    <td>Mematuhi Aturan</td>
-                                    <td><?= $nilai_akhir['mematuhi_aturan'] ?></td>
-                                </tr>
-                                <tr>
-                                    <td>13</td>
-                                    <td>Penampilan</td>
-                                    <td><?= $nilai_akhir['penampilan'] ?></td>
-                                </tr>
-                                <tr>
-                                    <td>14</td>
-                                    <td>Perilaku</td>
-                                    <td><?= $nilai_akhir['perilaku'] ?></td>
-                                </tr>
+                            <tr>
+                                <td>1</td>
+                                <td>Kehadiran</td>
+                                <td><?= $nilai_akhir['kehadiran'] ?></td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>Tanggung Jawab</td>
+                                <td><?= $nilai_akhir['tanggung_jawab'] ?></td>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td>Kemampuan Kerja</td>
+                                <td><?= $nilai_akhir['kemampuan_kerja'] ?></td>
+                            </tr>
+                            <tr>
+                                <td>4</td>
+                                <td>Integritas</td>
+                                <td><?= $nilai_akhir['integritas'] ?></td>
+                            </tr>
+                            <tr>
+                                <td>5</td>
+                                <td>Perilaku</td>
+                                <td><?= $nilai_akhir['perilaku'] ?></td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" style="text-end"><strong>Rata-Rata</strong></td>
+                                <td class="text-end" style="text-end">
+                                    <?= $nilai_akhir['rata'] ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2"><strong>Predikat</strong></td>
+                                <td class="text-end" style="text-end">
+                                    <?= $nilai_akhir['predikat'] ?>
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
+        </div>
+    </div>
+    <!-- Footer with date and mentor's name -->
+    <div class="footer" style="margin: left 100px;">
+        <div class="tanggal" style="margin-bottom: 70px;">
+            <strong>Jakarta, <?= $tanggal_hari_ini ?></strong>
+        </div>
+        <div class="mentor" style="margin: left 20px;">
+            <strong><?= $mentor['nama'] ?></strong>
         </div>
     </div>
 </body>

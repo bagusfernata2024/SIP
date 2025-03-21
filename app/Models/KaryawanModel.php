@@ -17,8 +17,9 @@ class KaryawanModel extends Model
     }
     public function getData()
     {
-        return $this->findAll();
+        return $this->where('band <=', 19)->findAll();
     }
+
 
     public function getDataDesc()
     {

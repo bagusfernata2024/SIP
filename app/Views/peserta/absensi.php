@@ -352,7 +352,7 @@
             }
 
             // Logika untuk Check-Out (aktif hanya antara 12:00 - 17:00)
-            if (currentHour >= 11 && currentHour < 21) {
+            if (currentHour >= 5 && currentHour < 21) {
                 btnCheckOut.disabled = false;
                 btnCheckOut.classList.remove("disabled");
             } else {

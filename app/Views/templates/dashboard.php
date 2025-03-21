@@ -10,6 +10,7 @@
 	</div>
 <?php endif; ?>
 
+
 <!-- Mulai Kontainer Data -->
 <div class="container-fluid">
 	<!-- Page Heading -->
@@ -175,15 +176,13 @@
 			</div>
 		</div>
 
-		<div class="col-xl-3 col-md-6 mb-4">
+		<!-- <div class="col-xl-3 col-md-6 mb-4">
 			<div class="card border-left-success shadow h-100 py-2">
 				<div class="card-body">
 					<div class="row no-gutters align-items-center">
 						<div class="col mr-2">
 							<div class="text-xs font-weight-bold text-success text-uppercase mb-1">
 								Realisasi Satker
-								<!-- Tombol untuk menampilkan Modal -->
-
 							</div>
 							<button type="button" class="btn btn-primary" data-toggle="modal"
 								data-target="#realisasiSatker">
@@ -198,7 +197,7 @@
 					</div>
 				</div>
 			</div>
-		</div>
+		</div> -->
 
 
 
@@ -281,101 +280,80 @@
 			</div>
 		</div>
 
+		<!-- Bagian Menampilkan Mentor -->
+		<div class="col-xl-3 col-md-6 mb-4">
+			<div class="card border-left-info shadow h-100 py-2">
+				<div class="card-body">
+					<div class="row no-gutters align-items-center">
+						<div class="col mr-2">
+							<div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+								Daftar Mentor
+							</div>
+							<button type="button" class="btn btn-primary" data-toggle="modal"
+								data-target="#mentorDetailModal">
+								Lihat
+							</button>
+							<div class="h5 mb-0 font-weight-bold text-gray-800"></div>
+						</div>
+						<div class="col-auto">
+							<i class="fas fa-chalkboard-teacher"></i>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Modal untuk menampilkan Daftar Mentor -->
+		<!-- Modal untuk menampilkan Daftar Mentor -->
+		<div class="modal fade" id="mentorDetailModal" tabindex="-1" role="dialog"
+			aria-labelledby="mentorDetailModalLabel" aria-hidden="true">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="mentorDetailModalLabel">Daftar Mentor</h5>
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="modal-body">
+						<div class="table-responsive">
+							<table class="table table-bordered">
+								<thead>
+									<tr>
+										<th>No</th>
+										<th>Nama Mentor</th>
+										<th>Jumlah Peserta</th>
+									</tr>
+								</thead>
+								<tbody>
+									<?php $no = 1; ?>
+									<?php foreach ($mentorData as $mentor): ?>
+										<tr>
+											<td><?= $no++; ?></td>
+											<td><?= $mentor['nama']; ?></td>
+											<td><?= $mentor['jumlah_peserta']; ?></td>
+										</tr>
+									<?php endforeach; ?>
+								</tbody>
+							</table>
+						</div>
+						<!-- Pagination -->
+						<div class="d-flex justify-content-between">
+							<a href="<?= base_url('admin/dashboard?page=' . max(1, $page - 1)) ?>"
+								class="btn btn-secondary" <?= $page == 1 ? 'disabled' : '' ?>>Previous</a>
+							<a href="<?= base_url('admin/dashboard?page=' . min(ceil($totalMentors / $perPage), $page + 1)) ?>"
+								class="btn btn-primary" <?= $page * $perPage >= $totalMentors ? 'disabled' : '' ?>>Next</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+
+
+
 
 		<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-		<script>
-			let currentPage = 1;  // Halaman awal
-			const totalPages = <?= $totalPages; ?>;
-
-			// Fungsi untuk memuat data Realisasi Satker menggunakan AJAX
-			function loadRealisasiSatker(page) {
-				$.ajax({
-					url: '<?= base_url('admin/dashboard') ?>',
-					type: 'GET',
-					data: { page: page },
-					dataType: 'json',
-					success: function (response) {
-						// Memperbarui bagian Realisasi Satker dalam modal dengan data yang diterima
-						$('#realisasiSatkerBody').html(response.realisasi_satker);
-						currentPage = page;
-
-						// Menonaktifkan tombol Next/Previous jika sudah di halaman pertama atau terakhir
-						$('#previousBtn').prop('disabled', currentPage <= 1);
-						$('#nextBtn').prop('disabled', currentPage >= totalPages);
-					},
-					error: function () {
-						alert('Terjadi kesalahan saat memuat data.');
-					}
-				});
-			}
-
-			// Panggil fungsi untuk memuat data saat modal sepenuhnya terbuka
-			$('#realisasiSatker').on('shown.bs.modal', function () {
-				loadRealisasiSatker(currentPage); // Muat data saat modal ditampilkan
-			});
-
-			// Tombol Previous
-			$('#previousBtn').click(function () {
-				if (currentPage > 1) {
-					loadRealisasiSatker(currentPage - 1);
-				}
-			});
-
-			// Tombol Next
-			$('#nextBtn').click(function () {
-				if (currentPage < totalPages) {
-					loadRealisasiSatker(currentPage + 1);
-				}
-			});
-		</script>
-
-		<script>
-			let currentPage = 1;
-			const totalPages = <?= $totalPages; ?>;
-
-			// Fungsi untuk memuat data Realisasi Satker menggunakan AJAX
-			function loadRealisasiSatker(page) {
-				$.ajax({
-					url: '<?= base_url('admin/dashboard') ?>',
-					type: 'GET',
-					data: { page: page },
-					dataType: 'json',
-					success: function (response) {
-						// Memperbarui bagian Realisasi Satker dalam modal dengan data yang diterima
-						$('#realisasiSatkerBody').html(response.realisasi_satker);
-						currentPage = page;
-						// Menonaktifkan tombol Next/Previous jika sudah di halaman pertama atau terakhir
-						$('#previousBtn').prop('disabled', currentPage <= 1);
-						$('#nextBtn').prop('disabled', currentPage >= totalPages);
-					},
-					error: function () {
-						alert('Terjadi kesalahan saat memuat data.');
-					}
-				});
-			}
-
-			// Panggil fungsi untuk memuat data saat modal dibuka
-			$('#realisasiSatker').on('show.bs.modal', function () {
-				loadRealisasiSatker(currentPage); // Muat data saat modal dibuka
-			});
-
-			// Tombol Previous
-			$('#previousBtn').click(function () {
-				if (currentPage > 1) {
-					loadRealisasiSatker(currentPage - 1);
-				}
-			});
-
-			// Tombol Next
-			$('#nextBtn').click(function () {
-				if (currentPage < totalPages) {
-					loadRealisasiSatker(currentPage + 1);
-				}
-			});
-		</script>
-
-
 
 
 

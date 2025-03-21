@@ -535,117 +535,6 @@ class DashboardMentor extends BaseController
         }
         return $this->response->setJSON(['success' => false, 'message' => 'Invalid request']);
     }
-
-
-    // Approve + Insert Nilai + Insert Absen
-    // public function approve_peserta()
-    // {
-    //     // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
-    //     $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
-
-    //     if ($user_level !== 'mentor') {
-    //         return view('no_access');
-    //     }
-    //     helper('date');
-
-    //     if ($this->request->isAJAX()) {
-    //         try {
-    //             $input = $this->request->getJSON();
-
-    //             if (!isset($input->id_magang, $input->id_register)) {
-    //                 return $this->response->setJSON(['success' => false, 'message' => 'Data tidak valid']);
-    //             }
-    //             $idMagang = $input->id_magang;
-    //             $idRegister = $input->id_register;
-
-    //             // Load model
-    //             $anakMagangModel = new AnakMagangModel();
-    //             $detailRegisModel = new DetailRegisModel();
-    //             $registrasiModel = new RegistrasiModel();
-    //             $userModel = new UserModel();
-    //             $nilaiModel = new NilaiModel();
-    //             $absenModel = new AbsensiModel();
-
-    //             // Get data registrasi
-    //             $registrasi = $registrasiModel->find($idRegister);
-    //             if (!$registrasi) {
-    //                 return $this->response->setJSON(['success' => false, 'message' => 'Data registrasi tidak ditemukan']);
-    //             }
-
-    //             // Update timeline status di tabel registrasi
-    //             $registrasiModel->updateTimelineAccMentor($idRegister, 'Kegiatan Dimulai');
-
-    //             // Update timeline status di tabel registrasi
-    //             $registrasiModel->updateStatusAccMentor($idRegister, 'Accept');
-
-    //             // Update status di tabel anak_magang
-    //             $anakMagangModel->update($idMagang, ['status' => 'Aktif']);
-
-    //             // Update approved di tabel detailregis
-    //             $detailRegisModel->where('id_register', $idRegister)->set(['approved' => 'Y'])->update();
-
-    //             // Insert data ke tabel users
-    //             $username = strtolower($registrasi['tipe']) . $idRegister;
-    //             $password = bin2hex(random_bytes(4));
-    //             $userModel->insert([
-    //                 'nomor' => $registrasi['nomor'],
-    //                 'username' => $username,
-    //                 'password' => password_hash($password, PASSWORD_BCRYPT),
-    //                 'level' => 'user',
-    //                 'aktif' => 'Y',
-    //                 'id_register' => $idRegister
-    //             ]);
-
-    //             // Insert default nilai for the new participant
-    //             $nilaiModel->insert([
-    //                 'id_magang' => $idMagang,
-    //                 // Nilai lainnya
-    //             ]);
-
-    //             // Generate absen data for the participant
-    //             $tanggalMulai = new DateTime($registrasi['tanggal1']);
-    //             $tanggalSelesai = new DateTime($registrasi['tanggal2']);
-    //             $tanggalSekarang = clone $tanggalMulai;
-
-    //             $absenData = [];
-    //             while ($tanggalSekarang <= $tanggalSelesai) {
-    //                 $absenData[] = [
-    //                     'id_magang' => $idMagang,
-    //                     'tgl' => $tanggalSekarang->format('Y-m-d'),
-    //                 ];
-    //                 $tanggalSekarang->modify('+1 day');
-    //             }
-
-    //             if (!$absenModel->insertBatch($absenData)) {
-    //                 log_message('error', 'Insert batch error: ' . json_encode($absenModel->errors()));
-    //                 return $this->response->setJSON(['success' => false, 'message' => 'Gagal membuat data absen']);
-    //             }
-
-    //             //Get mentor data
-    //             $mentor = $anakMagangModel->select('mentor.nama, mentor.nipg, mentor.email, mentor.division')
-    //                 ->join('mentor', 'mentor.id_mentor = anak_magang.id_mentor')
-    //                 ->where('anak_magang.id_magang', $idMagang)
-    //                 ->first();
-
-    //             if (!$mentor) {
-    //                 return $this->response->setJSON(['success' => false, 'message' => 'Data mentor tidak ditemukan']);
-    //             }
-
-    //             // Send email to peserta
-    //             if (!$this->sendEmailToPeserta($registrasi, 'Accept', $mentor, $username, $password)) {
-    //                 return $this->response->setJSON(['success' => false, 'message' => 'Gagal mengirim email ke peserta']);
-    //             }
-
-    //             return $this->response->setJSON(['success' => true, 'message' => 'Peserta berhasil diapprove']);
-    //         } catch (\Exception $e) {
-    //             log_message('error', 'Error saat memproses approve peserta: ' . $e->getMessage());
-    //             return $this->response->setJSON(['success' => false, 'message' => 'Terjadi kesalahan pada server']);
-    //         }
-    //     }
-    //     return $this->response->setJSON(['success' => false, 'message' => 'Invalid request']);
-    // }
-
-
     private function sendEmailToPeserta($peserta, $status, $mentor = null, $username = null, $password = null)
     {
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
@@ -756,177 +645,6 @@ class DashboardMentor extends BaseController
         log_message('info', 'Email berhasil dikirim ke ' . $peserta['email']);
         return true;
     }
-
-
-    // public function approve_peserta()
-    // {
-    //     if ($this->request->isAJAX()) {
-    //         $input = $this->request->getJSON();
-    //         $idMagang = $input->id_magang;
-    //         $idRegister = $input->id_register;
-
-    //         // Load model
-    //         $anakMagangModel = new \App\Models\AnakMagangModel();
-    //         $detailRegisModel = new \App\Models\DetailRegisModel();
-    //         $registrasiModel = new \App\Models\RegistrasiModel();
-    //         $userModel = new \App\Models\UserModel();
-
-    //         // Get data registrasi
-    //         $registrasi = $registrasiModel->find($idRegister);
-    //         if (!$registrasi) {
-    //             return $this->response->setJSON(['success' => false, 'message' => 'Data registrasi tidak ditemukan']);
-    //         }
-
-    //         // Update status di tabel anak_magang
-    //         $anakMagangModel->update($idMagang, ['status' => 'Aktif']);
-
-    //         // Update approved di tabel detailregis
-    //         $detailRegisModel->where('id_register', $idRegister)
-    //             ->set(['approved' => 'Y'])
-    //             ->update();
-
-    //         // Insert data ke tabel users
-    //         $username = strtolower($registrasi['tipe']) . $idRegister; // Generate username
-    //         $password = 'defaultpassword'; // Default password
-    //         $userModel->insert([
-    //             'nomor' => $registrasi['nomor'],
-    //             'username' => $username,
-    //             'password' => password_hash($password, PASSWORD_BCRYPT), // Default password
-    //             'level' => 'user',
-    //             'aktif' => 'Y'
-    //         ]);
-
-    //         // Get mentor data (optional)
-    //         $mentor = $anakMagangModel->select('mentor.nama, mentor.nipg, mentor.email, mentor.division')
-    //             ->join('mentor', 'mentor.id_mentor = anak_magang.id_mentor')
-    //             ->where('anak_magang.id_magang', $idMagang)
-    //             ->first();
-
-    //         // Send email to peserta
-    //         $this->sendEmailToPeserta($registrasi, 'Accept', $mentor, $username, $password);
-
-    //         return $this->response->setJSON(['success' => true]);
-    //     }
-
-    //     return $this->response->setJSON(['success' => false, 'message' => 'Invalid request']);
-    // }
-
-    // private function sendEmailToPeserta($peserta, $status, $mentor = null, $username = null, $password = null)
-    // {
-    //     $email = \Config\Services::email();
-
-    //     $email->setFrom('ormasbbctestt@gmail.com', 'PGN GAS Admin Internship Program');
-    //     $email->setTo($peserta['email']);
-
-    //     if ($status === 'Accept' && $mentor && $username && $password) {
-    //         $email->setSubject('Selamat! Pendaftaran Anda Telah Diterima');
-    //         $email->setMessage("
-    //         Kepada Yth. {$peserta['nama']},
-
-    //         Dengan hormat,
-    //         Kami dengan senang hati menginformasikan bahwa pendaftaran Anda dalam program ini telah diterima.
-
-    //         Berikut adalah informasi terkait akun Anda:
-    //         - **Username**: {$username}
-    //         - **Password**: {$password}
-
-    //         Berikut juga informasi terkait mentor Anda:
-    //         - Nama: {$mentor['nama']}
-    //         - NIPG: {$mentor['nipg']}
-    //         - Email: {$mentor['email']}
-    //         - Satuan Kerja: {$mentor['division']}
-
-    //         Silakan login ke sistem kami menggunakan username dan password di atas untuk informasi lebih lanjut dan memulai program ini. Jika Anda memiliki pertanyaan, jangan ragu untuk menghubungi kami.
-
-    //         Terima kasih atas partisipasi Anda.
-
-    //         Hormat kami,
-    //         Admin Program
-    //     ");
-    //     } elseif ($status === 'reject') {
-    //         $email->setSubject('Hasil Pendaftaran Program');
-    //         $email->setMessage("
-    //         Kepada Yth. {$peserta['nama']},
-
-    //         Dengan hormat,
-    //         Kami mengucapkan terima kasih atas minat dan partisipasi Anda dalam program ini. 
-    //         Namun, dengan berat hati kami sampaikan bahwa pendaftaran Anda belum dapat diterima.
-
-    //         Kami mendorong Anda untuk tetap semangat dan terus meningkatkan kemampuan Anda. 
-    //         Jika ada pertanyaan lebih lanjut, silakan hubungi tim kami.
-
-    //         Hormat kami,
-    //         Admin Program
-    //     ");
-    //     }
-
-    //     // Proses pengiriman email
-    //     if (!$email->send()) {
-    //         // Log jika email gagal dikirim
-    //         echo $email->printDebugger(['headers']);
-    //         log_message('error', 'Email gagal dikirim ke ' . $peserta['email']);
-    //         log_message('error', 'Debug email: ' . $email->printDebugger(['headers', 'subject', 'body']));
-    //         return false; // Kembalikan false jika gagal
-    //     } else {
-    //         // Log jika email berhasil dikirim
-    //         log_message('info', 'Email berhasil dikirim ke ' . $peserta['email']);
-    //         return true; // Kembalikan true jika berhasil
-    //     }
-    // }
-
-
-    // private function sendEmailToPeserta($peserta, $status, $mentor = null, $username = null, $password = null)
-    // {
-    //     $email = \Config\Services::email();
-
-    //     $email->setFrom('ormasbbctestt@gmail.com', 'PGN GAS Admin Internship Program');
-    //     $email->setTo($peserta['email']);
-
-    //     if ($status === 'Accept' && $mentor && $username && $password) {
-    //         $email->setSubject('Selamat! Pendaftaran Anda Telah Diterima');
-    //         $email->setMessage("
-    //         Kepada Yth. {$peserta['nama']},
-
-    //         Dengan hormat,
-    //         Kami dengan senang hati menginformasikan bahwa pendaftaran Anda dalam program ini telah diterima.
-
-    //         Berikut adalah informasi terkait akun Anda:
-    //         - **Username**: {$username}
-    //         - **Password**: {$password}
-
-    //         Berikut juga informasi terkait mentor Anda:
-    //         - Nama: {$mentor['nama']}
-    //         - NIPG: {$mentor['nipg']}
-    //         - Email: {$mentor['email']}
-    //         - Satuan Kerja: {$mentor['division']}
-
-    //         Silakan login ke sistem kami menggunakan username dan password di atas untuk informasi lebih lanjut dan memulai program ini. Jika Anda memiliki pertanyaan, jangan ragu untuk menghubungi kami.
-
-    //         Terima kasih atas partisipasi Anda.
-
-    //         Hormat kami,
-    //         Admin Program
-    //     ");
-    //     } elseif ($status === 'reject') {
-    //         $email->setSubject('Hasil Pendaftaran Program');
-    //         $email->setMessage("
-    //         Kepada Yth. {$peserta['nama']},
-
-    //         Dengan hormat,
-    //         Kami mengucapkan terima kasih atas minat dan partisipasi Anda dalam program ini. 
-    //         Namun, dengan berat hati kami sampaikan bahwa pendaftaran Anda belum dapat diterima.
-
-    //         Kami mendorong Anda untuk tetap semangat dan terus meningkatkan kemampuan Anda. 
-    //         Jika ada pertanyaan lebih lanjut, silakan hubungi tim kami.
-
-    //         Hormat kami,
-    //         Admin Program
-    //     ");
-    //     }
-
-    //     return $email->send();
-    // }
-
     public function absensiBimbingan()
     {
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
@@ -981,8 +699,6 @@ class DashboardMentor extends BaseController
             return redirect()->to('/404');
         }
     }
-
-
     public function rekapAbsensiBimbingan()
     {
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
@@ -1206,22 +922,39 @@ class DashboardMentor extends BaseController
 
         $id_magang = $this->request->getPost('id_magang');
         $id_register = $this->request->getPost('id_register');
+        $tanggung_jawab = $this->request->getPost('tanggung_jawab');
+        $kehadiran = $this->request->getPost('kehadiran');
+        $kemampuan_kerja = $this->request->getPost('kemampuan_kerja');
+        $integritas = $this->request->getPost('integritas');
+        $perilaku = (int)$this->request->getPost('perilaku');
+        
+        // if($perilaku == 'Sangat Baik'){
+        //     $perilaku = 100;
+        // } else if($perilaku == 'Baik'){
+        //     $perilaku = 90;
+        // } else if($perilaku == 'Cukup Baik'){
+        //     $perilaku = 80;
+        // } else{
+        //     $perilaku = 70;
+        // }
+        $total = $tanggung_jawab + $kehadiran + $kemampuan_kerja + $integritas + $perilaku;
+        $rata = $total / 5;
+        if($rata < 60){
+            $predikat = "Tidak Memuaskan";
+        } else if ($rata < 80){
+            $predikat = "Memuaskan";
+        } else{
+            $predikat = "Sangat Memuaskan";
+        }
 
         $data = [
-            'ketepatan_waktu' => $this->request->getPost('ketepatan_waktu'),
-            'sikap_kerja' => $this->request->getPost('sikap_kerja'),
             'tanggung_jawab' => $this->request->getPost('tanggung_jawab'),
             'kehadiran' => $this->request->getPost('kehadiran'),
             'kemampuan_kerja' => $this->request->getPost('kemampuan_kerja'),
-            'keterampilan_kerja' => $this->request->getPost('keterampilan_kerja'),
-            'kualitas_hasil' => $this->request->getPost('kualitas_hasil'),
-            'kemampuan_komunikasi' => $this->request->getPost('kemampuan_komunikasi'),
-            'kerjasama' => $this->request->getPost('kerjasama'),
-            'kerajinan' => $this->request->getPost('kerajinan'),
-            'percaya_diri' => $this->request->getPost('percaya_diri'),
-            'mematuhi_aturan' => $this->request->getPost('mematuhi_aturan'),
-            'penampilan' => $this->request->getPost('penampilan'),
+            'integritas' => $this->request->getPost('integritas'),
             'perilaku' => $this->request->getPost('perilaku'),
+            'rata' => $rata,
+            'predikat'=> $predikat,
             'tgl_input' => date('Y-m-d'),
         ];
 
@@ -1289,9 +1022,10 @@ class DashboardMentor extends BaseController
         // dd($data['nilai']);
 
         foreach ($data['nilai'] as $item) {
-            $item->total_nilai = $this->hitungTotalNilai($item);
-            $item->status = $item->total_nilai > 75 ? 'Lulus' : 'Tidak Lulus';
+            $item->status = $item->rata > 75 ? 'Lulus' : 'Tidak Lulus';
         }
+
+        // dd($data['nilai']);
 
         return view('mentor/header') .
             view('mentor/sidebar') .
@@ -1323,36 +1057,29 @@ class DashboardMentor extends BaseController
         $data['id_magang'] = $id_magang;
         // dd($data['nilai_akhir_pure']);
         $total = 0;
-        $total += $data['nilai_akhir_pure']['ketepatan_waktu'];
-        $total += $data['nilai_akhir_pure']['sikap_kerja'];
-        $total += $data['nilai_akhir_pure']['tanggung_jawab'];
         $total += $data['nilai_akhir_pure']['kehadiran'];
+        $total += $data['nilai_akhir_pure']['tanggung_jawab'];
         $total += $data['nilai_akhir_pure']['kemampuan_kerja'];
-        $total += $data['nilai_akhir_pure']['keterampilan_kerja'];
-        $total += $data['nilai_akhir_pure']['kualitas_hasil'];
-        $total += $data['nilai_akhir_pure']['kemampuan_komunikasi'];
-        $total += $data['nilai_akhir_pure']['kerjasama'];
-        $total += $data['nilai_akhir_pure']['kerajinan'];
-        $total += $data['nilai_akhir_pure']['percaya_diri'];
-        $total += $data['nilai_akhir_pure']['mematuhi_aturan'];
-        $total += $data['nilai_akhir_pure']['penampilan'];
+        $total += $data['nilai_akhir_pure']['integritas'];
+        $total += $data['nilai_akhir_pure']['perilaku'];
 
-        switch ($data['nilai_akhir_pure']['perilaku']) {
-            case 'Sangat Baik':
-                $total += 100;
-                break;
-            case 'Baik':
-                $total += 75;
-                break;
-            case 'Cukup Baik':
-                $total += 50;
-                break;
-            case 'Tidak Baik':
-                $total += 0;
-                break;
-        }
 
-        $total = $total / 14;
+        // switch ($data['nilai_akhir_pure']['perilaku']) {
+        //     case 'Sangat Baik':
+        //         $total += 100;
+        //         break;
+        //     case 'Baik':
+        //         $total += 75;
+        //         break;
+        //     case 'Cukup Baik':
+        //         $total += 50;
+        //         break;
+        //     case 'Tidak Baik':
+        //         $total += 0;
+        //         break;
+        // }
+
+        $total = $total / 5;
 
         $data['status'] = $total > 75 ? 'Lulus' : 'Tidak Lulus';
         $data['encrypt_id'] = $encrypt_id;
@@ -1424,44 +1151,42 @@ class DashboardMentor extends BaseController
 
         // Memuat model
         // Mengambil nilai berdasarkan mentor
+        $nilai_akhir = $this->nilaiModel->getNilaiByIdMagangFull($id_magang);
+        $nilai_akhir_pure = $this->nilaiModel->getNilaiByIdMagangPure($id_magang);
         $data['nilai_akhir'] = $this->nilaiModel->getNilaiByIdMagangFull($id_magang);
         $data['nilai_akhir_pure'] = $this->nilaiModel->getNilaiByIdMagangPure($id_magang);
+        // dd($data['nilai_akhir_pure']);
+
         // dd($data['nilai_akhir']);
         $data['id_magang'] = $id_magang;
         // dd($data['nilai_akhir_pure']);
         $total = 0;
-        $total += $data['nilai_akhir_pure']['ketepatan_waktu'];
-        $total += $data['nilai_akhir_pure']['sikap_kerja'];
-        $total += $data['nilai_akhir_pure']['tanggung_jawab'];
         $total += $data['nilai_akhir_pure']['kehadiran'];
+        $total += $data['nilai_akhir_pure']['tanggung_jawab'];
         $total += $data['nilai_akhir_pure']['kemampuan_kerja'];
-        $total += $data['nilai_akhir_pure']['keterampilan_kerja'];
-        $total += $data['nilai_akhir_pure']['kualitas_hasil'];
-        $total += $data['nilai_akhir_pure']['kemampuan_komunikasi'];
-        $total += $data['nilai_akhir_pure']['kerjasama'];
-        $total += $data['nilai_akhir_pure']['kerajinan'];
-        $total += $data['nilai_akhir_pure']['percaya_diri'];
-        $total += $data['nilai_akhir_pure']['mematuhi_aturan'];
-        $total += $data['nilai_akhir_pure']['penampilan'];
+        $total += $data['nilai_akhir_pure']['integritas'];        
+        $total += (int)$data['nilai_akhir_pure']['perilaku'];
 
-        switch ($data['nilai_akhir_pure']['perilaku']) {
-            case 'Sangat Baik':
-                $total += 100;
-                break;
-            case 'Baik':
-                $total += 75;
-                break;
-            case 'Cukup Baik':
-                $total += 50;
-                break;
-            case 'Tidak Baik':
-                $total += 0;
-                break;
-        }
+        // dd($data['nilai_akhir_pure']['perilaku']);
 
-        $total = $total / 14;
+        // switch ($data['nilai_akhir_pure']['perilaku']) {
+        //     case 'Sangat Baik':
+        //         $total += 100;
+        //         break;
+        //     case 'Baik':
+        //         $total += 90;
+        //         break;
+        //     case 'Cukup Baik':
+        //         $total += 80;
+        //         break;
+        //     case 'Tidak Baik':
+        //         $total += 70;
+        //         break;
+        // }
 
-        $data['status'] = $total > 75 ? 'Lulus' : 'Tidak Lulus';
+        $total = $total / 5;
+
+        $data['status'] = $nilai_akhir_pure['rata'] > 75 ? 'Lulus' : 'Tidak Lulus';
 
         // Menggunakan PdfGenerator (periksa pustaka PDF Anda di CI4)
         $pdf = new PdfGenerator();
@@ -1472,115 +1197,6 @@ class DashboardMentor extends BaseController
         $html = view('mentor/cetak_detail_riwayat_nilai_bimbingan', $data);  // Menggunakan view() di CI4
         $pdf->generate($html, $file_pdf, $paper, $orientation);
     }
-
-    //Before ceking
-    // public function detailRiwayatNilaiBimbingan($id_magang)
-    // {
-    //     // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
-    //     $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
-
-    //     if ($user_level !== 'mentor') {
-    //         return view('no_access');
-    //     }
-    //     helper('date');
-
-    //     $user_nomor = session()->get('nomor');
-
-    //     // Memuat model
-    //     $model = new NilaiModel();
-
-    //     // Mengambil nilai berdasarkan mentor
-    //     $data['nilai_akhir'] = $model->getNilaiByMentor($user_nomor);
-    //     $data['id_magang'] = $id_magang;
-
-    //     dd($data['nilai_akhir']);
-
-    //     foreach ($data['nilai_akhir'] as $item) {
-    //         $item->total_nilai = $this->hitungTotalNilai($item);
-    //         $item->status = $item->total_nilai > 75 ? 'Lulus' : 'Tidak Lulus';
-    //     }
-
-    //     // Menampilkan view
-    //     return view('mentor/header') .
-    //         view('mentor/sidebar') .
-    //         view('mentor/topbar') .
-    //         view('mentor/detail_riwayat_nilai_bimbingan', $data) .
-    //         view('mentor/footer');
-    // }
-
-    // private function hitungTotalNilai($item)
-    // {
-    //     // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
-    //     $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
-
-    //     if ($user_level !== 'mentor') {
-    //         return view('no_access');
-    //     }
-    //     $total = 0;
-
-    //     $total += $item->ketepatan_waktu;
-    //     $total += $item->sikap_kerja;
-    //     $total += $item->tanggung_jawab;
-    //     $total += $item->kehadiran;
-    //     $total += $item->kemampuan_kerja;
-    //     $total += $item->keterampilan_kerja;
-    //     $total += $item->kualitas_hasil;
-    //     $total += $item->kemampuan_komunikasi;
-    //     $total += $item->kerjasama;
-    //     $total += $item->kerajinan;
-    //     $total += $item->percaya_diri;
-    //     $total += $item->mematuhi_aturan;
-    //     $total += $item->penampilan;
-
-    //     switch ($item->perilaku) {
-    //         case 'Sangat Baik':
-    //             $total += 100;
-    //             break;
-    //         case 'Baik':
-    //             $total += 75;
-    //             break;
-    //         case 'Cukup Baik':
-    //             $total += 50;
-    //             break;
-    //         case 'Tidak Baik':
-    //             $total += 0;
-    //             break;
-    //     }
-
-    //     return $total / 14;
-    // }
-
-    // public function cetakDetailRiwayatNilaiBimbingan()
-    // {
-    //     // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
-    //     $user_level = $this->session->get('level'); // Pastikan 'level' di-set saat login
-
-    //     if ($user_level !== 'mentor') {
-    //         return view('no_access');
-    //     }
-    //     helper('date');
-
-    //     $user_nomor = session()->get('nomor');
-    //     $id_magang = $this->request->getUri()->getSegment(4);
-    //     // Memuat model
-    //     $model = new NilaiModel();
-    //     $data['nilai_akhir'] = $model->getNilaiByMentor($user_nomor);
-    //     $data['id_magang'] = $id_magang;
-
-    //     foreach ($data['nilai_akhir'] as $item) {
-    //         $item->total_nilai = $this->hitungTotalNilai($item);
-    //         $item->status = $item->total_nilai > 75 ? 'Lulus' : 'Tidak Lulus';
-    //     }
-
-    //     // Menggunakan PdfGenerator (periksa pustaka PDF Anda di CI4)
-    //     $pdf = new PdfGenerator();
-    //     $data['title'] = "Detail Rekap Absensi";
-    //     $file_pdf = $data['title'];
-    //     $paper = 'A4';
-    //     $orientation = "landscape";
-    //     $html = view('mentor/cetak_detail_riwayat_nilai_bimbingan', $data);  // Menggunakan view() di CI4
-    //     $pdf->generate($html, $file_pdf, $paper, $orientation);
-    // }
 
     public function review_surat($encrypt_id)
     {

@@ -7,6 +7,7 @@ use App\Models\AnakMagangModel;
 use App\Models\LaporanModel;
 use App\Models\NilaiModel;
 use App\Models\PesertaModel;
+use App\Models\MentorModel;
 use App\Models\RegistrasiModel;
 use App\Models\DetailRegisModel;
 
@@ -29,6 +30,7 @@ class Dashboard extends BaseController
     protected $pdfgenerator;
     protected $registrasiModel;
     protected $detailRegisModel;
+    protected $mentorModel;
 
 
 
@@ -43,6 +45,7 @@ class Dashboard extends BaseController
         $this->pdfgenerator = new PdfGenerator();
         $this->registrasiModel = new RegistrasiModel();
         $this->detailRegisModel = new DetailRegisModel();
+        $this->mentorModel = new MentorModel();
 
 
         // if (!$this->session->get('peserta_logged_in')) {
@@ -230,88 +233,6 @@ class Dashboard extends BaseController
             view('peserta/absensi', $data) .
             view('peserta/footer');
     }
-
-    // public function absensi()
-    // {
-    //     helper('date');
-    //     $user_id_register = $this->session->get('id_register'); // Ambil id_register dari session
-    //     $anakMagangModel = new \App\Models\AnakMagangModel();
-    //     // Ambil data anak magang berdasarkan id_register
-    //     $anakMagang = $anakMagangModel->where('id_register', $user_id_register)->first();
-
-    //     // Debug untuk memastikan data anak magang ditemukan
-    //     if (!$anakMagang) {
-    //         return view('peserta/header') .
-    //             view('peserta/sidebar', $data) .
-    //             view('peserta/topbar') .
-    //             view('peserta/absensi', [
-    //                 'absensi_today' => null,
-    //                 'absensi' => [],
-    //                 'id_magang' => null,
-    //                 'error_message' => 'Anda belum terdaftar pada program magang.'
-    //             ]) .
-    //             view('peserta/footer');
-    //     }
-
-    //     // Ambil tanggal awal dan akhir magang
-    //     $tanggalAwal = $anakMagang['tgl_mulai'];
-    //     $tanggalAkhir = $anakMagang['tgl_selesai'];
-    //     $tanggalRange = $this->generateTanggalRange($tanggalAwal, $tanggalAkhir);
-
-    //     // Ambil data absensi yang sudah ada berdasarkan id_magang
-    //     $absensiExist = $this->absensiModel->where('id_magang', $anakMagang['id_magang'])->findAll();
-
-    //     // Debug untuk memastikan data absensi ditemukan
-    //     if (empty($absensiExist)) {
-    //         echo "Data absensi tidak ditemukan untuk id_magang: " . $anakMagang['id_magang'];
-    //         die();
-    //     }
-
-    //     // Map absensi yang sudah ada berdasarkan tanggal
-    //     $absensiMapped = [];
-    //     foreach ($absensiExist as $absen) {
-    //         $absensiMapped[$absen['tgl']] = $absen;
-    //     }
-
-    //     // Buat data absensi lengkap dengan entri default jika belum ada
-    //     $absensiFinal = [];
-    //     foreach ($tanggalRange as $tanggal) {
-    //         if (isset($absensiMapped[$tanggal])) {
-    //             $absensiFinal[] = $absensiMapped[$tanggal];
-    //         } else {
-    //             $absensiFinal[] = [
-    //                 'tgl' => $tanggal,
-    //                 'jam_masuk' => null,
-    //                 'jam_pulang' => null,
-    //                 'deskripsi' => null,
-    //                 'statuss' => 'Belum Absen',
-    //                 'approved' => null,
-    //             ];
-    //         }
-    //     }
-
-    //     // Data absensi hari ini
-    //     $tgl = date('Y-m-d');
-    //     $data['absensi_today'] = $absensiMapped[$tgl] ?? null;
-
-    //     // Data untuk view
-    //     $data['absensi'] = $absensiFinal;
-    //     $data['id_magang'] = 2035;
-
-
-    //     // Debug data akhir untuk memastikan data diteruskan ke view
-    //     // echo "<pre>";
-    //     // print_r($data);
-    //     // echo "</pre>";
-    //     // die();
-
-    //     return view('peserta/header') .
-    //         view('peserta/sidebar', $data) .
-    //         view('peserta/topbar') .
-    //         view('peserta/absensi', $data) .
-    //         view('peserta/footer');
-    // }
-
     // Helper untuk generate range tanggal
     private function generateTanggalRange($startDate, $endDate)
     {
@@ -340,64 +261,6 @@ class Dashboard extends BaseController
 
         return $dates;
     }
-
-
-
-
-    // public function absensi()
-    // {
-    //     helper('date');
-    //     $user_nomor = $this->session->get('nomor');
-    //     $id_magang = $this->absensiModel->getIdMagang($user_nomor);
-
-    //     $tgl = date('Y-m-d');
-
-    //     // Mengambil data absensi hari ini
-    //     $data['absensi_today'] = $this->absensiModel->getTodayAbsence($id_magang, $tgl);
-
-    //     // Mengambil semua data absensi user, terurut berdasarkan tanggal terbaru
-    //     $data['absensi'] = $this->absensiModel->getAbsensiByUserNomor($user_nomor);
-
-    //     // ID magang digunakan untuk referensi
-    //     $data['id_magang'] = $id_magang;
-
-    //     return view('peserta/header') .
-    //         view('peserta/sidebar', $data) .
-    //         view('peserta/topbar') .
-    //         view('peserta/absensi', $data) .
-    //         view('peserta/footer');
-    // }
-
-    // public function updateDeskripsi()
-    // {
-    //     // Mendapatkan data dari request POST
-    //     $id_absen = $this->request->getPost('id_absen');
-    //     $deskripsi = $this->request->getPost('deskripsi');
-
-    //     // Validasi data
-    //     if (!$id_absen || !$deskripsi) {
-    //         return $this->response->setJSON(['success' => false, 'message' => 'Data tidak valid']);
-    //     }
-
-    //     // Update deskripsi pada absensi dengan id_absen yang diberikan
-    //     try {
-    //         $data = [
-    //             'deskripsi' => $deskripsi
-    //         ];
-
-    //         // Memastikan bahwa id_absen ada dan data berhasil diupdate
-    //         $updateResult = $this->absensiModel->update($id_absen, $data);
-
-    //         if ($updateResult) {
-    //             return $this->response->setJSON(['success' => true]);
-    //         } else {
-    //             return $this->response->setJSON(['success' => false, 'message' => 'Gagal memperbarui data']);
-    //         }
-    //     } catch (\Exception $e) {
-    //         // Tangani error jika ada
-    //         return $this->response->setJSON(['success' => false, 'message' => $e->getMessage()]);
-    //     }
-    // }
 
     public function updateDeskripsi()
     {
@@ -430,27 +293,6 @@ class Dashboard extends BaseController
             return $this->response->setJSON(['error' => 'Gagal memperbarui deskripsi.']);
         }
     }
-
-
-
-    // public function absensi()
-    // {
-    //     helper('date');
-    //     $user_nomor = $this->session->get('nomor');
-    //     $id_magang = $this->absensiModel->getIdMagang($user_nomor);
-
-    //     $tgl = date('Y-m-d');
-
-    //     $data['absensi_today'] = $this->absensiModel->getTodayAbsence($id_magang, $tgl);
-    //     $data['absensi'] = $this->absensiModel->getAbsensiByUserNomor($user_nomor);
-    //     $data['id_magang'] = $id_magang;
-
-    //     return view('peserta/header') .
-    //         view('peserta/sidebar', $data) .
-    //         view('peserta/topbar') .
-    //         view('peserta/absensi', $data) .
-    //         view('peserta/footer');
-    // }
 
     public function checkIn()
     {
@@ -561,45 +403,7 @@ class Dashboard extends BaseController
             return $this->response->setJSON(['error' => 'Anda belum Check-In hari ini!']);
         }
     }
-
-    // public function checkOut()
-    // {
-    //     $user_nomor = $this->session->get('nomor');
-    //     $id_magang = $this->absensiModel->getIdMagang($user_nomor);
-    //     $tgl = date('Y-m-d');
-    //     $jam_pulang = date('H:i:s'); // Pastikan ini waktu server
-    //     $latitude_keluar = $this->request->getPost('latitude');
-    //     $longitude_keluar = $this->request->getPost('longitude');
-    //     $deskripsi = $this->request->getPost('deskripsi');
-
-    //     // Pastikan bahwa pengguna belum check-out hari ini
-    //     $existingCheckOut = $this->absensiModel->getTodayAbsence($id_magang, $tgl);
-
-    //     if ($existingCheckOut && $existingCheckOut['jam_pulang'] == NULL) {
-    //         if ($latitude_keluar != NULL && $longitude_keluar != NULL) {
-    //             $data = [
-    //                 'jam_pulang' => $jam_pulang, // Waktu server
-    //                 'latitude_keluar' => $latitude_keluar,
-    //                 'longitude_keluar' => $longitude_keluar,
-    //                 'deskripsi' => $deskripsi,
-    //                 'statuss' => 'Hadir'
-    //             ];
-
-    //             $this->absensiModel->updateCheckOut($id_magang, $tgl, $data);
-
-    //             $this->session->setFlashdata('success', 'Check-Out berhasil!');
-    //             return redirect()->to('dashboard/absensi');
-    //         } else {
-    //             $this->session->setFlashdata('error', 'Check-Out gagal! Lokasi tidak ditemukan.');
-    //             return redirect()->to('dashboard/absensi');
-    //         }
-    //     } else {
-    //         $this->session->setFlashdata('error', 'Check-Out gagal! Anda sudah Check-Out hari ini.');
-    //         return redirect()->to('dashboard/absensi');
-    //     }
-    // }
-
-
+    
     public function laporan()
     {
         $id_register = $this->session->get('id_register');
@@ -770,6 +574,8 @@ class Dashboard extends BaseController
         }
         $id_register = $this->session->get('id_register');
         $id_magang = $this->anakMagangModel->getIdMagang($id_register);
+        $nilai = $this->nilaiModel->getNilaiByIdMagangPure($id_magang);
+        $data['nilai'] = $nilai;
         $anakMagang = $this->anakMagangModel->find($id_magang);
         $user_register = $this->registrasiModel->getRegistrasiById($this->session->get('id_register'));
         if ($id_magang != NULL) {
@@ -818,16 +624,23 @@ class Dashboard extends BaseController
         $session = session();
         $id_register = $session->get('id_register');
         $id_magang = $this->nilaiModel->getIdMagang($id_register);
+        $anak_magang = $this->anakMagangModel->getPesertaByIdMagangOne($id_magang);
+        // dd($anak_magang);
         // Ambil data nilai dan data registrasi
         $nilai_akhir = $this->nilaiModel->getNilaiByPeserta($id_magang);
-        $registrasi_data = $this->registrasiModel->getRegistrasiById($id_register); // Ambil data dari tabel registrasi berdasarkan nomo
+        $registrasi_data = $this->registrasiModel->getRegistrasiById($id_register); // Ambil data dari tabel registrasi berdasarkan nomor
+        $mentor = $this->mentorModel->getMentorByIdMentorOne($anak_magang['id_mentor']);
+        // dd($mentor);
         // Gabungkan data registrasi dan nilai_akhir dalam array
+        $tanggal_hari_ini = date('d-m-Y'); // Format tanggal: YYYY-MM-DD
         $nilai_akhir['nama'] = $registrasi_data['nama'];
         $nilai_akhir['nomor'] = $registrasi_data['nomor'];
         $nilai_akhir['instansi'] = $registrasi_data['instansi'];
         $nilai_akhir['tanggal1'] = $registrasi_data['tanggal1'];
         $nilai_akhir['tanggal2'] = $registrasi_data['tanggal2'];
 
+        $data['mentor'] = $mentor;
+        $data['tanggal_hari_ini'] = $tanggal_hari_ini; // Menambahkan tanggal hari ini
         // Kirim data ke view
         $data['nilai_akhir'] = $nilai_akhir;
         // Menggunakan layanan PDF untuk menghasilkan file
@@ -1124,6 +937,8 @@ class Dashboard extends BaseController
         $id_register = $this->session->get('id_register');
         $register = $this->registrasiModel->getRegistrasiById($id_register);
         $id_magang = $this->anakMagangModel->getIdMagangByRegister($id_register);
+        $nilai = $this->nilaiModel->getNilaiByIdMagangPure($id_magang);
+        $data['nilai'] = $nilai;
         $anak_magang = $this->anakMagangModel->getPesertaByIdMagang($id_magang);
         $data['anak_magang'] = $anak_magang;
         $data['registrasi'] = $register;

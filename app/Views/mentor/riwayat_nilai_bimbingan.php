@@ -54,13 +54,13 @@
                                             </tr>
                                         </tfoot>
                                         <tbody>
-                                            <?php if (!empty($nilai)) : ?>
-                                                <?php if ($nilai[0]->perilaku != NULL && $nilai[0]->ketepatan_waktu != NULL && $nilai[0]->sikap_kerja != NULL && $nilai[0]->tanggung_jawab != NULL && $nilai[0]->kehadiran != NULL && $nilai[0]->kemampuan_kerja != NULL && $nilai[0]->keterampilan_kerja != NULL && $nilai[0]->kualitas_hasil != NULL && $nilai[0]->kemampuan_komunikasi != NULL && $nilai[0]->kerjasama != NULL && $nilai[0]->kerajinan != NULL && $nilai[0]->percaya_diri != NULL && $nilai[0]->mematuhi_aturan != NULL && $nilai[0]->penampilan != NULL && $nilai[0]->perilaku != NULL): ?>
+                                            <?php if ($nilai) : ?>
+                                                <?php if ($nilai[0]->perilaku != NULL && $nilai[0]->tanggung_jawab != NULL && $nilai[0]->kehadiran != NULL && $nilai[0]->kemampuan_kerja != NULL && $nilai[0]->integritas != NULL): ?>
                                                     <?php
                                                     $no = 1;
                                                     foreach ($nilai as $item):
                                                     ?>
-                                                        <?php if($item->ketepatan_waktu !== null): ?>
+                                                        <?php if($item->kehadiran !== null): ?>
                                                         <tr>
                                                             <td><?= $no++; ?></td>
                                                             <td><?= $item->nomor; ?></td>

@@ -128,17 +128,27 @@ class PesertaModel extends Model
             ->countAllResults();
     }
 
-
-    public function getTotalAnakBimbinganTidakAktif($id_mentor)
+    public function getTotalAnakBimbingantidakAktif($id_mentor)
     {
         return $this->db->table('anak_magang')
             ->join('detailregis', 'detailregis.id_register = anak_magang.id_register')
             ->join('registrasi', 'registrasi.id_register = detailregis.id_register')
-            ->join('nilai', 'nilai.id_magang = anak_magang.id_magang')
             ->where('detailregis.nipg', $id_mentor)
-            ->where('anak_magang.status', 'Selesai Magang') // Kondisi untuk anak magang dengan status 'Aktif'
+            ->where('anak_magang.status', 'Selesai Magang')
             ->countAllResults();
     }
+
+
+    // public function getTotalAnakBimbinganTidakAktif($id_mentor)
+    // {
+    //     return $this->db->table('anak_magang')
+    //         ->join('detailregis', 'detailregis.id_register = anak_magang.id_register')
+    //         ->join('registrasi', 'registrasi.id_register = detailregis.id_register')
+    //         ->join('nilai', 'nilai.id_magang = anak_magang.id_magang')
+    //         ->where('detailregis.nipg', $id_mentor)
+    //         ->where('anak_magang.status', 'Selesai Magang') // Kondisi untuk anak magang dengan status 'Aktif'
+    //         ->countAllResults();
+    // }
 
     public function getPesertaMagang()
     {

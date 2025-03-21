@@ -94,7 +94,7 @@
             <br><br><br>
             <p style="color: #1F497D; font-size:28px; margin-top:6px; font-family:Calibri;"><b><?= $registrasi['nama'] ?></b></p>
             <br><br>
-            <p style="color: black; font-size: 28px; font-family:Calibri; margin-top: 25px;"><b><?= $registrasi['minat'] ?></b></p>
+            <p style="color: black; font-size: 28px; font-family:Calibri; margin-top: 30px;"><b><?= $registrasi['minat'] ?></b></p>
             <br>
             <p style="font-size: 18px; font-family:Calibri;">Mulai tanggal
                 <?php
@@ -130,8 +130,8 @@
                 ?>
                 dengan hasil
             </p>
-            <p style="color: black; font-size: 28px; font-family:Calibri; margin-top: 5px;"><b>Memuaskan</b></p>
-            <p style="margin-top: 40px; font-size: 18px; font-family:Calibri;">
+            <p style="color: black; font-size: 28px; font-family:Calibri; margin-top: 5px;"><b><?= $nilai['predikat'] ?></b></p>
+            <p style="margin-top: 45px; font-size: 18px; font-family:Calibri;">
                 <?php
                 // Format tanggal selesai dengan bulan dalam bahasa Indonesia
                 $tanggal_selesai = date('d', strtotime($registrasi['tanggal2']));

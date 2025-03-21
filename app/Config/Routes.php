@@ -13,7 +13,7 @@ $routes->get('/cetak_word', 'Admin\Dashboard::generateSuratMagang');
 
 //Login
 $routes->get('/login', 'Login::index');
-$routes->post('/login/proses_login', 'Login::prosesLogin');
+$routes->post('/login/proses_login', 'Login::loginLDAP');
 
 //Login Peserta
 $routes->post('/login/proses_login_peserta', 'Login::prosesLoginPeserta');
