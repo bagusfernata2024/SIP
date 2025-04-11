@@ -116,16 +116,18 @@ class AbsensiModel extends Model
     }
 
     public function getAbsenByMentor($user_nomor)
-    {
-        return $this->db->table('absen')
-            ->select('absen.*, registrasi.nama, registrasi.instansi, registrasi.email, registrasi.nik')
-            ->join('anak_magang', 'anak_magang.id_magang = absen.id_magang')
-            ->join('detailregis', 'detailregis.id_register = anak_magang.id_register')
-            ->join('registrasi', 'registrasi.id_register = detailregis.id_register')
-            ->where('detailregis.nipg', $user_nomor)
-            ->get()
-            ->getResult();
-    }
+{
+    return $this->db->table('absen')
+        ->select('absen.*, registrasi.nama, registrasi.instansi, registrasi.email, registrasi.nik')
+        ->join('anak_magang', 'anak_magang.id_magang = absen.id_magang')
+        ->join('detailregis', 'detailregis.id_register = anak_magang.id_register')
+        ->join('registrasi', 'registrasi.id_register = detailregis.id_register')
+        ->where('detailregis.nipg', $user_nomor)
+        ->where('absen.deskripsi IS NOT NULL')  // menambahkan filter untuk deskripsi yang tidak null
+        ->get()
+        ->getResult();
+}
+
 
     public function getAbsenByMentorCountNotYetConfirm($user_nomor)
     {
