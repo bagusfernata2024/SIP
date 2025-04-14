@@ -10,6 +10,8 @@ use CodeIgniter\Router\RouteCollection;
 $routes->get('/', 'HalamanUtama::index');
 $routes->get('/cetak_word', 'Admin\Dashboard::generateSuratMagang');
 
+$routes->get('/smtp', 'Admin\Dashboard::smtp');
+
 
 //Login
 $routes->get('/login', 'Login::index');

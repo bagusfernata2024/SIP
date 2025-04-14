@@ -241,8 +241,8 @@ class Login extends BaseController
             }
 
             // Set timeout for the connection (10 seconds)
-            ldap_set_option($authenticated, LDAP_OPT_NETWORK_TIMEOUT, 10);  // 10 seconds timeout
-            ldap_set_option($authenticated, LDAP_OPT_TIMEOUT, 10); // Timeout for the search as well
+            // ldap_set_option($authenticated, LDAP_OPT_NETWORK_TIMEOUT, 10);  // 10 seconds timeout
+            // ldap_set_option($authenticated, LDAP_OPT_TIMEOUT, 10); // Timeout for the search as well
 
             // Increase script execution time to avoid timeouts for longer processes
             set_time_limit(10);  // 10 seconds script execution time limit
