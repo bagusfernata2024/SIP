@@ -70,7 +70,7 @@
 
 		<li class="nav-item <?= service('uri')->getSegment(2) == 'sertifikat' ? 'active' : ''; ?>">
 			<a class="nav-link" href="<?php echo site_url('dashboard/sertifikat'); ?>">
-				<i class="fas fa-graduation-cap"></i>
+				<i class="fas fa-file"></i>
 				<span>Sertifikat</span>
 			</a>
 		</li>
