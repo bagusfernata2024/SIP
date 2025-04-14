@@ -183,7 +183,6 @@
                 <br><br>    
                 <p><strong>Perhitungan Uang Saku</strong></p>
                 <p><strong>Jumlah Hari : <?= $absenCountApproved ?></strong></p>
-                <p><strong>Total Uang Saku: </strong>Rp <?= number_format($absenCountApproved * 50000, 0, ',', '.') ?></p>
 
             </div>
 

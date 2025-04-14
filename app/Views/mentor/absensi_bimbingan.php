@@ -47,7 +47,7 @@
                             $no = 1;
                             foreach ($absen as $item):
                                 // Hanya tampilkan data jika jam_masuk atau jam_pulang tidak null
-                                if (!empty($item->jam_masuk) || !empty($item->jam_pulang)):
+                                // if (!empty($item->jam_masuk) || !empty($item->jam_pulang)):
                             ?>
                                     <?php if ($item->approved == NULL): ?>
                                         <tr>
@@ -73,7 +73,7 @@
                                         </tr>
                                     <?php endif; ?>
                             <?php
-                                endif;
+                                // endif;
                             endforeach; ?>
                         <?php else: ?>
                             <tr>

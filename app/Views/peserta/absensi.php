@@ -154,7 +154,7 @@
                                         </td>
                                         <td>
                                             <!-- Tombol Edit hanya aktif jika approved bukan Y dan deskripsi tidak null -->
-                                            <?php if ($absen['approved'] !== 'Y' && !empty($absen['deskripsi'])): ?>
+                                            <?php if ($absen['approved'] !== 'Y'): ?>
                                                 <button class="btn btn-warning btn-sm editBtn" data-id="<?= $absen['id_absen'] ?>" data-deskripsi="<?= $absen['deskripsi'] ?>">
                                                     <i class="bi bi-pencil"></i>
                                                 </button>

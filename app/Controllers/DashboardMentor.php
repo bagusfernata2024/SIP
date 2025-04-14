@@ -656,6 +656,7 @@ class DashboardMentor extends BaseController
         helper('date');
         $user_nomor = session()->get('nomor');
         $data['absen'] = $this->absensiModel->getAbsenByMentor($user_nomor);
+        // dd($data['absen']);
 
         return view('mentor/header') .
             view('mentor/sidebar') .
