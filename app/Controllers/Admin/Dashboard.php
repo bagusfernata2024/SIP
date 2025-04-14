@@ -44,7 +44,7 @@ class Dashboard extends BaseController
 
 
     protected $encryption;
-    private $encryption_key = 'ThisIsASecretKeyForEncryption';
+    // private $encryption_key = 'ThisIsASecretKeyForEncryption';
     public function __construct()
     {
         $this->session = session();
@@ -76,7 +76,6 @@ class Dashboard extends BaseController
         $output = base64_encode($output);
 
         return $output;
-
     }
 
     public function decryptor($data)
@@ -94,6 +93,43 @@ class Dashboard extends BaseController
         return $output;
     }
 
+    public function smtp()
+    {
+        $email = \Config\Services::email();
+
+        $email->setFrom('mdndfzn@gmail.com', 'PGN GAS Admin Magang Program');
+        $email->setTo('mdndfzn@gmail.com');
+        $email->setSubject('PGN');
+        $email->setMessage("
+            <html>
+            <head>
+                <style>
+                    table {
+                        border-collapse: collapse;
+                        width: 100%;
+                    }
+                    th, td {
+                        text-align: left;
+                        padding: 8px;
+                    }
+                    th {
+                        background-color: #f2f2f2;
+                    }
+                    tr:nth-child(even) {
+                        background-color: #f9f9f9;
+                    }
+                </style>
+            </head>
+            <body>
+                <p>Yth</p>
+            </body>
+            </html>
+        ");
+        $email->setMailType('html'); // Mengatur email dalam format HTML
+        $email->send();
+        return redirect()->to(base_url())->with('error', 'Tidak ada peserta yang perlu diingatkan.');
+        
+    }
     public function index()
     {
         // Cek level pengguna dari session (misalnya 'level' menyimpan informasi jenis pengguna)
@@ -637,9 +673,7 @@ class Dashboard extends BaseController
             if ($data['anak_magang']['nipg_co_mentor'] !== null) {
                 $nipg = $data['anak_magang']['nipg_co_mentor'];
                 $data['co_mentor'] = $this->karyawanModel->getDataByNipg($nipg);
-
             }
-
         }
 
         // dd($nipg);
@@ -2158,7 +2192,6 @@ class Dashboard extends BaseController
             // Tambahkan ID terenkripsi ke array data
             $data_peserta['encrypted_id_magang'] = $encrypted_id_magang;
             $data_peserta['encrypted_id_register'] = $encrypted_id_register;
-
         }
         echo view('templates/header');
         echo view('templates/sidebar');
